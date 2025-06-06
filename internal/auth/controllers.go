@@ -158,7 +158,7 @@ func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 		server.WriteResponse(rw, http.StatusUnauthorized, "login failed")
 	}
 
-	jwt, err := GenerateUserJwt(user.ID, user.Name, uint8(user.Level))
+	jwt, err := GenerateUserJwt(user.ID, user.Name, uint8(user.Level), user.JwtKillSwitch)
 	if err != nil {
 		server.WriteResponse(
 			rw,
