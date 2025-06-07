@@ -38,6 +38,10 @@ func (r Router) HandleFunc(path string, handler http.HandlerFunc, middleware ...
 	r.mux.HandleFunc(r.prefix(path), r.wrap(handler, middleware...))
 }
 
+func (r Router) Handle(path string, handler http.Handler, middleware ...Middleware) {
+	r.mux.HandleFunc(r.prefix(path), r.wrap(handler.ServeHTTP, middleware...))
+}
+
 // Group creates a sub router and assigns a base path and middleware to all routes assigned within it
 func (r Router) Group(path string, middleware ...Middleware) Router {
 	return Router{
@@ -74,10 +78,14 @@ func (r Router) wrap(handler http.HandlerFunc, middleware ...Middleware) http.Ha
 }
 
 func (r Router) prefix(uri string) string {
+	suffix := ""
+	if uri[len(uri)-1] == '/' {
+		suffix = "/"
+	}
 	if strings.Contains(uri, " ") {
 		parts := strings.SplitN(uri, " ", 2)
-		return parts[0] + " " + path.Join(r.basePath, strings.Trim(parts[1], " "))
+		return parts[0] + " " + path.Join(r.basePath, strings.Trim(parts[1], " ")) + suffix
 	}
 
-	return path.Join(r.basePath, uri)
+	return path.Join(r.basePath, uri) + suffix
 }

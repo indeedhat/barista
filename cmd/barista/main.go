@@ -1,4 +1,4 @@
-package barista
+package main
 
 import (
 	"context"
@@ -49,7 +49,7 @@ func main() {
 	})
 
 	svr := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":8087",
 		Handler: c.Handler(mux),
 	}
 

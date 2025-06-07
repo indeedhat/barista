@@ -3,9 +3,12 @@ package internal
 import (
 	"net/http"
 
+	"github.com/a-h/templ"
+	"github.com/indeedhat/barista/assets"
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/server"
+	"github.com/indeedhat/barista/internal/ui/pages"
 )
 
 func BuildRoutes(
@@ -14,6 +17,18 @@ func BuildRoutes(
 	authController auth.Controller,
 	authRepo auth.Repository,
 ) *http.ServeMux {
+	buildApiRoutes(r, coffeeController, authController, authRepo)
+	buildUiRoutes(r)
+
+	return r.ServerMux()
+}
+
+func buildApiRoutes(
+	r server.Router,
+	coffeeController coffee.Controller,
+	authController auth.Controller,
+	authRepo auth.Repository,
+) {
 	guest := r.Group("/api", auth.IsGuestMiddleware)
 	{
 		guest.HandleFunc("POST /auth/login", authController.Login)
@@ -47,6 +62,10 @@ func BuildRoutes(
 	{
 		admin.HandleFunc("POST /user", authController.CreateUser)
 	}
+}
 
-	return r.ServerMux()
+func buildUiRoutes(r server.Router) {
+	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Assets))))
+
+	r.Handle("GET /login", templ.Handler(pages.Login()))
 }

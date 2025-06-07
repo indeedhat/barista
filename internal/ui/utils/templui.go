@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -10,8 +11,38 @@ import (
 	"github.com/a-h/templ"
 )
 
+// TwMerge is not the original merge function provided by templui but i wanted to remove the
+// external dependency, its by no means perfect but good enough
 func TwMerge(classes ...string) string {
 	return strings.Join(classes, " ")
+
+	var classList []string
+	classMap := make(map[string]string)
+
+	for _, class := range strings.Fields(strings.Join(classes, " ")) {
+		baseClass := strings.Split(class, "-")[0]
+		if _, found := classMap[baseClass]; found {
+			for i, v := range classList {
+				if v != baseClass {
+					continue
+				}
+
+				classList = append(classList[:i], classList[i+1:]...)
+				break
+			}
+		}
+
+		classMap[baseClass] = class
+		classList = append(classList, baseClass)
+	}
+
+	var buf bytes.Buffer
+	for _, baseClass := range classList {
+		buf.WriteString(classMap[baseClass])
+		buf.WriteByte(' ')
+	}
+
+	return buf.String()
 }
 
 // TwIf returns value if condition is true, otherwise an empty value of type T.
