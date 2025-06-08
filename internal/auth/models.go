@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"time"
 
 	"github.com/indeedhat/barista/internal/database/model"
 	"gorm.io/gorm"
@@ -37,6 +38,7 @@ type AuthUser struct {
 }
 
 type Repository interface {
+	CreateRootUser() error
 	FindUser(id uint) (*User, error)
 	FindUserByLogin(name, password string) (*User, error)
 	SaveUser(*User) error
@@ -49,6 +51,17 @@ type SqliteRepository struct {
 
 func NewSqliteRepo(db *gorm.DB) Repository {
 	return SqliteRepository{db}
+}
+
+func (r SqliteRepository) CreateRootUser() error {
+	root := User{
+		Name:          envRootUsername.Get(defaultRootUsername),
+		Password:      envRootPassword.Get(defaultRootPassword),
+		Level:         LevelAdmin,
+		JwtKillSwitch: time.Now().Unix(),
+	}
+
+	return r.SaveUser(&root)
 }
 
 // FindUserByLogin implements Repository.

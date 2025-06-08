@@ -19,16 +19,31 @@ import (
 )
 
 func main() {
+	firstRun := database.Exists()
+
 	db, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	db.AutoMigrate(
+		coffee.Coffee{},
+		coffee.Roaster{},
+		coffee.FlavourProfile{},
+		auth.User{},
+	)
 
 	authRepo := auth.NewSqliteRepo(db)
 	coffeeRepo := coffee.NewSqliteRepo(db)
 
 	authController := auth.NewController(authRepo)
 	coffeeController := coffee.NewController(coffeeRepo)
+
+	if firstRun {
+		if err := authRepo.CreateRootUser(); err != nil {
+			log.Fatalf("Failed to create root user: %s", err)
+		}
+	}
 
 	router := server.NewRouter(server.ServerConfig{
 		MaxBodySize: 1 << 20,

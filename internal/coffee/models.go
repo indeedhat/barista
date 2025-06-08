@@ -23,22 +23,22 @@ type Coffee struct {
 	Name      string           `json:"name"`
 	Roast     RoastLevel       `json:"roast"`
 	Rating    *uint8           `json:"rating"`
-	Flaviours []FlavourProfile `json:"flavours"`
-	Roaster   Roaster          `json:"roaster"`
+	Flaviours []FlavourProfile `gorm:"foreignKey:ID" json:"flavours"`
+	Roaster   Roaster          `gorm:"foreignKey:ID" json:"roaster"`
 }
 
 type Roaster struct {
 	model.SoftDelete
 
 	Name    string   `json:"name"`
-	Coffees []Coffee `json:"-"`
+	Coffees []Coffee `gorm:"foreignKey:ID" json:"-"`
 }
 
 type FlavourProfile struct {
 	model.SoftDelete
 
 	Name    string   `json:"name"`
-	Coffees []Coffee `json:"-"`
+	Coffees []Coffee `gorm:"foreignKey:ID" json:"-"`
 }
 
 type Repository interface {

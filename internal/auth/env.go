@@ -11,3 +11,11 @@ const (
 	envJwtRefreshAge dotenv.Int = "JWT_REFRESH_AGE"
 	envJwtTTl        dotenv.Int = "JWT_TTL"
 )
+
+const (
+	envRootUsername dotenv.String = "ROOT_USERNAME"
+	envRootPassword dotenv.String = "ROOT_PASSWORD"
+
+	defaultRootUsername = "admin"
+	defaultRootPassword = "admin"
+)
