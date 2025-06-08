@@ -63,6 +63,17 @@ func extractJwtFromAuthHeader(r *http.Request) string {
 	return parts[1]
 }
 
+// extractJwtFromAuthHeader will verify that the Authorization header both exists and is in the
+// Bearer format, if so it will extract the token (hopefully this should be a valid JWT)
+func extractJwtFromCookie(r *http.Request) string {
+	c, err := r.Cookie(sessionCookie)
+	if err != nil {
+		return ""
+	}
+
+	return c.Value
+}
+
 // VerifyJwt will check that the JWT is both a jwt and valid
 func verifyJwt(jwtString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(jwtString, &Claims{}, func(token *jwt.Token) (any, error) {

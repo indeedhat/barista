@@ -36,6 +36,8 @@ func buildApiRoutes(
 
 	private := r.Group("/api", auth.IsLoggedInMiddleware(authRepo))
 	{
+		private.HandleFunc("POST /auth/logout", authController.Logout)
+
 		private.HandleFunc("POST /me", authController.GetLoggedInUser)
 
 		private.HandleFunc("POST /coffee", coffeeController.CreateCoffee)

@@ -6,7 +6,10 @@ import (
 	"time"
 
 	"github.com/indeedhat/barista/internal/server"
+	"github.com/stripe/stripe-go/v74/checkout/session"
 )
+
+const sessionCookie = "bs"
 
 type Controller struct {
 	repo Repository
@@ -168,7 +171,26 @@ func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rw.Header().Set("auth_token", "jwt."+jwt)
+	http.SetCookie(rw, &http.Cookie{
+		Name:     sessionCookie,
+		Value:    jwt,
+		HttpOnly: true,
+		Domain:   r.URL.Host,
+		Path:     "/",
+		MaxAge:   86400 * 30,
+	})
+	server.WriteResponse(rw, http.StatusNoContent, nil)
+}
+
+func (c Controller) Logout(rw http.ResponseWriter, r *http.Request) {
+	http.SetCookie(rw, &http.Cookie{
+		Name:     sessionCookie,
+		Value:    "",
+		HttpOnly: true,
+		Domain:   r.URL.Host,
+		Path:     "/",
+		MaxAge:   0,
+	})
 	server.WriteResponse(rw, http.StatusNoContent, nil)
 }
 

@@ -19,12 +19,10 @@ func IsLoggedInMiddleware(repo Repository) server.Middleware {
 func UserHasPermissionMiddleware(level Level, repo Repository) server.Middleware {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) {
-			jwt := extractJwtFromAuthHeader(r)
+			jwt := extractJwtFromCookie(r)
 			if jwt == "" {
-				if jwt = r.URL.Query().Get("bearer"); jwt == "" {
-					server.WriteResponse(rw, http.StatusUnauthorized, errors.New("Not Authorized"))
-					return
-				}
+				server.WriteResponse(rw, http.StatusUnauthorized, errors.New("Not Authorized"))
+				return
 			}
 
 			claims, err := verifyJwt(jwt)
@@ -64,12 +62,10 @@ func UserHasPermissionMiddleware(level Level, repo Repository) server.Middleware
 func AdminOrSelfMiddleware(repo Repository) server.Middleware {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(rw http.ResponseWriter, r *http.Request) {
-			jwt := extractJwtFromAuthHeader(r)
+			jwt := extractJwtFromCookie(r)
 			if jwt == "" {
-				if jwt = r.URL.Query().Get("bearer"); jwt == "" {
-					server.WriteResponse(rw, http.StatusUnauthorized, errors.New("Not Authorized"))
-					return
-				}
+				server.WriteResponse(rw, http.StatusUnauthorized, errors.New("Not Authorized"))
+				return
 			}
 
 			claims, err := verifyJwt(jwt)
