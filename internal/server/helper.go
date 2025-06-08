@@ -4,9 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"path"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -110,4 +115,50 @@ func PathID(r *http.Request) (uint, error) {
 	}
 
 	return uint(n), nil
+}
+
+type UploadProps struct {
+	Optional bool
+	Ext      []string
+	Mime     []string
+}
+
+func UploadFile(r *http.Request, formKey, savePath string, props *UploadProps) error {
+	file, header, err := r.FormFile(formKey)
+	if err != nil {
+		if props != nil && props.Optional && errors.Is(err, http.ErrMissingFile) {
+			return nil
+		}
+		return errors.New("file upload failed")
+	}
+	defer file.Close()
+
+	ext := strings.ToLower(path.Ext(header.Filename))
+	if props != nil && len(props.Ext) > 0 {
+		if !slices.Contains(props.Ext, ext) {
+			return fmt.Errorf("file extension %s not allowed", ext)
+		}
+	}
+
+	if props != nil && len(props.Mime) > 0 {
+		buf := make([]byte, 512)
+		if _, err := file.Read(buf); err != nil {
+			return errors.New("filetype could not be verified")
+		}
+
+		mimeType := http.DetectContentType(buf)
+		if !slices.Contains(props.Mime, mimeType) {
+			return fmt.Errorf("mime type %s not allowed", mimeType)
+		}
+	}
+
+	_ = os.MkdirAll(path.Dir(savePath), os.ModePerm)
+	saveFile, err := os.Create(savePath + ext)
+	if err != nil {
+		return errors.New("file upload could not be saved on the server")
+	}
+	defer saveFile.Close()
+
+	_, err = io.Copy(saveFile, file)
+	return errors.New("file upload could not be saved on the server")
 }

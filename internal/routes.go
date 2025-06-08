@@ -40,14 +40,15 @@ func buildApiRoutes(
 
 		private.HandleFunc("POST /coffee", coffeeController.CreateCoffee)
 		private.HandleFunc("PUT /coffee/{id}", coffeeController.UpdateCoffee)
+		private.HandleFunc("POST /coffee/{id}/image", coffeeController.UpdateCoffeeImage)
 		private.HandleFunc("DELETE /coffee/{id}", coffeeController.DeleteCoffee)
 
 		private.HandleFunc("POST /roaster", coffeeController.CreateRoaster)
 		private.HandleFunc("PUT /roaster/{id}", coffeeController.UpdateRoaster)
+		private.HandleFunc("POST /roaster/{id}/image", coffeeController.UpdateRoasterImage)
 		private.HandleFunc("DELETE /roaster/{id}", coffeeController.DeleteRoaster)
 
 		private.HandleFunc("POST /flavour", coffeeController.CreateFlavourProfile)
-		private.HandleFunc("PUT /flavour/{id}", coffeeController.UpdateFlavourProfile)
 		private.HandleFunc("DELETE /flavour/{id}", coffeeController.DeleteFlavourProfile)
 	}
 
@@ -66,6 +67,7 @@ func buildApiRoutes(
 
 func buildUiRoutes(r server.Router) {
 	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Assets))))
+	r.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 
 	r.Handle("GET /login", templ.Handler(pages.Login()))
 }

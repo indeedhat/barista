@@ -1,6 +1,7 @@
 package coffee
 
 import (
+	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/database/model"
 	"gorm.io/gorm"
 )
@@ -25,6 +26,7 @@ type Coffee struct {
 	Rating    *uint8           `json:"rating"`
 	Flaviours []FlavourProfile `gorm:"foreignKey:ID" json:"flavours"`
 	Roaster   Roaster          `gorm:"foreignKey:ID" json:"roaster"`
+	User      auth.User
 }
 
 type Roaster struct {
@@ -32,6 +34,7 @@ type Roaster struct {
 
 	Name    string   `json:"name"`
 	Coffees []Coffee `gorm:"foreignKey:ID" json:"-"`
+	User    auth.User
 }
 
 type FlavourProfile struct {
