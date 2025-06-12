@@ -20,7 +20,7 @@ func BuildRoutes(
 	authRepo auth.Repository,
 ) *http.ServeMux {
 	buildApiRoutes(r, coffeeController, authController, authRepo)
-	buildUiRoutes(r)
+	buildUiRoutes(r, authRepo)
 
 	return r.ServerMux()
 }
@@ -31,12 +31,12 @@ func buildApiRoutes(
 	authController auth.Controller,
 	authRepo auth.Repository,
 ) {
-	guest := r.Group("/api", auth.IsGuestMiddleware)
+	guest := r.Group("/api", auth.IsGuestMiddleware(auth.API, authRepo))
 	{
 		guest.HandleFunc("POST /auth/login", authController.Login)
 	}
 
-	private := r.Group("/api", auth.IsLoggedInMiddleware(authRepo))
+	private := r.Group("/api", auth.IsLoggedInMiddleware(auth.API, authRepo))
 	{
 		private.HandleFunc("POST /auth/logout", authController.Logout)
 
@@ -56,20 +56,20 @@ func buildApiRoutes(
 		private.HandleFunc("DELETE /flavour/{id}", coffeeController.DeleteFlavourProfile)
 	}
 
-	self := r.Group("/api", auth.AdminOrSelfMiddleware(authRepo))
+	self := r.Group("/api", auth.AdminOrSelfMiddleware(auth.API, authRepo))
 	{
 		self.HandleFunc("PATCH /user/{id}", authController.UpdateUser)
 		self.HandleFunc("POST /user/{id}/change-password", authController.ChangePassword)
 		self.HandleFunc("POST /user/{id}/force-logout", authController.ForceLogoutUser)
 	}
 
-	admin := r.Group("/api", auth.UserHasPermissionMiddleware(auth.LevelAdmin, authRepo))
+	admin := r.Group("/api", auth.UserHasPermissionMiddleware(auth.API, auth.LevelAdmin, authRepo))
 	{
 		admin.HandleFunc("POST /user", authController.CreateUser)
 	}
 }
 
-func buildUiRoutes(r server.Router) {
+func buildUiRoutes(r server.Router, authRepo auth.Repository) {
 	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Public))))
 	r.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 
@@ -84,15 +84,23 @@ func buildUiRoutes(r server.Router) {
 		},
 	}).ParseFS(templates.FS, "layouts/*", "pages/*"))
 
-	r.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
-		log.Print(tmpls.ExecuteTemplate(w, "layouts/guest", map[string]any{
-			"Page": "pages/login",
-		}))
-	})
+	guest := r.Group("", auth.IsGuestMiddleware(auth.UI, authRepo))
+	{
+		guest.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
+			log.Print("/login")
+			log.Print(tmpls.ExecuteTemplate(w, "layouts/guest", map[string]any{
+				"Page": "pages/login",
+			}))
+		})
+	}
 
-	r.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		log.Print(tmpls.ExecuteTemplate(w, "layouts/user", map[string]any{
-			"Page": "pages/home",
-		}))
-	})
+	private := r.Group("", auth.IsLoggedInMiddleware(auth.UI, authRepo))
+	{
+		private.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+			log.Print("/")
+			log.Print(tmpls.ExecuteTemplate(w, "layouts/user", map[string]any{
+				"Page": "pages/home",
+			}))
+		})
+	}
 }
