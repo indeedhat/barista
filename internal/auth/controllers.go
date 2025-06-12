@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/indeedhat/barista/internal/server"
-	"github.com/stripe/stripe-go/v74/checkout/session"
 )
 
 const sessionCookie = "bs"

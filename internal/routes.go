@@ -1,14 +1,16 @@
 package internal
 
 import (
+	"html/template"
+	"log"
 	"net/http"
+	"strings"
 
-	"github.com/a-h/templ"
 	"github.com/indeedhat/barista/assets"
+	"github.com/indeedhat/barista/assets/templates"
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/server"
-	"github.com/indeedhat/barista/internal/ui/pages"
 )
 
 func BuildRoutes(
@@ -68,8 +70,23 @@ func buildApiRoutes(
 }
 
 func buildUiRoutes(r server.Router) {
-	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Assets))))
+	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Public))))
 	r.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 
-	r.Handle("GET /login", templ.Handler(pages.Login()))
+	tmpl := template.New("")
+	tmpls := template.Must(tmpl.Funcs(template.FuncMap{
+		"embed": func(name string, data any) template.HTML {
+			var out strings.Builder
+			if err := tmpl.ExecuteTemplate(&out, name, data); err != nil {
+				log.Println(err)
+			}
+			return template.HTML(out.String())
+		},
+	}).ParseFS(templates.FS, "layouts/*", "pages/*"))
+
+	r.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
+		log.Print(tmpls.ExecuteTemplate(w, "layouts/guest", map[string]any{
+			"Page": "pages/login",
+		}))
+	})
 }

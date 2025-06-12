@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	firstRun := database.Exists()
+	firstRun := !database.Exists()
 
 	db, err := database.Connect()
 	if err != nil {
