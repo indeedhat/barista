@@ -89,4 +89,10 @@ func buildUiRoutes(r server.Router) {
 			"Page": "pages/login",
 		}))
 	})
+
+	r.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		log.Print(tmpls.ExecuteTemplate(w, "layouts/user", map[string]any{
+			"Page": "pages/home",
+		}))
+	})
 }

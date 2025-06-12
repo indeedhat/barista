@@ -79,11 +79,14 @@ func (r Router) wrap(handler http.HandlerFunc, middleware ...Middleware) http.Ha
 
 func (r Router) prefix(uri string) string {
 	suffix := ""
-	if uri[len(uri)-1] == '/' {
+	if len(uri) > 1 && uri[len(uri)-1] == '/' {
 		suffix = "/"
 	}
 	if strings.Contains(uri, " ") {
 		parts := strings.SplitN(uri, " ", 2)
+		if parts[1] == "/" {
+			suffix = ""
+		}
 		return parts[0] + " " + path.Join(r.basePath, strings.Trim(parts[1], " ")) + suffix
 	}
 
