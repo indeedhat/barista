@@ -36,9 +36,9 @@
 >
     <figure>
         <img src="/{{ .Icon }}"
-            onerror="this.src = '/assets/img/coffee.png'"
+            onerror="this.src = '/assets/img/coffee.png';this.classList.remove('object-fit');this.classList.add('object-contain')"
             alt="roaster"
-            class="h-full object-contain w-[120px] rounded-box"
+            class="h-full object-fit w-[100px] rounded-box"
         />
     </figure>
     <div class="card-body">

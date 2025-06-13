@@ -17,8 +17,8 @@
             <div class="drawer-content">
                 <header class="navbar bg-base-300">
                     <div class="navbar-start">
-                        <button class="btn btn-ghost text-xl" hx-get="/" hx-target="main">
-                            <img src="/assets/img/coffee.png" class="h-5 w-5" alt="coffee"/>
+                        <button class="btn btn-ghost text-xl" hx-get="/" hx-target="main" hx-push-url="/">
+                            <img src="/assets/img/coffee.png" class="h-8 w-8" alt="coffee"/>
                             Barista
                         </button>
                     </div>
@@ -38,7 +38,6 @@
                     {{ embed .Page . }}
                 </main>
                 <div class="toast toast-top toast-end" id="toast-container"></div>
-            </div>
             <div class="drawer-side" id="nav-aside">
                 <label for="nav" aria-label="close sidebar" class="drawer-overlay"></label>
                 <aside class="menu bg-base-200 text-base-content min-h-full p-4 gap-2">

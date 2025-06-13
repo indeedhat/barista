@@ -70,7 +70,7 @@ type ToastLevel string
 
 const (
 	Info    ToastLevel = "info"
-	Warning ToastLevel = "warning"
+	Warning ToastLevel = "error"
 	Success ToastLevel = "success"
 )
 
