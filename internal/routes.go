@@ -1,16 +1,13 @@
 package internal
 
 import (
-	"html/template"
-	"log"
 	"net/http"
-	"strings"
 
 	"github.com/indeedhat/barista/assets"
-	"github.com/indeedhat/barista/assets/templates"
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/server"
+	"github.com/indeedhat/barista/internal/ui"
 )
 
 func BuildRoutes(
@@ -20,7 +17,7 @@ func BuildRoutes(
 	authRepo auth.Repository,
 ) *http.ServeMux {
 	buildApiRoutes(r, coffeeController, authController, authRepo)
-	buildUiRoutes(r, authRepo)
+	buildUiRoutes(r, coffeeController, authController, authRepo)
 
 	return r.ServerMux()
 }
@@ -38,8 +35,6 @@ func buildApiRoutes(
 
 	private := r.Group("/api", auth.IsLoggedInMiddleware(auth.API, authRepo))
 	{
-		private.HandleFunc("POST /auth/logout", authController.Logout)
-
 		private.HandleFunc("POST /me", authController.GetLoggedInUser)
 
 		private.HandleFunc("POST /coffee", coffeeController.CreateCoffee)
@@ -69,38 +64,40 @@ func buildApiRoutes(
 	}
 }
 
-func buildUiRoutes(r server.Router, authRepo auth.Repository) {
+func buildUiRoutes(
+	r server.Router,
+	coffeeController coffee.Controller,
+	authController auth.Controller,
+	authRepo auth.Repository,
+) {
 	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Public))))
 	r.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
 
-	tmpl := template.New("")
-	tmpls := template.Must(tmpl.Funcs(template.FuncMap{
-		"embed": func(name string, data any) template.HTML {
-			var out strings.Builder
-			if err := tmpl.ExecuteTemplate(&out, name, data); err != nil {
-				log.Println(err)
-			}
-			return template.HTML(out.String())
-		},
-	}).ParseFS(templates.FS, "layouts/*", "pages/*"))
-
 	guest := r.Group("", auth.IsGuestMiddleware(auth.UI, authRepo))
 	{
-		guest.HandleFunc("GET /login", func(w http.ResponseWriter, r *http.Request) {
-			log.Print("/login")
-			log.Print(tmpls.ExecuteTemplate(w, "layouts/guest", map[string]any{
-				"Page": "pages/login",
-			}))
-		})
+		guest.HandleFunc("GET /login", authController.ViewLogin)
+		guest.HandleFunc("POST /login", authController.Login)
 	}
 
 	private := r.Group("", auth.IsLoggedInMiddleware(auth.UI, authRepo))
 	{
 		private.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-			log.Print("/")
-			log.Print(tmpls.ExecuteTemplate(w, "layouts/user", map[string]any{
-				"Page": "pages/home",
-			}))
+			if r.URL.Path != "/" && r.URL.Path != "/home" {
+				pageData := ui.NewPageData("404 Not Found", "404")
+				pageData.User = r.Context().Value("user").(*auth.User)
+				w.WriteHeader(http.StatusNotFound)
+				ui.RenderUser(w, r, pageData)
+				return
+			}
+
+			pageData := ui.NewPageData("Home", "home")
+			pageData.User = r.Context().Value("user").(*auth.User)
+			ui.RenderUser(w, r, pageData)
 		})
+
+		private.HandleFunc("GET /roasters", coffeeController.ViewRoasters)
+		private.HandleFunc("POST /roasters", coffeeController.CreateRoaster)
+
+		private.HandleFunc("POST /logout", authController.Logout)
 	}
 }

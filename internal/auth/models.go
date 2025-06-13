@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/indeedhat/barista/internal/database/model"
@@ -37,6 +38,10 @@ type AuthUser struct {
 	Password string `gorm:"->"`
 }
 
+func (AuthUser) TableName() string {
+	return "users"
+}
+
 type Repository interface {
 	CreateRootUser() error
 	FindUser(id uint) (*User, error)
@@ -54,9 +59,14 @@ func NewSqliteRepo(db *gorm.DB) Repository {
 }
 
 func (r SqliteRepository) CreateRootUser() error {
+	pwd, err := hashPassword(envRootPassword.Get(defaultRootPassword))
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
 	root := User{
 		Name:          envRootUsername.Get(defaultRootUsername),
-		Password:      envRootPassword.Get(defaultRootPassword),
+		Password:      pwd,
 		Level:         LevelAdmin,
 		JwtKillSwitch: time.Now().Unix(),
 	}

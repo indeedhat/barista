@@ -26,15 +26,20 @@ type Coffee struct {
 	Rating    *uint8           `json:"rating"`
 	Flaviours []FlavourProfile `gorm:"foreignKey:ID" json:"flavours"`
 	Roaster   Roaster          `gorm:"foreignKey:ID" json:"roaster"`
-	User      auth.User
+	User      auth.User        `gorm:"foreignKey:ID" json:"user"`
 }
 
 type Roaster struct {
 	model.SoftDelete
 
-	Name    string   `json:"name"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+
 	Coffees []Coffee `gorm:"foreignKey:ID" json:"-"`
-	User    auth.User
+
+	UserID uint      `json:"-"`
+	User   auth.User `gorm:"foreignKey:UserID" json:"user"`
 }
 
 type FlavourProfile struct {
@@ -49,6 +54,7 @@ type Repository interface {
 	SaveCoffee(*Coffee) error
 	DeleteCoffee(*Coffee) error
 
+	IndexRoastersForUser(*auth.User) []Roaster
 	FindRoaster(uint) (*Roaster, error)
 	SaveRoaster(*Roaster) error
 	DeleteRoaster(*Roaster) error
@@ -61,6 +67,17 @@ type Repository interface {
 
 type SqliteRepository struct {
 	db *gorm.DB
+}
+
+// IndexRoastersForUser implements Repository.
+func (r SqliteRepository) IndexRoastersForUser(user *auth.User) []Roaster {
+	var roasters []Roaster
+
+	r.db.Where("user_id = ?", user.ID).
+		Order("name ASC").
+		Find(&roasters)
+
+	return roasters
 }
 
 func NewSqliteRepo(db *gorm.DB) Repository {

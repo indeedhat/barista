@@ -9,10 +9,12 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -45,6 +47,14 @@ func UnmarshalBody(r *http.Request, v any) error {
 // ValidateRequest runs the provided struct against its validation tags
 func ValidateRequest(v any) error {
 	checker := validator.New()
+	checker.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		// skip if tag key says it should be ignored
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
 	return checker.Struct(v)
 }
 
@@ -60,7 +70,7 @@ func WriteResponse(rw http.ResponseWriter, code int, v any) {
 	case string:
 		resp = []byte(val)
 	case validator.ValidationErrors:
-		v = extractFIeldErrors(val)
+		v = ExtractFIeldErrors(val)
 	case error:
 		v = errorResponse{val.Error()}
 	}
@@ -86,14 +96,18 @@ type fieldErrorsResponse struct {
 	Fields map[string][]string `json:"fields"`
 }
 
-func extractFIeldErrors(errs validator.ValidationErrors) fieldErrorsResponse {
+func ExtractFIeldErrors(errs error) fieldErrorsResponse {
 	resp := fieldErrorsResponse{
 		Fields: make(map[string][]string),
 	}
 
-	for _, err := range errs {
+	for _, err := range errs.(validator.ValidationErrors) {
+		spew.Dump(err)
 		k := err.Field()
-		resp.Fields[k] = append(resp.Fields[k], err.Error())
+		resp.Fields[k] = append(
+			resp.Fields[k],
+			fmt.Sprintf("validation for '%s' failed on the '%s' tag", k, err.Tag()),
+		)
 	}
 
 	return resp
@@ -161,4 +175,8 @@ func UploadFile(r *http.Request, formKey, savePath string, props *UploadProps) e
 
 	_, err = io.Copy(saveFile, file)
 	return errors.New("file upload could not be saved on the server")
+}
+
+func Redirect(rw http.ResponseWriter, r *http.Request, url string) {
+	http.Redirect(rw, r, url, http.StatusSeeOther)
 }

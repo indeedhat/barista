@@ -1,17 +1,21 @@
 {{define "pages/login"}}
-<div class="card card-border bg-neutral">
+<div class="card card-border bg-neutral" id="login-card">
     <div class="card-body">
         <h2 class="card-title">Login</h2>
-        <form>
+        <form
+            hx-target="#login-card"
+            hx-post="/login"
+            hx-ext="json-enc"
+        >
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">Name</legend>
-                <input type="text" class="input" placeholder="Name..." />
-            </fieldset>
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Password</legend>
-                <input type="password" class="input" placeholder="Password..." />
-            </fieldset>
-            <fieldset class="text-right">
+                <label class="label">Name *</label>
+                <input type="text" name="name" class="input" placeholder="Name..." value="{{ .Data.name }}" />
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="label">Password *</label>
+                <input type="password" name="password" class="input" placeholder="Password..." />
+                {{ template "field-error" .FieldErrors.password }}
+
                 <button type="submit" class="btn btn-primary">Login</button>
             </fieldset>
         </form>

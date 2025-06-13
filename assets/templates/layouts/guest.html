@@ -5,9 +5,12 @@
         <meta charset="UTF-8">
         <title>Barista</title>
         <script src="/assets/js/htmx.js"></script>
+        <script src="/assets/js/htmx-json.js"></script>
+        <script src="/assets/js/toast.js"></script>
         <link rel="stylesheet" href="/assets/css/app.css" />
     </head>
     <body hx-boost="true" hx-target="body" data-theme="coffee">
+        <div class="toast toast-top toast-end" id="toast-container"></div>
         <main class="h-screen flex items-center justify-center">
             {{ embed .Page . }}
         </main>

@@ -19,7 +19,7 @@ func (c Context) Config() ServerConfig {
 	return c.cfg
 }
 
-func (c Context) WithData(key, val any) Context {
+func (c Context) WithValue(key, val any) Context {
 	return Context{
 		Context: context.WithValue(c.Context, key, val),
 		cfg:     c.cfg,

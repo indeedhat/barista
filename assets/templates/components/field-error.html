@@ -1,0 +1,5 @@
+{{ define "field-error" }}
+    {{ if . }}
+        <p class="input-error">{{ index . 0 }}</p>
+    {{ end }}
+{{ end }}

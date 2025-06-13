@@ -2,3 +2,10 @@
 @plugin "daisyui" {
     themes: coffee --default;
 }
+
+.input-error {
+    color: var(--color-error);
+}
+.input-error:empty {
+    display:none;
+}

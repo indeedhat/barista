@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/indeedhat/barista/internal/server"
+	"github.com/indeedhat/barista/internal/ui"
 )
 
 const sessionCookie = "bs"
@@ -137,6 +138,13 @@ func (c Controller) ChangePassword(rw http.ResponseWriter, r *http.Request) {
 	server.WriteResponse(rw, http.StatusNoContent, nil)
 }
 
+func (c Controller) ViewLogin(wr http.ResponseWriter, r *http.Request) {
+	ui.RenderGuest(wr, r, ui.PageData{
+		Title: "Login",
+		Page:  "pages/login",
+	})
+}
+
 type loginRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Password string `json:"password" validate:"required"`
@@ -144,29 +152,33 @@ type loginRequest struct {
 
 // Login handles user login attempts
 func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
+	pageData := ui.NewPageData("Login", "login")
+
 	var req loginRequest
 	if err := server.UnmarshalBody(r, &req); err != nil {
-		server.WriteResponse(rw, http.StatusBadRequest, nil)
+		ui.Toast(rw, ui.Warning, "The server did not understand the request")
 		return
 	}
 
 	if err := server.ValidateRequest(req); err != nil {
-		server.WriteResponse(rw, http.StatusUnprocessableEntity, err)
+		pageData.FieldErrors = server.ExtractFIeldErrors(err).Fields
+		pageData.Data["name"] = req.Name
+		ui.Toast(rw, ui.Warning, "Login failed")
+		ui.RenderGuest(rw, r, pageData)
 		return
 	}
 
 	user, err := c.repo.FindUserByLogin(req.Name, req.Password)
 	if user == nil {
-		server.WriteResponse(rw, http.StatusUnauthorized, "login failed")
+		pageData.Data["name"] = req.Name
+		ui.Toast(rw, ui.Warning, "Login failed")
+		ui.RenderGuest(rw, r, pageData)
+		return
 	}
 
 	jwt, err := GenerateUserJwt(user.ID, user.Name, uint8(user.Level), user.JwtKillSwitch)
 	if err != nil {
-		server.WriteResponse(
-			rw,
-			http.StatusInternalServerError,
-			errors.New("Failed to process login"),
-		)
+		ui.Toast(rw, ui.Warning, "Failed to process login")
 		return
 	}
 
@@ -178,7 +190,8 @@ func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		MaxAge:   86400 * 30,
 	})
-	server.WriteResponse(rw, http.StatusNoContent, nil)
+
+	ui.Redirect(rw, "/")
 }
 
 func (c Controller) Logout(rw http.ResponseWriter, r *http.Request) {
@@ -190,7 +203,7 @@ func (c Controller) Logout(rw http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		MaxAge:   0,
 	})
-	server.WriteResponse(rw, http.StatusNoContent, nil)
+	ui.Redirect(rw, "/login")
 }
 
 // GetLoggedInUser returns the json representation of the logged in user

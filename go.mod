@@ -3,7 +3,7 @@ module github.com/indeedhat/barista
 go 1.24.3
 
 require (
-	github.com/a-h/templ v0.3.898
+	github.com/davecgh/go-spew v1.1.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang-jwt/jwt/v5 v5.2.2

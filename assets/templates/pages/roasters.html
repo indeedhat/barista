@@ -1,0 +1,45 @@
+{{ define "pages/roasters" }}
+<div class="card card-border bg-neutral w-full" id="create-card">
+    <div class="card-body">
+        <form
+            hx-post="/roasters"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset">
+                <label class="label">Name *</label>
+                <input type="text" name="name" class="input w-full" placeholder="Name..." value="{{ .Data.form.name }}" />
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="label">Description</label>
+                <textarea name="description" class="textarea w-full" placeholder="Description...">{{ .Data.form.description }}</textarea>
+                {{ template "field-error" .FieldErrors.description }}
+
+                <label class="label">URL</label>
+                <input type="text" name="url" class="input w-full" placeholder="https://..." value="{{ .Data.form.url }}" />
+                {{ template "field-error" .FieldErrors.url }}
+
+                <button type="submit" class="btn btn-primary">Create Roaster</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+{{ range .Data.Roasters }}
+    <article class="card card-side card-border bg-neutral w-full" 
+        hx-get="/roasters/{{ .ID }}"
+        hx-push-url="/roasters/{{ .ID }}"
+    >
+        <figure>
+            <img src="uploads/roaster/{{ .ID }}.webp" alt="{{ .Name }}" />
+        </figure>
+        <div class="card-body">
+            <div class="card-title">{{ .Name }}</div>
+            <p>{{ .Description }}</p>
+            {{ if .URL }}
+                <div class="card-actions">
+                    <a href="{{ .URL }}" class="badge badge-outline" target="_blank">Roaster Website</a>
+                </div>
+            {{ end }}
+        </div>
+    </article>
+{{ end }}
+{{ end }}

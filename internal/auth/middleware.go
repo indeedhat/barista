@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/indeedhat/barista/internal/server"
@@ -31,12 +32,13 @@ func UserHasPermissionMiddleware(rt RouteType, level Level, repo Repository) ser
 				return
 			}
 
-			if user.Level&level != level {
-				redirectOrHeader(rw, r, http.StatusForbidden, rt, "/login")
+			log.Print(user.Level, " ", level, " ", user.Level&level)
+			if user.Level&level != user.Level {
+				redirectOrHeader(rw, r, http.StatusForbidden, rt, "/")
 				return
 			}
 
-			r = r.WithContext(context.WithValue(r.Context(), "user", user))
+			r = r.WithContext(r.Context().(server.Context).WithValue("user", user))
 			next(rw, r)
 		}
 	}
