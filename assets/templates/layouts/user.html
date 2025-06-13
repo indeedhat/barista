@@ -3,6 +3,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Barista | {{ .Title }}</title>
         <script src="/assets/js/htmx.js"></script>
         <script src="/assets/js/htmx-json.js"></script>
@@ -12,7 +13,7 @@
     </head>
     <body hx-boost="true" hx-target="body" data-theme="coffee">
         <div class="drawer drawer-end">
-            <input id="nav-drawer" type="checkbox" class="drawer-toggle" />
+            <input id="nav" type="checkbox" class="drawer-toggle" />
             <div class="drawer-content">
                 <header class="navbar bg-base-300">
                     <div class="navbar-start">
@@ -22,7 +23,7 @@
                         </button>
                     </div>
                     <div class="navbar-end">
-                        <label for="nav-drawer" class="btn btn-square btn-ghost drawer-button">
+                        <label for="nav" class="btn btn-square btn-ghost drawer-button">
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
                                 viewBox="0 0 24 24"
@@ -38,8 +39,8 @@
                 </main>
                 <div class="toast toast-top toast-end" id="toast-container"></div>
             </div>
-            <div class="drawer-side">
-                <label for="nav-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+            <div class="drawer-side" id="nav-aside">
+                <label for="nav" aria-label="close sidebar" class="drawer-overlay"></label>
                 <aside class="menu bg-base-200 text-base-content min-h-full p-4 gap-2">
                     <ul class="menu bg-base-300 rounded-field w-56">
                         <li><span>Hello, {{ .User.Name }}</span></li>
@@ -49,7 +50,6 @@
                     </ul>
                     <ul class="menu bg-base-300 rounded-field w-56">
                         <li><a href="/roasters" hx-target="main">Roasters</a></li>
-                        <li><a>Create Roaster</a></li>
                     </ul>
                     <div class="flex-grow"></div>
                     <ul class="menu bg-base-200 rounded-field w-56">
@@ -58,6 +58,11 @@
                 </aside>
             </div>
         </div>
+        <script>
+        document.querySelectorAll("#nav-aside a").forEach(e => {
+            e.addEventListener('click', () => nav.click())
+        })
+        </script>
     </body>
 </html>
 {{ end }}

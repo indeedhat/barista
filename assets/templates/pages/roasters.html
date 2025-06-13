@@ -43,7 +43,7 @@
     </figure>
     <div class="card-body">
         <div class="card-title">{{ .Name }}</div>
-        <p>{{ .Description }}</p>
+        <p class="whitespace-pre">{{ .Description }}</p>
         {{ if .URL }}
         <div class="card-actions">
             <a href="{{ .URL }}" class="badge badge-outline" target="_blank">Roaster Website</a>
@@ -51,9 +51,7 @@
         {{ end }}
     </div>
 </article>
-{{ end }}
-
-{{ if not .Data.Roasters }}
+{{ else }}
 <div class="alert alert-notice">No roasters to display</div>
 {{ end }}
 {{ end }}
