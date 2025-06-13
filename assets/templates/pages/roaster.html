@@ -1,0 +1,58 @@
+{{ define "pages/roaster" }}
+<div class="card card-border bg-neutral w-full" id="create-card">
+    <div class="card-body">
+        <div class="flex justify-center">
+            <div class="relative h-full object-contain rounded-field border max-w-[50%]"
+                onclick="upload_icon_modal.showModal()"
+            >
+
+                <img src="/{{ .Data.Roaster.Icon }}" onerror="this.src = '/assets/img/coffee.png'" alt="roaster" />
+                <div class="absolute bottom-0 right-0 rounded-field bg-neutral border">
+                    <img src="/assets/img/edit.png" alt="{{ .Data.Roaster.Name }}" />
+                </div>
+            </div>
+            <dialog id="upload_icon_modal" class="modal">
+                <div class="modal-box">
+                    <h3 class="text-lg font-bold">Replace Icon</h3>
+                    <fieldset class="fieldset">
+                        <input type="file"
+                            class="file-input"
+                            name="image"
+                            hx-encoding="multipart/form-data"
+                            hx-post="/roasters/{{ .Data.Roaster.ID }}/icon"
+                        />
+                    </fieldset>
+                    <div class="modal-action">
+                        <form method="dialog">
+                            <button class="btn">Close</button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
+        </div>
+
+        <form
+            hx-post="/roasters/{{ .Data.Roaster.ID }}"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset">
+                <label class="label">Name *</label>
+                <input type="text" name="name" class="input w-full" placeholder="Name..." value="{{ or .Form.name .Data.Roaster.Name }}" />
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="label">Description</label>
+                <textarea name="description" class="textarea w-full" placeholder="Description...">{{
+                    or .Form.description .Data.Roaster.Description
+                }}</textarea>
+                {{ template "field-error" .FieldErrors.description }}
+
+                <label class="label">URL</label>
+                <input type="text" name="url" class="input w-full" placeholder="https://..." value="{{ or .Form.url .Data.Roaster.URL }}" />
+                {{ template "field-error" .FieldErrors.url }}
+
+                <button type="submit" class="btn btn-primary">Save Roaster</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+{{ end }}

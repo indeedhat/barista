@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/go-playground/validator/v10"
+	"github.com/indeedhat/barista/internal/ui"
 )
 
 // Body reads in the Request body as a byte array
@@ -35,17 +35,23 @@ func Body(r *http.Request) []byte {
 // UnmarshalBody unmarshales the request body into the provided data structure
 //
 // NB: this is JSON only
-func UnmarshalBody(r *http.Request, v any) error {
+func UnmarshalBody(r *http.Request, v any, pageData ...*ui.PageData) error {
 	data := Body(r)
 	if data == nil {
 		return errors.New("could not read request body")
 	}
 
-	return json.Unmarshal(data, v)
+	err := json.Unmarshal(data, v)
+
+	if err != nil && len(pageData) > 0 {
+		pageData[0].Form = v
+	}
+
+	return err
 }
 
 // ValidateRequest runs the provided struct against its validation tags
-func ValidateRequest(v any) error {
+func ValidateRequest(v any, pageData ...*ui.PageData) error {
 	checker := validator.New()
 	checker.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
@@ -55,7 +61,13 @@ func ValidateRequest(v any) error {
 		}
 		return name
 	})
-	return checker.Struct(v)
+
+	err := checker.Struct(v)
+	if err != nil && len(pageData) > 0 {
+		pageData[0].FieldErrors = ExtractFIeldErrors(err).Fields
+	}
+
+	return err
 }
 
 type errorResponse struct {
@@ -102,7 +114,6 @@ func ExtractFIeldErrors(errs error) fieldErrorsResponse {
 	}
 
 	for _, err := range errs.(validator.ValidationErrors) {
-		spew.Dump(err)
 		k := err.Field()
 		resp.Fields[k] = append(
 			resp.Fields[k],
@@ -137,44 +148,50 @@ type UploadProps struct {
 	Mime     []string
 }
 
-func UploadFile(r *http.Request, formKey, savePath string, props *UploadProps) error {
+func UploadFile(r *http.Request, formKey, savePath string, props *UploadProps) (string, error) {
 	file, header, err := r.FormFile(formKey)
 	if err != nil {
 		if props != nil && props.Optional && errors.Is(err, http.ErrMissingFile) {
-			return nil
+			return "", nil
 		}
-		return errors.New("file upload failed")
+		return "", errors.New("file upload failed")
 	}
 	defer file.Close()
 
 	ext := strings.ToLower(path.Ext(header.Filename))
 	if props != nil && len(props.Ext) > 0 {
 		if !slices.Contains(props.Ext, ext) {
-			return fmt.Errorf("file extension %s not allowed", ext)
+			return "", fmt.Errorf("file extension %s not allowed", ext)
 		}
 	}
 
 	if props != nil && len(props.Mime) > 0 {
 		buf := make([]byte, 512)
 		if _, err := file.Read(buf); err != nil {
-			return errors.New("filetype could not be verified")
+			return "", errors.New("filetype could not be verified")
 		}
 
 		mimeType := http.DetectContentType(buf)
 		if !slices.Contains(props.Mime, mimeType) {
-			return fmt.Errorf("mime type %s not allowed", mimeType)
+			return "", fmt.Errorf("mime type %s not allowed", mimeType)
 		}
 	}
+
+	file.Seek(0, io.SeekStart)
 
 	_ = os.MkdirAll(path.Dir(savePath), os.ModePerm)
 	saveFile, err := os.Create(savePath + ext)
 	if err != nil {
-		return errors.New("file upload could not be saved on the server")
+		return "", errors.New("file upload could not be saved on the server")
 	}
 	defer saveFile.Close()
 
 	_, err = io.Copy(saveFile, file)
-	return errors.New("file upload could not be saved on the server")
+	if err != nil {
+		return "", errors.New("file upload could not be saved on the server")
+	}
+
+	return savePath + ext, nil
 }
 
 func Redirect(rw http.ResponseWriter, r *http.Request, url string) {

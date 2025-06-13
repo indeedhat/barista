@@ -10,10 +10,10 @@
         <link rel="stylesheet" href="/assets/css/app.css" />
     </head>
     <body hx-boost="true" hx-target="body" data-theme="coffee">
-        <div class="toast toast-top toast-end" id="toast-container"></div>
         <main class="h-screen flex items-center justify-center">
             {{ embed .Page . }}
         </main>
+        <div class="toast toast-top toast-end" id="toast-container"></div>
     </body>
 </html>
 {{ end }}

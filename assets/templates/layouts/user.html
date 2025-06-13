@@ -8,6 +8,7 @@
         <script src="/assets/js/htmx-json.js"></script>
         <script src="/assets/js/toast.js"></script>
         <link rel="stylesheet" href="/assets/css/app.css" />
+        <script>var $ = (selector) => document.querySelector(selector)</script>
     </head>
     <body hx-boost="true" hx-target="body" data-theme="coffee">
         <div class="drawer drawer-end">
@@ -15,7 +16,10 @@
             <div class="drawer-content">
                 <header class="navbar bg-base-300">
                     <div class="navbar-start">
-                        <button class="btn btn-ghost text-xl">Barista</button>
+                        <button class="btn btn-ghost text-xl" hx-get="/" hx-target="main">
+                            <img src="/assets/img/coffee.png" class="h-5 w-5" alt="coffee"/>
+                            Barista
+                        </button>
                     </div>
                     <div class="navbar-end">
                         <label for="nav-drawer" class="btn btn-square btn-ghost drawer-button">
@@ -29,10 +33,10 @@
                         </label>
                     </div>
                 </header>
-                <div class="toast toast-top toast-end" id="toast-container"></div>
                 <main class="flex flex-col justify-center gap-2 p-2" hx-target="this">
                     {{ embed .Page . }}
                 </main>
+                <div class="toast toast-top toast-end" id="toast-container"></div>
             </div>
             <div class="drawer-side">
                 <label for="nav-drawer" aria-label="close sidebar" class="drawer-overlay"></label>

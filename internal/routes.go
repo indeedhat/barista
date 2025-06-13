@@ -42,9 +42,6 @@ func buildApiRoutes(
 		private.HandleFunc("POST /coffee/{id}/image", coffeeController.UpdateCoffeeImage)
 		private.HandleFunc("DELETE /coffee/{id}", coffeeController.DeleteCoffee)
 
-		private.HandleFunc("POST /roaster", coffeeController.CreateRoaster)
-		private.HandleFunc("PUT /roaster/{id}", coffeeController.UpdateRoaster)
-		private.HandleFunc("POST /roaster/{id}/image", coffeeController.UpdateRoasterImage)
 		private.HandleFunc("DELETE /roaster/{id}", coffeeController.DeleteRoaster)
 
 		private.HandleFunc("POST /flavour", coffeeController.CreateFlavourProfile)
@@ -85,6 +82,7 @@ func buildUiRoutes(
 			if r.URL.Path != "/" && r.URL.Path != "/home" {
 				pageData := ui.NewPageData("404 Not Found", "404")
 				pageData.User = r.Context().Value("user").(*auth.User)
+				ui.Toast(w, ui.Warning, "Not Found")
 				w.WriteHeader(http.StatusNotFound)
 				ui.RenderUser(w, r, pageData)
 				return
@@ -97,6 +95,9 @@ func buildUiRoutes(
 
 		private.HandleFunc("GET /roasters", coffeeController.ViewRoasters)
 		private.HandleFunc("POST /roasters", coffeeController.CreateRoaster)
+		private.HandleFunc("GET /roasters/{id}", coffeeController.ViewRoaster)
+		private.HandleFunc("POST /roasters/{id}", coffeeController.UpdateRoaster)
+		private.HandleFunc("POST /roasters/{id}/icon", coffeeController.UpdateRoasterImage)
 
 		private.HandleFunc("POST /logout", authController.Logout)
 	}

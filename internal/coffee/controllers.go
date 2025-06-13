@@ -7,12 +7,11 @@ import (
 
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/server"
-	"github.com/indeedhat/barista/internal/ui"
 )
 
 const (
-	CoffeeImagePath  = "upload/coffee/"
-	RoasterImagePath = "upload/roaster/"
+	CoffeeImagePath  = "uploads/coffee/"
+	RoasterImagePath = "uploads/roaster/"
 )
 
 type Controller struct {
@@ -102,7 +101,7 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := server.UploadFile(r, "image", fmt.Sprint(CoffeeImagePath, coffee.ID), &server.UploadProps{
+	if _, err := server.UploadFile(r, "image", fmt.Sprint(CoffeeImagePath, coffee.ID), &server.UploadProps{
 		Ext:  []string{".jpg", ".jpeg", ".png"},
 		Mime: []string{"image/png", "image/jpeg"},
 	}); err != nil {
@@ -201,174 +200,6 @@ func (c Controller) DeleteCoffee(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.repo.DeleteCoffee(coffee); err != nil {
-		server.WriteResponse(rw, http.StatusInternalServerError, nil)
-		return
-	}
-
-	server.WriteResponse(rw, http.StatusNoContent, nil)
-}
-
-func (c Controller) ViewRoasters(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*auth.User)
-	roasters := c.repo.IndexRoastersForUser(user)
-
-	ui.RenderUser(rw, r, ui.PageData{
-		Title: "Roasters",
-		Page:  "pages/roasters",
-		User:  user,
-		Data: map[string]any{
-			"Roasters": roasters,
-		},
-	})
-}
-
-func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*auth.User)
-
-	id, err := server.PathID(r)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, nil)
-		return
-	}
-
-	roaster, err := c.repo.FindRoaster(id)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, errors.New("Roaster not found"))
-		return
-	}
-
-	if roaster.User.ID != user.ID {
-		server.WriteResponse(rw, http.StatusForbidden, nil)
-		return
-	}
-
-	if err := server.UploadFile(r, "image", fmt.Sprint(RoasterImagePath, roaster.ID), &server.UploadProps{
-		Ext:  []string{".jpg", ".jpeg", ".png"},
-		Mime: []string{"image/png", "image/jpeg"},
-	}); err != nil {
-		server.WriteResponse(rw, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	server.WriteResponse(rw, http.StatusNoContent, nil)
-}
-
-type createRoasterRequest struct {
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description"`
-	URL         string `json:"url" validate:"omitempty,url"`
-}
-
-func (c Controller) CreateRoaster(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Roasters", "roasters", user)
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-
-	var req createRoasterRequest
-	if err := server.UnmarshalBody(r, &req); err != nil {
-		ui.Toast(rw, ui.Warning, "The server did not understand the request")
-		return
-	}
-
-	if err := server.ValidateRequest(req); err != nil {
-		pageData.FieldErrors = server.ExtractFIeldErrors(err).Fields
-		pageData.Data["form"] = req
-		ui.Toast(rw, ui.Warning, "Failed to create roaster")
-		ui.RenderUser(rw, r, pageData)
-		return
-	}
-
-	roaster := Roaster{
-		Name:        req.Name,
-		Description: req.Description,
-		URL:         req.URL,
-		User:        *user,
-	}
-
-	if err := c.repo.SaveRoaster(&roaster); err != nil {
-		ui.Toast(rw, ui.Warning, "Failed to create roaster")
-		return
-	}
-
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	ui.RenderUser(rw, r, pageData)
-}
-
-type updateRoasterRequest struct {
-	Name string `json:"name" validate:"required"`
-}
-
-func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*auth.User)
-
-	id, err := server.PathID(r)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, nil)
-		return
-	}
-
-	var req updateRoasterRequest
-	if err := server.UnmarshalBody(r, &req); err != nil {
-		server.WriteResponse(rw, http.StatusBadRequest, nil)
-		return
-	}
-
-	if err := server.ValidateRequest(req); err != nil {
-		server.WriteResponse(rw, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	roaster, err := c.repo.FindRoaster(id)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, errors.New("Roaster not found"))
-		return
-	}
-
-	if roaster.User.ID != user.ID {
-		server.WriteResponse(rw, http.StatusForbidden, nil)
-		return
-	}
-
-	roaster.Name = req.Name
-
-	if err := c.repo.SaveRoaster(roaster); err != nil {
-		server.WriteResponse(rw, http.StatusInternalServerError, nil)
-		return
-	}
-
-	server.WriteResponse(rw, http.StatusNoContent, nil)
-}
-
-func (c Controller) DeleteRoaster(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*auth.User)
-
-	id, err := server.PathID(r)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, nil)
-		return
-	}
-
-	roaster, err := c.repo.FindRoaster(id)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, errors.New("Roaster not found"))
-		return
-	}
-
-	if roaster.User.ID != user.ID {
-		server.WriteResponse(rw, http.StatusForbidden, nil)
-		return
-	}
-
-	if len(roaster.Coffees) > 0 {
-		server.WriteResponse(
-			rw,
-			http.StatusNotFound,
-			errors.New("Cannot delete a roaster that still has assigned coffees"),
-		)
-		return
-	}
-
-	if err := c.repo.DeleteRoaster(roaster); err != nil {
 		server.WriteResponse(rw, http.StatusInternalServerError, nil)
 		return
 	}

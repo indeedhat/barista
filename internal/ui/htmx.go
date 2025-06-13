@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/indeedhat/barista/assets/templates"
 )
 
@@ -30,6 +29,7 @@ type PageData struct {
 	Title       string
 	Page        string
 	User        any
+	Form        any
 	FieldErrors map[string][]string
 	Data        map[string]any
 }
@@ -38,6 +38,7 @@ func NewPageData(title, page string, user ...any) PageData {
 	d := PageData{
 		Title:       title,
 		Page:        "pages/" + page,
+		Form:        make(map[string]any),
 		FieldErrors: make(map[string][]string),
 		Data:        make(map[string]any),
 	}
@@ -50,7 +51,6 @@ func NewPageData(title, page string, user ...any) PageData {
 }
 
 func RenderGuest(w http.ResponseWriter, r *http.Request, data PageData) error {
-	spew.Dump(r.Header)
 	if r.Header.Get("HX-Request") == "true" {
 		return tmpls.ExecuteTemplate(w, "layouts/hx", data)
 	}
@@ -59,7 +59,6 @@ func RenderGuest(w http.ResponseWriter, r *http.Request, data PageData) error {
 }
 
 func RenderUser(w http.ResponseWriter, r *http.Request, data PageData) error {
-	spew.Dump(r.Header)
 	if r.Header.Get("HX-Request") == "true" {
 		return tmpls.ExecuteTemplate(w, "layouts/hx", data)
 	}
@@ -80,7 +79,7 @@ type toastEvent struct {
 	Message string     `json:"message"`
 }
 
-func Toast(w http.ResponseWriter, level ToastLevel, message string) error {
+func Toast(w http.ResponseWriter, level ToastLevel, message string, code ...int) error {
 	data, err := json.Marshal(map[string]any{
 		"triggerToast": toastEvent{level, message},
 	})
@@ -89,6 +88,9 @@ func Toast(w http.ResponseWriter, level ToastLevel, message string) error {
 	}
 
 	w.Header().Set("HX-Trigger", string(data))
+	if len(code) > 1 {
+		w.WriteHeader(code[0])
+	}
 
 	return nil
 }
