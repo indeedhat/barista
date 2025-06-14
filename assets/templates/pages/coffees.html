@@ -1,0 +1,94 @@
+{{ define "pages/coffees" }}
+<div class="breadcrumbs text-sm">
+  <ul>
+    <li><a>Home</a></li>
+  </ul>
+</div>
+
+{{ if not .Data.open }}
+<button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">Create Coffee</button>
+{{ end}}
+<div class="card card-border bg-neutral w-full {{ if not .Data.open }}hidden{{ end }}" id="create-card">
+    <div class="card-body">
+        <form
+            hx-post="/coffees"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset">
+                <label class="label">Name *</label>
+                <input type="text" name="name" class="input w-full" placeholder="Name..." value="{{ .Form.Name }}" />
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="label">Roaster *</label>
+                <select class="select w-full" name="roaster.int">
+                    <option value="" disabled selected>Pick a Roaster</option>
+                    {{ range .Data.Roasters }}
+                    <option value="{{ .ID }}" {{ selected $.Form.Roaster .ID }}>{{ .Name }}</option>
+                    {{ end}}
+                </select>
+                {{ template "field-error" .FieldErrors.flavour }}
+
+                <label class="label">Roast Level *</label>
+                <select class="select w-full" name="roast.int">
+                    <option value="" disabled selected>Pick a Roast Level</option>
+                    <option value="1" {{ selected $.Form.Roast 1 }}>Very Light</option>
+                    <option value="2" {{ selected $.Form.Roast 2 }}>Light</option>
+                    <option value="3" {{ selected $.Form.Roast 3 }}>Medium Light</option>
+                    <option value="4" {{ selected $.Form.Roast 4 }}>Medium</option>
+                    <option value="5" {{ selected $.Form.Roast 5 }}>Medium Dark</option>
+                    <option value="6" {{ selected $.Form.Roast 6 }}>Dark</option>
+                    <option value="7" {{ selected $.Form.Roast 7 }}>Very Dark</option>
+                </select>
+                {{ template "field-error" .FieldErrors.roast }}
+
+                <label class="label">Rating</label>
+                <div class="rating">
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="1 star"
+                        value="1"
+                        {{ checked .Form.Rating 1 }}
+                    />
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="2 star"
+                        value="2"
+                        {{ checked .Form.Rating 2 }}
+                    />
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="3 star"
+                        value="3"
+                        {{ checked .Form.Rating 3 }}
+                    />
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="4 star"
+                        value="4"
+                        {{ checked .Form.Rating 4 }}
+                    />
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="5 star"
+                        value="5"
+                        {{ checked .Form.Rating 5 }}
+                    />
+                </div>
+                {{ template "field-error" .FieldErrors.rating }}
+
+                <label class="label">Notes</label>
+                <textarea name="notes" class="textarea w-full" placeholder="Notes...">{{
+                    .Form.Notes
+                }}</textarea>
+                {{ template "field-error" .FieldErrors.notes }}
+
+                <label class="label">URL</label>
+                <input type="text" name="url" class="input w-full" placeholder="https://..." value="{{ or .Form.URL "" }}" />
+                {{ template "field-error" .FieldErrors.url }}
+
+                <label class="label">Flavours (TODO)</label>
+                <input class="input w-full" disabled />
+
+                <button type="submit" class="btn btn-primary">Create Coffee</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<h2>Coffees</h2>
+{{ range .Data.Coffees }}
+    {{ template "coffee-card" . }}
+{{ else }}
+<div class="alert alert-notice">No coffees to display</div>
+{{ end }}
+{{ end }}

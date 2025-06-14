@@ -58,6 +58,7 @@ func (c Controller) CreateRoaster(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
+	pageData.Data["open"] = false
 
 	ui.Toast(rw, ui.Success, "Roaster created")
 	ui.RenderUser(rw, r, pageData)
@@ -102,6 +103,16 @@ func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	roaster, err := c.repo.FindRoaster(id)
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Roaster not found")
+		ui.RenderUser(rw, r, pageData)
+		return
+	}
+
+	pageData.Title = roaster.Name
+	pageData.Data["Roaster"] = roaster
+
 	var req updateRoasterRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
@@ -114,16 +125,6 @@ func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 		ui.RenderUser(rw, r, pageData)
 		return
 	}
-
-	roaster, err := c.repo.FindRoaster(id)
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Roaster not found")
-		ui.RenderUser(rw, r, pageData)
-		return
-	}
-
-	pageData.Title = roaster.Name
-	pageData.Data["Roaster"] = roaster
 
 	if roaster.UserID != user.ID {
 		ui.Toast(rw, ui.Warning, "Roaster does not belong to you")
@@ -142,6 +143,7 @@ func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	pageData.Title = roaster.Name
+	ui.Toast(rw, ui.Success, "Roaster Updated")
 	ui.RenderUser(rw, r, pageData)
 }
 

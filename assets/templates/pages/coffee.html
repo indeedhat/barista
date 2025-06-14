@@ -1,0 +1,125 @@
+{{ define "pages/coffee" }}
+<div class="breadcrumbs text-sm">
+  <ul>
+    <li><a href="/">Home</a></li>
+        <li><a href="/roasters/{{ .Data.Coffee.Roaster.ID }}">{{ .Data.Coffee.Roaster.Name }}</a></li>
+  </ul>
+</div>
+
+<div class="card card-border bg-neutral w-full" id="update-card">
+    <div class="card-body">
+        <div class="flex justify-center">
+            <div class="relative h-full object-contain rounded-field border max-w-[50%] overflow-hidden"
+                onclick="upload_icon_modal.showModal()"
+            >
+
+                <img src="/{{ .Data.Coffee.Icon }}" onerror="this.src = '/assets/img/coffee.png'" alt="coffee" />
+                <div class="absolute bottom-0 right-0 rounded-field bg-neutral border">
+                    <img src="/assets/img/edit.png" alt="{{ .Data.Coffee.Name }}" />
+                </div>
+            </div>
+            <dialog id="upload_icon_modal" class="modal">
+                <div class="modal-box">
+                    <h3 class="text-lg font-bold">Replace Icon</h3>
+                    <fieldset class="fieldset">
+                        <input type="file"
+                            class="file-input"
+                            name="image"
+                            hx-encoding="multipart/form-data"
+                            hx-post="/coffees/{{ .Data.Coffee.ID }}/icon"
+                        />
+                    </fieldset>
+                    <div class="modal-action">
+                        <form method="dialog">
+                            <button class="btn">Close</button>
+                        </form>
+                    </div>
+                </div>
+            </dialog>
+        </div>
+
+        <form
+            hx-post="/coffees/{{ .Data.Coffee.ID }}"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset">
+                <label class="label">Name *</label>
+                <input type="text" name="name" class="input w-full" placeholder="Name..." value="{{ or .Form.Name .Data.Coffee.Name }}" />
+                {{ template "field-error" .FieldErrors.name }}
+
+
+                {{ $roaster := or .Form.Roaster .Data.Coffee.RoasterID }}
+                <label class="label">Roaster *</label>
+                <select class="select w-full" name="roaster.int">
+                    <option value="" disabled selected>Pick a Roaster</option>
+                    {{ range .Data.Roasters }}
+                    <option value="{{ .ID }}" {{ selected $roaster .ID }}>{{ .Name }}</option>
+                    {{ end}}
+                </select>
+                {{ template "field-error" .FieldErrors.flavour }}
+
+
+                {{ $roastLevel := or .Form.Roast .Data.Coffee.Roast }}
+                <label class="label">Roast Level *</label>
+                <select class="select w-full" name="roast.int">
+                    <option value="" disabled selected>Pick a Roast Level</option>
+                    <option value="1" {{ selected $roastLevel 1 }}>Very Light</option>
+                    <option value="2" {{ selected $roastLevel 2 }}>Light</option>
+                    <option value="3" {{ selected $roastLevel 3 }}>Medium Light</option>
+                    <option value="4" {{ selected $roastLevel 4 }}>Medium</option>
+                    <option value="5" {{ selected $roastLevel 5 }}>Medium Dark</option>
+                    <option value="6" {{ selected $roastLevel 6 }}>Dark</option>
+                    <option value="7" {{ selected $roastLevel 7 }}>Very Dark</option>
+                </select>
+                {{ template "field-error" .FieldErrors.roast }}
+
+                {{ $rating := or .Form.Rating .Data.Coffee.Rating }}
+                <label class="label">Rating</label>
+                <div class="rating">
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="1 star"
+                        value="1"
+                        {{ checked $rating 1 }}
+                    />
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="2 star"
+                        value="2"
+                        {{ checked $rating 2 }}
+                    />
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="3 star"
+                        value="3"
+                        {{ checked $rating 3 }}
+                    />
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="4 star"
+                        value="4"
+                        {{ checked $rating 4 }}
+                    />
+                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="5 star"
+                        value="5"
+                        {{ checked $rating 5 }}
+                    />
+                </div>
+                {{ template "field-error" .FieldErrors.rating }}
+
+                <label class="label">Notes</label>
+                <textarea name="notes" class="textarea w-full" placeholder="Notes...">{{
+                    or .Form.Notes .Data.Coffee.Notes
+                }}</textarea>
+                {{ template "field-error" .FieldErrors.notes }}
+
+                <label class="label">URL</label>
+                <input type="text" name="url" class="input w-full" placeholder="https://..." value="{{ or .Form.URL .Data.Coffee.URL "" }}" />
+                {{ template "field-error" .FieldErrors.url }}
+
+                <label class="label">Flavours (TODO)</label>
+                <input class="input w-full" disabled />
+
+                <button type="submit" class="btn btn-primary">Update Coffee</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<h2>Roaster</h2>
+{{ with .Data.Coffee.Roaster }}
+    {{ template "roaster-card" . }}
+{{ end }}
+{{ end }}

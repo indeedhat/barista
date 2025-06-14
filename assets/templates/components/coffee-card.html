@@ -1,0 +1,37 @@
+{{ define "coffee-card" }}
+<article class="card card-side card-border bg-neutral w-full" 
+    hx-get="/coffees/{{ .ID }}"
+    hx-push-url="/coffees/{{ .ID }}"
+>
+    <figure>
+        <img src="/{{ .Icon }}"
+            onerror="this.src = '/assets/img/coffee.png';this.classList.remove('object-fit');this.classList.add('object-contain')"
+            alt="roaster"
+            class="h-full object-fit w-[100px] rounded-box"
+        />
+    </figure>
+    <div class="card-body">
+        <div class="card-title">{{ .Name }}</div>
+        <p>{{ .Roaster.Name }}</p>
+        <div>
+            {{ range .Flavours }}
+            <span class="badge badge-outline">{{ .Name }}</span>
+            {{ end }}
+        </div>
+        <div class="card-actions justify-between">
+            <div class="rating">
+                <div class="mask mask-star" aria-label="1 star" {{ if eq .Rating 1 }}aria-current="true"{{ end }}></div>
+                <div class="mask mask-star" aria-label="2 star" {{ if eq .Rating 2 }}aria-current="true"{{ end }}></div>
+                <div class="mask mask-star" aria-label="3 star" {{ if eq .Rating 3 }}aria-current="true"{{ end }}></div>
+                <div class="mask mask-star" aria-label="4 star" {{ if eq .Rating 4 }}aria-current="true"{{ end }}></div>
+                <div class="mask mask-star" aria-label="5 star" {{ if eq .Rating 5 }}aria-current="true"{{ end }}></div>
+            </div>
+            {{ if .URL }}
+            <a href="{{ .URL }}" class="badge badge-outline" target="_blank">Website</a>
+            {{ else if .Roaster.URL }}
+            <a href="{{ .Roaster.URL }}" class="badge badge-outline" target="_blank">Website</a>
+            {{ end }}
+        </div>
+    </div>
+</article>
+{{ end }}

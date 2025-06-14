@@ -2,10 +2,12 @@ package ui
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/indeedhat/barista/assets/templates"
 )
@@ -19,6 +21,21 @@ func init() {
 				log.Println(err)
 			}
 			return template.HTML(out.String())
+		},
+		"selected": func(actual, expect any) string {
+			if fmt.Sprint(expect) == fmt.Sprint(actual) {
+				return "selected"
+			}
+			return ""
+		},
+		"checked": func(actual, expect any) string {
+			if fmt.Sprint(expect) == fmt.Sprint(actual) {
+				return "checked"
+			}
+			return ""
+		},
+		"unix": func() int {
+			return int(time.Now().Unix())
 		},
 	}).ParseFS(templates.FS, "layouts/*", "pages/*", "components/*"))
 }

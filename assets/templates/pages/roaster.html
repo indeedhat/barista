@@ -1,4 +1,12 @@
 {{ define "pages/roaster" }}
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/roasters">Roasters</a></li>
+        <li><a href="/roasters/{{ .Data.Roaster.ID }}">{{ .Data.Roaster.Name }}</a></li>
+    </ul>
+</div>
+
 <div class="card card-border bg-neutral w-full" id="create-card">
     <div class="card-body">
         <div class="flex justify-center">
@@ -55,4 +63,12 @@
         </form>
     </div>
 </div>
+
+<h2>Coffees</h2>
+{{ range .Data.Roaster.Coffees }}
+    {{ template "coffee-card" . }}
+{{ else }}
+<div class="alert alert-notice">No coffees to display</div>
 {{ end }}
+{{ end }}
+

@@ -43,7 +43,7 @@ func UnmarshalBody(r *http.Request, v any, pageData ...*ui.PageData) error {
 
 	err := json.Unmarshal(data, v)
 
-	if err != nil && len(pageData) > 0 {
+	if err == nil && len(pageData) > 0 {
 		pageData[0].Form = v
 	}
 

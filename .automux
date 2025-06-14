@@ -3,8 +3,6 @@
 version = 1
 
 session_id = "barista"
-# config = "./tmux.conf"
-# attach_existing = false
 
 window "Editor" {
     exec = "vim"
@@ -12,11 +10,9 @@ window "Editor" {
 }
 
 window "Shell" {
+    exec = "air"
     split {
-        #     vertical = true
-        #     exec = "cmd_to_run_in_split"
-        #     size = 30
-        #     dir = "sub/"
+        exec = "npx @tailwindcss/cli -i ./assets/tailwind/app.css -o ./assets/css/app.css --watch"
     }
 }
 

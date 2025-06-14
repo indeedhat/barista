@@ -1,0 +1,23 @@
+{{ define "roaster-card"}}
+<article class="card card-side card-border bg-neutral w-full" 
+    hx-get="/roasters/{{ .ID }}"
+    hx-push-url="/roasters/{{ .ID }}"
+>
+    <figure>
+        <img src="/{{ .Icon }}"
+            onerror="this.src = '/assets/img/coffee.png';this.classList.remove('object-fit');this.classList.add('object-contain')"
+            alt="roaster"
+            class="h-full object-fit w-[100px] rounded-box"
+        />
+    </figure>
+    <div class="card-body">
+        <div class="card-title">{{ .Name }}</div>
+        <p class="whitespace-pre">{{ .Description }}</p>
+        {{ if .URL }}
+        <div class="card-actions">
+            <a href="{{ .URL }}" class="badge badge-outline" target="_blank">Roaster Website</a>
+        </div>
+        {{ end }}
+    </div>
+</article>
+{{ end }}

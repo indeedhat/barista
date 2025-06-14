@@ -9,7 +9,7 @@ import (
 type RoastLevel uint8
 
 const (
-	VeryLight RoastLevel = iota
+	VeryLight RoastLevel = iota + 1
 	Light
 	MediumLight
 	Medium
@@ -21,12 +21,20 @@ const (
 type Coffee struct {
 	model.SoftDelete
 
-	Name      string           `json:"name"`
-	Roast     RoastLevel       `json:"roast"`
-	Rating    *uint8           `json:"rating"`
-	Flaviours []FlavourProfile `gorm:"foreignKey:ID" json:"flavours"`
-	Roaster   Roaster          `gorm:"foreignKey:ID" json:"roaster"`
-	User      auth.User        `gorm:"foreignKey:ID" json:"user"`
+	Name   string     `json:"name"`
+	Roast  RoastLevel `gorm:"index" json:"roast"`
+	Rating uint8      `json:"rating"`
+	URL    string     `json:"url"`
+	Notes  string     `json:"notes"`
+	Icon   string     `json:"icon"`
+
+	RoasterID uint    `json:"roaster_id"`
+	Roaster   Roaster `json:"roaster"`
+
+	UserID uint      `json:"user_id"`
+	User   auth.User `json:"user"`
+
+	Flavours []FlavourProfile `gorm:"many2many:coffee_flavour_profiles;" json:"flavours"`
 }
 
 type Roaster struct {
@@ -37,9 +45,9 @@ type Roaster struct {
 	URL         string `json:"url"`
 	Icon        string `json:"icon"`
 
-	Coffees []Coffee `gorm:"foreignKey:ID" json:"-"`
+	Coffees []Coffee `gorm:"foreignKey:RoasterID" json:"coffees"`
 
-	UserID uint      `json:"-"`
+	UserID uint      `json:"user_id"`
 	User   auth.User `gorm:"foreignKey:UserID" json:"user"`
 }
 
@@ -47,10 +55,11 @@ type FlavourProfile struct {
 	model.SoftDelete
 
 	Name    string   `json:"name"`
-	Coffees []Coffee `gorm:"foreignKey:ID" json:"-"`
+	Coffees []Coffee `gorm:"many2many:coffee_flavour_profiles;" json:"-"`
 }
 
 type Repository interface {
+	IndexCoffeesForUser(*auth.User) []Coffee
 	FindCoffee(uint) (*Coffee, error)
 	SaveCoffee(*Coffee) error
 	DeleteCoffee(*Coffee) error
@@ -68,6 +77,18 @@ type Repository interface {
 
 type SqliteRepository struct {
 	db *gorm.DB
+}
+
+// IndexCoffeesForUser implements Repository.
+func (r SqliteRepository) IndexCoffeesForUser(user *auth.User) []Coffee {
+	var coffees []Coffee
+
+	r.db.Preload("Roaster").
+		Where("user_id = ?", user.ID).
+		Order("name ASC").
+		Find(&coffees)
+
+	return coffees
 }
 
 // IndexRoastersForUser implements Repository.
@@ -89,7 +110,7 @@ func NewSqliteRepo(db *gorm.DB) Repository {
 func (r SqliteRepository) FindCoffee(id uint) (*Coffee, error) {
 	var coffee Coffee
 
-	if err := r.db.First(&coffee, id).Error; err != nil {
+	if err := r.db.Preload("Roaster").First(&coffee, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -122,7 +143,7 @@ func (r SqliteRepository) FindFlavourProfiles(ids []uint) ([]FlavourProfile, err
 func (r SqliteRepository) FindRoaster(id uint) (*Roaster, error) {
 	var roaster Roaster
 
-	if err := r.db.First(&roaster, id).Error; err != nil {
+	if err := r.db.Preload("Coffees").First(&roaster, id).Error; err != nil {
 		return nil, err
 	}
 

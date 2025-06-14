@@ -1,4 +1,11 @@
 {{ define "pages/roasters" }}
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/roasters">Roasters</a></li>
+    </ul>
+</div>
+
 {{ if not .Data.open }}
 <button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">Create Roaster</button>
 {{ end}}
@@ -29,28 +36,9 @@
     </div>
 </div>
 
+<h2>Roasters</h2>
 {{ range .Data.Roasters }}
-<article class="card card-side card-border bg-neutral w-full" 
-    hx-get="/roasters/{{ .ID }}"
-    hx-push-url="/roasters/{{ .ID }}"
->
-    <figure>
-        <img src="/{{ .Icon }}"
-            onerror="this.src = '/assets/img/coffee.png';this.classList.remove('object-fit');this.classList.add('object-contain')"
-            alt="roaster"
-            class="h-full object-fit w-[100px] rounded-box"
-        />
-    </figure>
-    <div class="card-body">
-        <div class="card-title">{{ .Name }}</div>
-        <p class="whitespace-pre">{{ .Description }}</p>
-        {{ if .URL }}
-        <div class="card-actions">
-            <a href="{{ .URL }}" class="badge badge-outline" target="_blank">Roaster Website</a>
-        </div>
-        {{ end }}
-    </div>
-</article>
+    {{ template "roaster-card" . }}
 {{ else }}
 <div class="alert alert-notice">No roasters to display</div>
 {{ end }}

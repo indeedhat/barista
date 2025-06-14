@@ -88,10 +88,14 @@ func buildUiRoutes(
 				return
 			}
 
-			pageData := ui.NewPageData("Home", "home")
-			pageData.User = r.Context().Value("user").(*auth.User)
-			ui.RenderUser(w, r, pageData)
+			coffeeController.ViewCoffees(w, r)
 		})
+
+		private.HandleFunc("GET /coffees", coffeeController.ViewCoffees)
+		private.HandleFunc("POST /coffees", coffeeController.CreateCoffee)
+		private.HandleFunc("GET /coffees/{id}", coffeeController.ViewCoffee)
+		private.HandleFunc("POST /coffees/{id}", coffeeController.UpdateCoffee)
+		private.HandleFunc("POST /coffees/{id}/icon", coffeeController.UpdateCoffeeImage)
 
 		private.HandleFunc("GET /roasters", coffeeController.ViewRoasters)
 		private.HandleFunc("POST /roasters", coffeeController.CreateRoaster)
