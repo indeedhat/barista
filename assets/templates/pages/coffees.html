@@ -96,12 +96,13 @@
                     <input type="text" disabled />
                 </label>
 
+                {{ template "flavours-input" . }}
+
                 <textarea name="notes" class="textarea w-full" placeholder="Notes...">{{
                     .Form.Notes
                 }}</textarea>
                 {{ template "field-error" .FieldErrors.notes }}
 
-                {{ template "flavours-input" . }}
                 <button type="submit" class="btn btn-primary">Create Coffee</button>
             </fieldset>
         </form>

@@ -1899,6 +1899,9 @@
   .flex {
     display: flex;
   }
+  .grid {
+    display: grid;
+  }
   .hidden {
     display: none;
   }
@@ -1995,6 +1998,9 @@
   }
   .flex-col {
     flex-direction: column;
+  }
+  .flex-wrap {
+    flex-wrap: wrap;
   }
   .items-center {
     align-items: center;
@@ -2143,6 +2149,10 @@
   .badge-info {
     --badge-color: var(--color-info);
     --badge-fg: var(--color-info-content);
+  }
+  .badge-primary {
+    --badge-color: var(--color-primary);
+    --badge-fg: var(--color-primary-content);
   }
   .btn-primary {
     --btn-color: var(--color-primary);

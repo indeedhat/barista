@@ -1,30 +1,27 @@
 {{ define "flavours-input" }}
-
-<div class="mt-4 space-y-2" id="checkbox-container"></div>
-
+<div class="flex flex-wrap gap-4" id="checkbox-container"></div>
 <div class="form-control max-w-md">
-    <label class="label">
-        <span class="label-text">Choose items</span>
+    <label class="input w-full">
+        <span class="label w-28">Flavours</span>
+        <input
+            list="flavour-options"
+            id="datalist-input"
+            placeholder="Type to select..."
+        />
+        <datalist id="flavour-options">
+            <option value="1">Apple</option>
+            <option value="2">Banana</option>
+            <option value="3">Cherry</option>
+            <option value="4">Date</option>
+            <option value="5">Elderberry</option>
+        </datalist>
     </label>
-    <input
-        list="flavour-options"
-        id="datalist-input"
-        placeholder="Type to select..."
-        class="input input-bordered"
-    />
-    <datalist id="flavour-options">
-        <option value="1">Apple</option>
-        <option value="2">Banana</option>
-        <option value="3">Cherry</option>
-        <option value="4">Date</option>
-        <option value="5">Elderberry</option>
-    </datalist>
 </div>
 
 
 <script>
-const $input = $("#datalist-input");
-const $container = $("#checkbox-container");
+const $input = $("#datalist-input")
+const $container = $("#checkbox-container")
 const $list = $("#flavour-options")
 
 const getOptionText = value => {
@@ -46,40 +43,46 @@ const addOption = (value, text) => {
 }
 
 $input.addEventListener("change", () => {
-    const value = $input.value.trim();
+    const value = $input.value.trim()
     console.log(value, getOptionText(value))
 
-    const id = `cb-flavour-${$input.value}`;
+    const id = `cb-flavour-${$input.value}`
     const text = getOptionText(value)
     removeOption(value)
 
-    const $label = document.createElement("label");
-    $label.className = "flex items-center gap-2 bg-base-200 p-2 rounded";
-    $label.id = id;
+    const $label = document.createElement("span")
+    $label.className = "badge badge-outline badge-primary"
+    $label.id = id
 
-    const $checkbox = document.createElement("input");
-    $checkbox.type = "checkbox";
-    $checkbox.checked = true;
-    $checkbox.className = "checkbox";
-    $checkbox.name = "flavours";
-    $checkbox.value = value;
+    const $checkbox = document.createElement("input")
+    $checkbox.type = "checkbox"
+    $checkbox.checked = true
+    $checkbox.className = "hidden"
+    $checkbox.name = "flavours.int[]"
+    $checkbox.value = value
 
-    const $span = document.createElement("span");
-    $span.textContent = text;
+    $label.addEventListener("click", () => $checkbox.click())
+
+    const $span = document.createElement("span")
+    $span.textContent = text
 
     // Remove when unchecked
     $checkbox.addEventListener("change", () => {
         if (!$checkbox.checked) {
             addOption(value, $span.textContent)
-            $label.remove();
+            $label.remove()
         }
-    });
+    })
 
-    $label.appendChild($checkbox);
-    $label.appendChild($span);
-    $container.appendChild($label);
+    const $close = document.createElement("span")
+    $close.textContent = '×'
 
-    $input.value = ''; // Clear input
-});
+    $label.appendChild($checkbox)
+    $label.appendChild($span)
+    $label.appendChild($close)
+    $container.appendChild($label)
+
+    $input.value = ''
+})
 </script>
 {{ end }}
