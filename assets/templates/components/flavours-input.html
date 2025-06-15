@@ -1,0 +1,85 @@
+{{ define "flavours-input" }}
+
+<div class="mt-4 space-y-2" id="checkbox-container"></div>
+
+<div class="form-control max-w-md">
+    <label class="label">
+        <span class="label-text">Choose items</span>
+    </label>
+    <input
+        list="flavour-options"
+        id="datalist-input"
+        placeholder="Type to select..."
+        class="input input-bordered"
+    />
+    <datalist id="flavour-options">
+        <option value="1">Apple</option>
+        <option value="2">Banana</option>
+        <option value="3">Cherry</option>
+        <option value="4">Date</option>
+        <option value="5">Elderberry</option>
+    </datalist>
+</div>
+
+
+<script>
+const $input = $("#datalist-input");
+const $container = $("#checkbox-container");
+const $list = $("#flavour-options")
+
+const getOptionText = value => {
+    const $el = [ ...$list.querySelectorAll("option") ].filter($e => $e.value == value)
+    return $el[0].text
+}
+
+const removeOption = value => {
+    const $el = $list.querySelector(`option[value="${value}"]`)
+    $list.removeChild($el)
+}
+
+const addOption = (value, text) => {
+    let $option = document.createElement("option")
+    $option.value = value
+    $option.text = text
+
+    $list.appendChild($option)
+}
+
+$input.addEventListener("change", () => {
+    const value = $input.value.trim();
+    console.log(value, getOptionText(value))
+
+    const id = `cb-flavour-${$input.value}`;
+    const text = getOptionText(value)
+    removeOption(value)
+
+    const $label = document.createElement("label");
+    $label.className = "flex items-center gap-2 bg-base-200 p-2 rounded";
+    $label.id = id;
+
+    const $checkbox = document.createElement("input");
+    $checkbox.type = "checkbox";
+    $checkbox.checked = true;
+    $checkbox.className = "checkbox";
+    $checkbox.name = "flavours";
+    $checkbox.value = value;
+
+    const $span = document.createElement("span");
+    $span.textContent = text;
+
+    // Remove when unchecked
+    $checkbox.addEventListener("change", () => {
+        if (!$checkbox.checked) {
+            addOption(value, $span.textContent)
+            $label.remove();
+        }
+    });
+
+    $label.appendChild($checkbox);
+    $label.appendChild($span);
+    $container.appendChild($label);
+
+    $input.value = ''; // Clear input
+});
+</script>
+{{ end }}

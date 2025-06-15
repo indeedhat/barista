@@ -15,7 +15,6 @@ import (
 	"github.com/indeedhat/barista/internal/database"
 	"github.com/indeedhat/barista/internal/server"
 	_ "github.com/indeedhat/dotenv/autoload"
-	"github.com/rs/cors"
 )
 
 func main() {
@@ -56,16 +55,9 @@ func main() {
 		authRepo,
 	)
 
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{server.CorsAllowHost.Get()},
-		AllowCredentials: true,
-		AllowedHeaders:   []string{"Authorization"},
-		ExposedHeaders:   []string{"Auth_token"},
-	})
-
 	svr := &http.Server{
 		Addr:    ":8087",
-		Handler: c.Handler(mux),
+		Handler: mux,
 	}
 
 	quit := make(chan os.Signal, 1)

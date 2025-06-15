@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
@@ -48,8 +47,6 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 		ui.RenderUser(rw, r, pageData)
 		return
 	}
-
-	spew.Dump(pageData.Form)
 
 	if err := server.ValidateRequest(req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "Bad request")

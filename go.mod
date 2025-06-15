@@ -3,12 +3,10 @@ module github.com/indeedhat/barista
 go 1.24.3
 
 require (
-	github.com/davecgh/go-spew v1.1.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/indeedhat/dotenv v0.0.0-20250530135927-23ddeda9168e
-	github.com/rs/cors v1.11.1
 	golang.org/x/crypto v0.37.0
 	gorm.io/gorm v1.30.0
 )

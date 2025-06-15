@@ -9,3 +9,7 @@
 .input-error:empty {
     display:none;
 }
+
+.input[list]::-webkit-calendar-picker-indicator {
+  line-height: 1em;
+}
