@@ -19,85 +19,96 @@
             hx-post="/coffees/{{ .Data.Coffee.ID }}"
             hx-ext="json-enc"
         >
-            <fieldset class="fieldset">
-                <label class="label">Name *</label>
-                <input type="text" name="name" class="input w-full" placeholder="Name..." value="{{ or .Form.Name .Data.Coffee.Name }}" />
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-28">Name *</span>
+                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.Name .Data.Coffee.Name }}" />
+                </label>
                 {{ template "field-error" .FieldErrors.name }}
 
-
                 {{ $roaster := or .Form.Roaster .Data.Coffee.RoasterID }}
-                <label class="label">Roaster *</label>
-                <select class="select w-full" name="roaster.int">
-                    <option value="" disabled selected>Pick a Roaster</option>
-                    {{ range .Data.Roasters }}
-                        <option value="{{ .ID }}" {{ selected $roaster .ID }}>{{ .Name }}</option>
-                    {{ end}}
-                </select>
+                <label class="input w-full">
+                    <span class="label w-28">Roaster *</span>
+                    <select class="w-full" name="roaster.int">
+                        <option value="" disabled selected>Pick a Roaster</option>
+                        {{ range .Data.Roasters }}
+                            <option value="{{ .ID }}" {{ selected $roaster .ID }}>{{ .Name }}</option>
+                        {{ end}}
+                    </select>
+                </label>
                 {{ template "field-error" .FieldErrors.flavour }}
 
-
                 {{ $roastLevel := or .Form.Roast .Data.Coffee.Roast }}
-                <label class="label">Roast Level *</label>
-                <select class="select w-full" name="roast.int">
-                    <option value="" disabled selected>Pick a Roast Level</option>
-                    <option value="1" {{ selected $roastLevel 1 }}>Very Light</option>
-                    <option value="2" {{ selected $roastLevel 2 }}>Light</option>
-                    <option value="3" {{ selected $roastLevel 3 }}>Medium Light</option>
-                    <option value="4" {{ selected $roastLevel 4 }}>Medium</option>
-                    <option value="5" {{ selected $roastLevel 5 }}>Medium Dark</option>
-                    <option value="6" {{ selected $roastLevel 6 }}>Dark</option>
-                    <option value="7" {{ selected $roastLevel 7 }}>Very Dark</option>
-                </select>
+                <label class="input w-full">
+                    <span class="label w-28">Roast *</span>
+                    <select class="w-full" name="roast.int">
+                        <option value="" disabled selected>Pick a Roast Level</option>
+                        <option value="1" {{ selected $roastLevel 1 }}>Very Light</option>
+                        <option value="2" {{ selected $roastLevel 2 }}>Light</option>
+                        <option value="3" {{ selected $roastLevel 3 }}>Medium Light</option>
+                        <option value="4" {{ selected $roastLevel 4 }}>Medium</option>
+                        <option value="5" {{ selected $roastLevel 5 }}>Medium Dark</option>
+                        <option value="6" {{ selected $roastLevel 6 }}>Dark</option>
+                        <option value="7" {{ selected $roastLevel 7 }}>Very Dark</option>
+                    </select>
+                </label>
                 {{ template "field-error" .FieldErrors.roast }}
 
                 {{ $caffeineLevel := or .Form.Caffeine .Data.Coffee.Caffeine }}
-                <label class="label">Caffeine Level *</label>
-                <select class="select w-full" name="caffeine.int">
-                    <option value="" disabled selected>Pick a Caffeine Level</option>
-                    <option value="1" {{ selected $caffeineLevel 1 }}>Caffeinated</option>
-                    <option value="2" {{ selected $caffeineLevel 2 }}>Half Caf</option>
-                    <option value="3" {{ selected $caffeineLevel 3 }}>Decaf</option>
-                </select>
+                <label class="input w-full">
+                    <span class="label w-28">Caffeine *</span>
+                    <select class="w-full" name="caffeine.int">
+                        <option value="" disabled selected>Pick a Caffeine Level</option>
+                        <option value="1" {{ selected $caffeineLevel 1 }}>Caffeinated</option>
+                        <option value="2" {{ selected $caffeineLevel 2 }}>Half Caf</option>
+                        <option value="3" {{ selected $caffeineLevel 3 }}>Decaf</option>
+                    </select>
+                </label>
                 {{ template "field-error" .FieldErrors.caffeine }}
 
                 {{ $rating := or .Form.Rating .Data.Coffee.Rating }}
-                <label class="label">Rating</label>
-                <div class="rating">
-                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="1 star"
-                        value="1"
-                        {{ checked $rating 1 }}
-                    />
-                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="2 star"
-                        value="2"
-                        {{ checked $rating 2 }}
-                    />
-                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="3 star"
-                        value="3"
-                        {{ checked $rating 3 }}
-                    />
-                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="4 star"
-                        value="4"
-                        {{ checked $rating 4 }}
-                    />
-                    <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="5 star"
-                        value="5"
-                        {{ checked $rating 5 }}
-                    />
-                </div>
+                <label class="input w-full">
+                    <span class="label w-22">Rating</span>
+                    <div class="rating">
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="1 star"
+                            value="1"
+                            {{ checked $rating 1 }}
+                        />
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="2 star"
+                            value="2"
+                            {{ checked $rating 2 }}
+                        />
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="3 star"
+                            value="3"
+                            {{ checked $rating 3 }}
+                        />
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="4 star"
+                            value="4"
+                            {{ checked $rating 4 }}
+                        />
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="5 star"
+                            value="5"
+                            {{ checked $rating 5 }}
+                        />
+                    </div>
+                </label>
                 {{ template "field-error" .FieldErrors.rating }}
 
-                <label class="label">Notes</label>
+                <label class="input w-full">
+                    <span class="label w-28">URL</span>
+                    <input type="text" name="url" class="input w-full" placeholder="https://..." value="{{ or .Form.URL .Data.Coffee.URL "" }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.url }}
+
+                <label class="input w-full">
+                    <span class="label w-28">URL</span>
+                    <input type="text" name="url" placeholder="https://..." value="{{ or .Form.URL "" }}" />
+                </label>
+
                 <textarea name="notes" class="textarea w-full" placeholder="Notes...">{{
                     or .Form.Notes .Data.Coffee.Notes
                 }}</textarea>
                 {{ template "field-error" .FieldErrors.notes }}
-
-                <label class="label">URL</label>
-                <input type="text" name="url" class="input w-full" placeholder="https://..." value="{{ or .Form.URL .Data.Coffee.URL "" }}" />
-                {{ template "field-error" .FieldErrors.url }}
-
-                <label class="label">Flavours (TODO)</label>
-                <input class="input w-full" disabled />
 
                 <button type="submit" class="btn btn-primary">Update Coffee</button>
             </fieldset>
