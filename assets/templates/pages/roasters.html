@@ -15,20 +15,23 @@
             hx-post="/roasters"
             hx-ext="json-enc"
         >
-            <fieldset class="fieldset">
-                <label class="label">Name *</label>
-                <input type="text" name="name" class="input w-full" placeholder="Name..." value="{{ .Form.name }}" />
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-22">Name *</span>
+                    <input type="text" name="name" placeholder="Name..." value="{{ .Form.name }}" />
+                </label>
                 {{ template "field-error" .FieldErrors.name }}
 
-                <label class="label">Description</label>
+                <label class="input w-full">
+                    <span class="label w-22">URL *</span>
+                    <input type="text" name="url" placeholder="https://..." value="{{ .Form.url }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.url }}
+
                 <textarea name="description" class="textarea w-full" placeholder="Description...">{{
                     .Form.description
                 }}</textarea>
                 {{ template "field-error" .FieldErrors.description }}
-
-                <label class="label">URL</label>
-                <input type="text" name="url" class="input w-full" placeholder="https://..." value="{{ .Form.url }}" />
-                {{ template "field-error" .FieldErrors.url }}
 
                 <button type="submit" class="btn btn-primary">Create Roaster</button>
             </fieldset>

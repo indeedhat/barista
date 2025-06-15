@@ -19,20 +19,23 @@
             hx-post="/roasters/{{ .Data.Roaster.ID }}"
             hx-ext="json-enc"
         >
-            <fieldset class="fieldset">
-                <label class="label">Name *</label>
-                <input type="text" name="name" class="input w-full" placeholder="Name..." value="{{ or .Form.name .Data.Roaster.Name }}" />
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-22">Name *</span>
+                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.name .Data.Roaster.Name }}" />
+                </label>
                 {{ template "field-error" .FieldErrors.name }}
 
-                <label class="label">Description</label>
+                <label class="input w-full">
+                    <span class="label w-22">URL *</span>
+                    <input type="text" name="url" placeholder="https://..." value="{{ or .Form.url .Data.Roaster.URL }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.url }}
+
                 <textarea name="description" class="textarea w-full" placeholder="Description...">{{
                     or .Form.description .Data.Roaster.Description
                 }}</textarea>
                 {{ template "field-error" .FieldErrors.description }}
-
-                <label class="label">URL</label>
-                <input type="text" name="url" class="input w-full" placeholder="https://..." value="{{ or .Form.url .Data.Roaster.URL }}" />
-                {{ template "field-error" .FieldErrors.url }}
 
                 <button type="submit" class="btn btn-primary">Save Roaster</button>
             </fieldset>
@@ -44,7 +47,7 @@
 {{ range .Data.Roaster.Coffees }}
     {{ template "coffee-card" . }}
 {{ else }}
-<div class="alert alert-notice">No coffees to display</div>
+    <div class="alert alert-notice">No coffees to display</div>
 {{ end }}
 {{ end }}
 
