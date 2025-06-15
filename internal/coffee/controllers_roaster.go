@@ -59,6 +59,7 @@ func (c Controller) CreateRoaster(rw http.ResponseWriter, r *http.Request) {
 
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["open"] = false
+	pageData.Form = createRoasterRequest{}
 
 	ui.Toast(rw, ui.Success, "Roaster created")
 	ui.RenderUser(rw, r, pageData)

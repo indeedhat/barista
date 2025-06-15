@@ -1,0 +1,41 @@
+{{ define "pages/flavours" }}
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/flavours">Flavours</a></li>
+    </ul>
+</div>
+
+{{ if not .Data.open }}
+    <button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">Create Flavour</button>
+{{ end}}
+<div class="card card-border bg-neutral w-full {{ if not .Data.open }}hidden{{ end }}" id="create-card">
+    <div class="card-body">
+        <form
+            hx-post="/flavours"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-22">Name *</span>
+                    <input type="text" name="name" placeholder="Name..." value="{{ .Form.Name }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.name }}
+
+                <button type="submit" class="btn btn-primary">Create Flavour</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<h2>Flavours</h2>
+{{ range .Data.Flavours }}
+    <article class="card card-side card-border bg-neutral w-full">
+        <div class="card-body">
+            <div class="card-title">{{ .Name }}</div>
+        </div>
+    </article>
+{{ else }}
+    <div class="alert alert-notice">No flavours to display</div>
+{{ end }}
+{{ end }}

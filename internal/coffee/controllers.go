@@ -1,10 +1,11 @@
 package coffee
 
 import (
-	"errors"
 	"net/http"
 
+	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/server"
+	"github.com/indeedhat/barista/internal/ui"
 )
 
 const (
@@ -24,19 +25,36 @@ type createSuccessResponse struct {
 	ID uint `json:"id"`
 }
 
+func (c Controller) ViewFlavours(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
+
+	pageData := ui.NewPageData("Flavours", "flavours", user)
+	pageData.Form = createFlavourProfileRequest{}
+	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+
+	ui.RenderUser(rw, r, pageData)
+}
+
 type createFlavourProfileRequest struct {
 	Name string `json:"name" validate:"required"`
 }
 
 func (c Controller) CreateFlavourProfile(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
+	pageData := ui.NewPageData("Flavours", "flavours", user)
+	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Data["open"] = true
+
 	var req createFlavourProfileRequest
-	if err := server.UnmarshalBody(r, &req); err != nil {
-		server.WriteResponse(rw, http.StatusBadRequest, nil)
+	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
+		ui.Toast(rw, ui.Warning, "The server did not understand the request")
+		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
-	if err := server.ValidateRequest(req); err != nil {
-		server.WriteResponse(rw, http.StatusUnprocessableEntity, err)
+	if err := server.ValidateRequest(req, &pageData); err != nil {
+		ui.Toast(rw, ui.Warning, "Failed to create flavour")
+		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -45,43 +63,15 @@ func (c Controller) CreateFlavourProfile(rw http.ResponseWriter, r *http.Request
 	}
 
 	if err := c.repo.SaveFlavourProfile(&flavour); err != nil {
-		server.WriteResponse(rw, http.StatusInternalServerError, nil)
+		ui.Toast(rw, ui.Warning, "Failed to create flavour")
+		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
-	server.WriteResponse(rw, http.StatusCreated, createSuccessResponse{flavour.ID})
-}
+	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Data["open"] = false
+	pageData.Form = createFlavourProfileRequest{}
 
-type updateFlavourProfileRequest struct {
-	Name string `json:"name" validate:"required"`
-}
-
-func (c Controller) DeleteFlavourProfile(rw http.ResponseWriter, r *http.Request) {
-	id, err := server.PathID(r)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, nil)
-		return
-	}
-
-	flavour, err := c.repo.FindFlavourProfile(id)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, errors.New("Coffee not found"))
-		return
-	}
-
-	if len(flavour.Coffees) > 0 {
-		server.WriteResponse(
-			rw,
-			http.StatusNotFound,
-			errors.New("Cannot delete a flavour profile that still has assigned coffees"),
-		)
-		return
-	}
-
-	if err := c.repo.DeleteFlavourProfile(flavour); err != nil {
-		server.WriteResponse(rw, http.StatusInternalServerError, nil)
-		return
-	}
-
-	server.WriteResponse(rw, http.StatusNoContent, nil)
+	ui.Toast(rw, ui.Success, "Flavour created")
+	ui.RenderUser(rw, r, pageData)
 }

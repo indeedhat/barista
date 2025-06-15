@@ -46,6 +46,15 @@ type Coffee struct {
 	Flavours []FlavourProfile `gorm:"many2many:coffee_flavour_profiles;" json:"flavours"`
 }
 
+func (c Coffee) FlavourIds() []uint {
+	var ids []uint
+	for _, flavour := range c.Flavours {
+		ids = append(ids, flavour.ID)
+	}
+
+	return ids
+}
+
 type Roaster struct {
 	model.SoftDelete
 
@@ -78,6 +87,7 @@ type Repository interface {
 	SaveRoaster(*Roaster) error
 	DeleteRoaster(*Roaster) error
 
+	IndexFlavourProfiles() []FlavourProfile
 	FindFlavourProfile(uint) (*FlavourProfile, error)
 	FindFlavourProfiles([]uint) ([]FlavourProfile, error)
 	SaveFlavourProfile(*FlavourProfile) error
@@ -86,6 +96,15 @@ type Repository interface {
 
 type SqliteRepository struct {
 	db *gorm.DB
+}
+
+// IndexFlavourProfiles implements Repository.
+func (r SqliteRepository) IndexFlavourProfiles() []FlavourProfile {
+	var flavours []FlavourProfile
+
+	r.db.Order("name ASC").Find(&flavours)
+
+	return flavours
 }
 
 // IndexCoffeesForUser implements Repository.
@@ -119,7 +138,7 @@ func NewSqliteRepo(db *gorm.DB) Repository {
 func (r SqliteRepository) FindCoffee(id uint) (*Coffee, error) {
 	var coffee Coffee
 
-	if err := r.db.Preload("Roaster").First(&coffee, id).Error; err != nil {
+	if err := r.db.Preload("Roaster").Preload("Flavours").First(&coffee, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -141,7 +160,7 @@ func (r SqliteRepository) FindFlavourProfile(id uint) (*FlavourProfile, error) {
 func (r SqliteRepository) FindFlavourProfiles(ids []uint) ([]FlavourProfile, error) {
 	var flavours []FlavourProfile
 
-	if err := r.db.Find(flavours, ids).Error; err != nil {
+	if err := r.db.Find(&flavours, ids).Error; err != nil {
 		return nil, err
 	}
 
@@ -176,6 +195,12 @@ func (r SqliteRepository) DeleteRoaster(roaster *Roaster) error {
 
 // SaveCoffe implements Repository.
 func (r SqliteRepository) SaveCoffee(coffee *Coffee) error {
+	if coffee.ID != 0 {
+		if err := r.db.Model(&coffee).Association("Flavours").Replace(coffee.Flavours); err != nil {
+			return err
+		}
+	}
+
 	return r.db.Save(coffee).Error
 }
 

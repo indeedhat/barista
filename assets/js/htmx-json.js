@@ -13,6 +13,7 @@ htmx.defineExtension('json-enc', {
         let ob = {}
 
         parameters.keys().forEach(k => {
+            const values = parameters.getAll(k)
             let key = k
             let array = false
             let int = false
@@ -25,9 +26,6 @@ htmx.defineExtension('json-enc', {
                 int = true
                 key = key.slice(0, -4)
             }
-
-
-            const values = parameters.getAll(k)
 
             if (array) {
                 ob[key] = []

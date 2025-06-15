@@ -9,18 +9,15 @@
             placeholder="Type to select..."
         />
         <datalist id="flavour-options">
-            <option value="1">Apple</option>
-            <option value="2">Banana</option>
-            <option value="3">Cherry</option>
-            <option value="4">Date</option>
-            <option value="5">Elderberry</option>
+            {{ range  .flavours }}
+                <option value="{{ .ID }}">{{ .Name }}</option>
+            {{ end }}
         </datalist>
     </label>
 </div>
 
-
-<script>
-const $input = $("#datalist-input")
+<script type="module">
+const $dlist = $("#datalist-input")
 const $container = $("#checkbox-container")
 const $list = $("#flavour-options")
 
@@ -42,11 +39,8 @@ const addOption = (value, text) => {
     $list.appendChild($option)
 }
 
-$input.addEventListener("change", () => {
-    const value = $input.value.trim()
-    console.log(value, getOptionText(value))
-
-    const id = `cb-flavour-${$input.value}`
+const selectFlavour = (value) => {
+    const id = `cb-flavour-${$dlist.value}`
     const text = getOptionText(value)
     removeOption(value)
 
@@ -82,7 +76,18 @@ $input.addEventListener("change", () => {
     $label.appendChild($close)
     $container.appendChild($label)
 
-    $input.value = ''
-})
+    $dlist.value = ''
+}
+
+const handleSelectFlavour = () => {
+    const value = $dlist.value.trim()
+    selectFlavour(value)
+}
+
+$dlist.addEventListener("change", handleSelectFlavour)
+
+{{ range .existing }}
+    selectFlavour('{{ . }}')
+{{ end }}
 </script>
 {{ end }}

@@ -43,9 +43,6 @@ func buildApiRoutes(
 		private.HandleFunc("DELETE /coffee/{id}", coffeeController.DeleteCoffee)
 
 		private.HandleFunc("DELETE /roaster/{id}", coffeeController.DeleteRoaster)
-
-		private.HandleFunc("POST /flavour", coffeeController.CreateFlavourProfile)
-		private.HandleFunc("DELETE /flavour/{id}", coffeeController.DeleteFlavourProfile)
 	}
 
 	self := r.Group("/api", auth.AdminOrSelfMiddleware(auth.API, authRepo))
@@ -96,6 +93,9 @@ func buildUiRoutes(
 		private.HandleFunc("GET /coffees/{id}", coffeeController.ViewCoffee)
 		private.HandleFunc("POST /coffees/{id}", coffeeController.UpdateCoffee)
 		private.HandleFunc("POST /coffees/{id}/icon", coffeeController.UpdateCoffeeImage)
+
+		private.HandleFunc("GET /flavours", coffeeController.ViewFlavours)
+		private.HandleFunc("POST /flavours", coffeeController.CreateFlavourProfile)
 
 		private.HandleFunc("GET /roasters", coffeeController.ViewRoasters)
 		private.HandleFunc("POST /roasters", coffeeController.CreateRoaster)

@@ -12,13 +12,12 @@ import (
 
 func (c Controller) ViewCoffees(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	roasters := c.repo.IndexRoastersForUser(user)
-	coffees := c.repo.IndexCoffeesForUser(user)
 
 	pageData := ui.NewPageData("Coffees", "coffees", user)
 	pageData.Form = createCoffeeRequest{}
-	pageData.Data["Roasters"] = roasters
-	pageData.Data["Coffees"] = coffees
+	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
+	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
+	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
 
 	ui.RenderUser(rw, r, pageData)
 }
@@ -39,6 +38,7 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData := ui.NewPageData("Coffees", "coffees", user)
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
+	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
 	pageData.Data["open"] = true
 
 	var req createCoffeeRequest
@@ -90,6 +90,7 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 
 	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
 	pageData.Data["open"] = false
+	pageData.Form = createCoffeeRequest{}
 
 	ui.Toast(rw, ui.Success, "Coffee created")
 	ui.RenderUser(rw, r, pageData)
@@ -115,6 +116,10 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData := ui.NewPageData("Coffee", "coffee", user)
 	pageData.Data["Coffee"] = coffee
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
+	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Form = updateCoffeeRequest{
+		Flavours: coffee.FlavourIds(),
+	}
 
 	ui.RenderUser(rw, r, pageData)
 }
@@ -140,6 +145,7 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	pageData.Title = coffee.Name
 	pageData.Data["Coffee"] = coffee
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
+	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
 
 	// TODO: i should probably find a nice way of doing this check with middleware but i cant think
 	//       of a good way of doing it right now without loading in the model twice
@@ -201,6 +207,7 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Title = coffee.Name
 	pageData.Data["Coffee"] = coffee
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
+	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
 
 	var req updateCoffeeRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {

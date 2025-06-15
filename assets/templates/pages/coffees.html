@@ -91,12 +91,10 @@
                 </label>
                 {{ template "field-error" .FieldErrors.url }}
 
-                <label class="input w-full">
-                    <span class="label w-28">Flavours</span>
-                    <input type="text" disabled />
-                </label>
-
-                {{ template "flavours-input" . }}
+                {{ template "flavours-input" (map
+                    "existing" .Form.Flavours
+                    "flavours" .Data.Flavours
+                ) }}
 
                 <textarea name="notes" class="textarea w-full" placeholder="Notes...">{{
                     .Form.Notes
