@@ -2,20 +2,26 @@
 <article class="card card-side card-border bg-neutral w-full" 
     hx-get="/coffees/{{ .ID }}"
     hx-push-url="/coffees/{{ .ID }}"
+    class="relative"
 >
     <figure>
         <img src="/{{ .Icon }}"
             onerror="this.src = '/assets/img/coffee.png';this.classList.remove('object-fit');this.classList.add('object-contain')"
             alt="roaster"
-            class="h-full object-fit w-[100px] rounded-box"
+            class="h-full object-fit w-[100px] rounded-box "
         />
     </figure>
+    {{ if eq .Caffeine 2 }}
+        <div class="badge badge-soft badge-accent absolute top-1 right-1">Half Caf</div>
+    {{ else if eq .Caffeine 3 }}
+        <div class="badge badge-soft badge-info absolute top-1 right-1">Decaf</div>
+    {{ end}}
     <div class="card-body">
         <div class="card-title">{{ .Name }}</div>
         <p>{{ .Roaster.Name }}</p>
         <div>
             {{ range .Flavours }}
-            <span class="badge badge-outline">{{ .Name }}</span>
+                <span class="badge badge-outline">{{ .Name }}</span>
             {{ end }}
         </div>
         <div class="card-actions justify-between">
@@ -27,9 +33,9 @@
                 <div class="mask mask-star" aria-label="5 star" {{ if eq .Rating 5 }}aria-current="true"{{ end }}></div>
             </div>
             {{ if .URL }}
-            <a href="{{ .URL }}" class="badge badge-outline" target="_blank">Website</a>
+                <a href="{{ .URL }}" class="badge badge-outline" target="_blank">Website</a>
             {{ else if .Roaster.URL }}
-            <a href="{{ .Roaster.URL }}" class="badge badge-outline" target="_blank">Website</a>
+                <a href="{{ .Roaster.URL }}" class="badge badge-outline" target="_blank">Website</a>
             {{ end }}
         </div>
     </div>

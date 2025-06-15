@@ -2,41 +2,18 @@
 <div class="breadcrumbs text-sm">
   <ul>
     <li><a href="/">Home</a></li>
-        <li><a href="/roasters/{{ .Data.Coffee.Roaster.ID }}">{{ .Data.Coffee.Roaster.Name }}</a></li>
+    <li><a href="/roasters/{{ .Data.Coffee.Roaster.ID }}">Roaster: {{ .Data.Coffee.Roaster.Name }}</a></li>
+    <li><a href="/roasters/{{ .Data.Coffee.Roaster.ID }}">Coffee: {{ .Data.Coffee.Roaster.Name }}</a></li>
   </ul>
 </div>
 
 <div class="card card-border bg-neutral w-full" id="update-card">
     <div class="card-body">
-        <div class="flex justify-center">
-            <div class="relative h-full object-contain rounded-field border max-w-[50%] overflow-hidden"
-                onclick="upload_icon_modal.showModal()"
-            >
-
-                <img src="/{{ .Data.Coffee.Icon }}" onerror="this.src = '/assets/img/coffee.png'" alt="coffee" />
-                <div class="absolute bottom-0 right-0 rounded-field bg-neutral border">
-                    <img src="/assets/img/edit.png" alt="{{ .Data.Coffee.Name }}" />
-                </div>
-            </div>
-            <dialog id="upload_icon_modal" class="modal">
-                <div class="modal-box">
-                    <h3 class="text-lg font-bold">Replace Icon</h3>
-                    <fieldset class="fieldset">
-                        <input type="file"
-                            class="file-input"
-                            name="image"
-                            hx-encoding="multipart/form-data"
-                            hx-post="/coffees/{{ .Data.Coffee.ID }}/icon"
-                        />
-                    </fieldset>
-                    <div class="modal-action">
-                        <form method="dialog">
-                            <button class="btn">Close</button>
-                        </form>
-                    </div>
-                </div>
-            </dialog>
-        </div>
+        {{ template "icon-upload" (map
+            "action" "/coffees/{{.Data.Coffee.ID}}/icon"
+            "icon" .Data.Coffee.Icon
+            "alt" .Data.Coffee.Name
+        ) }}
 
         <form
             hx-post="/coffees/{{ .Data.Coffee.ID }}"
@@ -53,7 +30,7 @@
                 <select class="select w-full" name="roaster.int">
                     <option value="" disabled selected>Pick a Roaster</option>
                     {{ range .Data.Roasters }}
-                    <option value="{{ .ID }}" {{ selected $roaster .ID }}>{{ .Name }}</option>
+                        <option value="{{ .ID }}" {{ selected $roaster .ID }}>{{ .Name }}</option>
                     {{ end}}
                 </select>
                 {{ template "field-error" .FieldErrors.flavour }}
@@ -72,6 +49,16 @@
                     <option value="7" {{ selected $roastLevel 7 }}>Very Dark</option>
                 </select>
                 {{ template "field-error" .FieldErrors.roast }}
+
+                {{ $caffeineLevel := or .Form.Caffeine .Data.Coffee.Caffeine }}
+                <label class="label">Caffeine Level *</label>
+                <select class="select w-full" name="caffeine.int">
+                    <option value="" disabled selected>Pick a Caffeine Level</option>
+                    <option value="1" {{ selected $caffeineLevel 1 }}>Caffeinated</option>
+                    <option value="2" {{ selected $caffeineLevel 2 }}>Half Caf</option>
+                    <option value="3" {{ selected $caffeineLevel 3 }}>Decaf</option>
+                </select>
+                {{ template "field-error" .FieldErrors.caffeine }}
 
                 {{ $rating := or .Form.Rating .Data.Coffee.Rating }}
                 <label class="label">Rating</label>

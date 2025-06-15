@@ -9,35 +9,11 @@
 
 <div class="card card-border bg-neutral w-full" id="create-card">
     <div class="card-body">
-        <div class="flex justify-center">
-            <div class="relative h-full object-contain rounded-field border max-w-[50%]"
-                onclick="upload_icon_modal.showModal()"
-            >
-
-                <img src="/{{ .Data.Roaster.Icon }}" onerror="this.src = '/assets/img/coffee.png'" alt="roaster" />
-                <div class="absolute bottom-0 right-0 rounded-field bg-neutral border">
-                    <img src="/assets/img/edit.png" alt="{{ .Data.Roaster.Name }}" />
-                </div>
-            </div>
-            <dialog id="upload_icon_modal" class="modal">
-                <div class="modal-box">
-                    <h3 class="text-lg font-bold">Replace Icon</h3>
-                    <fieldset class="fieldset">
-                        <input type="file"
-                            class="file-input"
-                            name="image"
-                            hx-encoding="multipart/form-data"
-                            hx-post="/roasters/{{ .Data.Roaster.ID }}/icon"
-                        />
-                    </fieldset>
-                    <div class="modal-action">
-                        <form method="dialog">
-                            <button class="btn">Close</button>
-                        </form>
-                    </div>
-                </div>
-            </dialog>
-        </div>
+        {{ template "icon-upload" (map
+            "action" "/roasters/{{.Data.Roaster.ID}}/icon"
+            "icon" .Data.Roaster.Icon
+            "alt" .Data.Roaster.Name
+        ) }}
 
         <form
             hx-post="/roasters/{{ .Data.Roaster.ID }}"

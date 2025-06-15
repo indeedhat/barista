@@ -6,7 +6,7 @@
 </div>
 
 {{ if not .Data.open }}
-<button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">Create Coffee</button>
+    <button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">Create Coffee</button>
 {{ end}}
 <div class="card card-border bg-neutral w-full {{ if not .Data.open }}hidden{{ end }}" id="create-card">
     <div class="card-body">
@@ -23,7 +23,7 @@
                 <select class="select w-full" name="roaster.int">
                     <option value="" disabled selected>Pick a Roaster</option>
                     {{ range .Data.Roasters }}
-                    <option value="{{ .ID }}" {{ selected $.Form.Roaster .ID }}>{{ .Name }}</option>
+                        <option value="{{ .ID }}" {{ selected $.Form.Roaster .ID }}>{{ .Name }}</option>
                     {{ end}}
                 </select>
                 {{ template "field-error" .FieldErrors.flavour }}
@@ -40,6 +40,15 @@
                     <option value="7" {{ selected $.Form.Roast 7 }}>Very Dark</option>
                 </select>
                 {{ template "field-error" .FieldErrors.roast }}
+
+                <label class="label">Caffeine Level *</label>
+                <select class="select w-full" name="caffeine.int">
+                    <option value="" disabled selected>Pick a Caffeine Level</option>
+                    <option value="1" {{ selected $.Form.Roast 1 }}>Caffeinated</option>
+                    <option value="2" {{ selected $.Form.Roast 2 }}>Half Caf</option>
+                    <option value="3" {{ selected $.Form.Roast 3 }}>Decaf</option>
+                </select>
+                {{ template "field-error" .FieldErrors.caffeine }}
 
                 <label class="label">Rating</label>
                 <div class="rating">
@@ -89,6 +98,6 @@
 {{ range .Data.Coffees }}
     {{ template "coffee-card" . }}
 {{ else }}
-<div class="alert alert-notice">No coffees to display</div>
+    <div class="alert alert-notice">No coffees to display</div>
 {{ end }}
 {{ end }}

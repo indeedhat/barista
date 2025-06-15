@@ -7,7 +7,7 @@
 </div>
 
 {{ if not .Data.open }}
-<button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">Create Roaster</button>
+    <button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">Create Roaster</button>
 {{ end}}
 <div class="card card-border bg-neutral w-full {{ if not .Data.open }}hidden{{ end }}" id="create-card">
     <div class="card-body">
@@ -40,6 +40,6 @@
 {{ range .Data.Roasters }}
     {{ template "roaster-card" . }}
 {{ else }}
-<div class="alert alert-notice">No roasters to display</div>
+    <div class="alert alert-notice">No roasters to display</div>
 {{ end }}
 {{ end }}

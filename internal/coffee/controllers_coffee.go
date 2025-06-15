@@ -27,7 +27,8 @@ func (c Controller) ViewCoffees(rw http.ResponseWriter, r *http.Request) {
 type createCoffeeRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Roaster  uint   `json:"roaster" validate:"required"`
-	Roast    uint8  `json:"roast" validate:"required"` // TODO: validate level
+	Roast    uint8  `json:"roast" validate:"required"`    // TODO: validate level
+	Caffeine uint8  `json:"caffeine" validate:"required"` // TODO: validate level
 	Rating   uint8  `json:"rating"`
 	Notes    string `json:"notes"`
 	URL      string `json:"url"`
@@ -76,6 +77,7 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 		Name:     req.Name,
 		Roaster:  *roaster,
 		Roast:    RoastLevel(req.Roast),
+		Caffeine: CaffeineLevel(req.Caffeine),
 		Rating:   req.Rating,
 		Notes:    req.Notes,
 		URL:      req.URL,
@@ -173,7 +175,8 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 type updateCoffeeRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Roaster  uint   `json:"roaster" validate:"required"`
-	Roast    uint8  `json:"roast" validate:"required"` // TODO: validate level
+	Roast    uint8  `json:"roast" validate:"required"`    // TODO: validate level
+	Caffeine uint8  `json:"caffeine" validate:"required"` // TODO: validate level
 	Rating   uint8  `json:"rating"`
 	Notes    string `json:"notes"`
 	URL      string `json:"url"`
@@ -240,6 +243,7 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	coffee.Name = req.Name
 	coffee.Roaster = *roaster
 	coffee.Roast = RoastLevel(req.Roast)
+	coffee.Caffeine = CaffeineLevel(req.Caffeine)
 	coffee.Rating = req.Rating
 	coffee.Notes = req.Notes
 	coffee.URL = req.URL

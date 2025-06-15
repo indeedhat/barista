@@ -2,45 +2,8 @@ package ui
 
 import (
 	"encoding/json"
-	"fmt"
-	"html/template"
-	"log"
 	"net/http"
-	"strings"
-	"time"
-
-	"github.com/indeedhat/barista/assets/templates"
 )
-
-func init() {
-	tmpl := template.New("")
-	tmpls = template.Must(tmpl.Funcs(template.FuncMap{
-		"embed": func(name string, data any) template.HTML {
-			var out strings.Builder
-			if err := tmpl.ExecuteTemplate(&out, name, data); err != nil {
-				log.Println(err)
-			}
-			return template.HTML(out.String())
-		},
-		"selected": func(actual, expect any) string {
-			if fmt.Sprint(expect) == fmt.Sprint(actual) {
-				return "selected"
-			}
-			return ""
-		},
-		"checked": func(actual, expect any) string {
-			if fmt.Sprint(expect) == fmt.Sprint(actual) {
-				return "checked"
-			}
-			return ""
-		},
-		"unix": func() int {
-			return int(time.Now().Unix())
-		},
-	}).ParseFS(templates.FS, "layouts/*", "pages/*", "components/*"))
-}
-
-var tmpls *template.Template
 
 type PageData struct {
 	Title       string

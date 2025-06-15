@@ -18,15 +18,24 @@ const (
 	VeryDark
 )
 
+type CaffeineLevel uint8
+
+const (
+	FullCaf CaffeineLevel = iota + 1
+	HalfCaf
+	Decaf
+)
+
 type Coffee struct {
 	model.SoftDelete
 
-	Name   string     `json:"name"`
-	Roast  RoastLevel `gorm:"index" json:"roast"`
-	Rating uint8      `json:"rating"`
-	URL    string     `json:"url"`
-	Notes  string     `json:"notes"`
-	Icon   string     `json:"icon"`
+	Name     string        `json:"name"`
+	Roast    RoastLevel    `gorm:"index" json:"roast"`
+	Rating   uint8         `json:"rating"`
+	URL      string        `json:"url"`
+	Notes    string        `json:"notes"`
+	Icon     string        `json:"icon"`
+	Caffeine CaffeineLevel `gorm:"index" json:"caffeine"`
 
 	RoasterID uint    `json:"roaster_id"`
 	Roaster   Roaster `json:"roaster"`
