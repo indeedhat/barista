@@ -3,12 +3,16 @@ package coffee
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/database/model"
 )
+
+func ptr[T any](v T) *T {
+	return &v
+}
 
 type RoastLevel uint8
 
@@ -48,6 +52,8 @@ type Coffee struct {
 	User   auth.User
 
 	Flavours []FlavourProfile `gorm:"many2many:coffee_flavour_profiles;"`
+
+	Recipes []Recipe
 }
 
 func (c Coffee) FlavourIds() []uint {
@@ -63,7 +69,8 @@ type Recipe struct {
 	model.SoftDelete
 
 	Name         string
-	Weight       float64
+	WeightIn     float64
+	WeightOut    float64
 	Time         time.Duration
 	Method       string
 	Declump      string
@@ -79,8 +86,6 @@ type Recipe struct {
 
 	UserID uint
 	User   auth.User `gorm:"foreignKey:UserID"`
-
-	Recipes []Recipe `gorm:"many2many:coffee_recipes;"`
 }
 
 type RecipeStep struct {
@@ -96,12 +101,13 @@ func (s RecipeSteps) Value() (driver.Value, error) {
 }
 
 func (s *RecipeSteps) Scan(value any) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return fmt.Errorf("failed to scan RecipeSteps: %v", value)
+	switch v := value.(type) {
+	case []byte:
+		return json.Unmarshal(v, s)
+	case string:
+		return json.Unmarshal([]byte(v), s)
 	}
-
-	return json.Unmarshal(bytes, s)
+	return errors.New("invalid data type")
 }
 
 type Roaster struct {

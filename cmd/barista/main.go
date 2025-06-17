@@ -29,6 +29,7 @@ func main() {
 		coffee.Coffee{},
 		coffee.Roaster{},
 		coffee.FlavourProfile{},
+		coffee.Recipe{},
 		auth.User{},
 	)
 

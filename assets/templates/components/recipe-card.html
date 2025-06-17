@@ -1,0 +1,115 @@
+{{ define "recipe-card" }}
+<article class="card card-side card-border bg-neutral w-full relative">
+    <div class="card-body" id="recipe_{{ .Recipe.ID }}">
+        <section>
+            <div class="absolute top-1 right-1">
+                {{ if .Recipe.Time }}
+                    <div class="badge badge-soft badge-accent">{{ .Recipe.Time }}</div>
+                {{ end }}
+                {{ if .Recipe.Frozen }}
+                    <div class="badge badge-soft badge-info">Frozen</div>
+                {{ end }}
+            </div>
+            <h2 class="card-title">{{ .Recipe.Name }}</h2>
+            <ul class="list card-open hidden">
+                <li class="list-row">
+                    <div>
+                        <div>Weight In</div>
+                        <div>{{ .Recipe.WeightIn }}g</div>
+                    </div>
+                </li>
+                <li class="list-row">
+                    <div>
+                        <div>Weight Out</div>
+                        <div>{{ .Recipe.WeightOut }}g</div>
+                    </div>
+                </li>
+                <li class="list-row">
+                    <div>
+                        <div>Method</div>
+                        <div>{{ .Recipe.Method }}g</div>
+                    </div>
+                </li>
+                <li class="list-row">
+                    <div>
+                        <div>Declump</div>
+                        <div>{{ .Recipe.Declump }}g</div>
+                    </div>
+                </li>
+                {{ if .Recipe.RDT }}
+                    <li class="list-row">
+                        <div>
+                            <div>RDT</div>
+                            <div>{{ .Recipe.RDT }} sprays</div>
+                        </div>
+                    </li>
+                {{ end}}
+                <li class="list-row">
+                    <div>
+                        <div>Grind</div>
+                        <div>{{ .Recipe.GrindSetting }} ({{ .Recipe.Grinder }})</div>
+                    </div>
+                </li>
+                <li class="list-row">
+                    <div>
+                        <div>Steps</div>
+                        <ul class="list">
+                            {{ range .Recipe.Steps }}
+                                <li class="list-row">
+                                    <div>
+                                        <div class="flex justify-between">
+                                            <span>{{ .Title }}</span>
+                                            {{ if .Time }}
+                                                <span class="badge badge-soft">{{ .Time }}</span>
+                                            {{ end }}
+                                        </div>
+                                        <div>{{ .Instructions }}</div>
+                                    </div>
+                                </li>
+                            {{ end }}
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+            <div class="card-actions justify-between">
+                <div class="rating">
+                    <div class="mask mask-star" aria-label="1 star" {{ if eq .Recipe.Rating 1 }}aria-current="true"{{ end }}></div>
+                    <div class="mask mask-star" aria-label="2 star" {{ if eq .Recipe.Rating 2 }}aria-current="true"{{ end }}></div>
+                    <div class="mask mask-star" aria-label="3 star" {{ if eq .Recipe.Rating 3 }}aria-current="true"{{ end }}></div>
+                    <div class="mask mask-star" aria-label="4 star" {{ if eq .Recipe.Rating 4 }}aria-current="true"{{ end }}></div>
+                    <div class="mask mask-star" aria-label="5 star" {{ if eq .Recipe.Rating 5 }}aria-current="true"{{ end }}></div>
+                </div>
+            </div>
+        </section>
+
+        <form
+            class="hidden"
+            {{ if .Recipe }}
+            hx-patch="/coffees/{{ .Coffee.ID }}/recipes/{{ .Recipe.ID }}"
+            {{ else }}
+            hx-post="/coffees/{{ .Coffee.ID }}/recipes"
+            {{ end }}
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-22">Name *</span>
+                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.name .Data.Roaster.Name }}" />
+                </label>
+            </fieldset>
+        </form>
+    </div>
+</article>
+
+<script type="module">
+const $card = $("#recipe_{{ .Recipe.ID }}")
+const $body = $card.querySelector(".card-open")
+const $form = $card.querySelector("form")
+
+const openBody = () => {
+    $body.classList.remove("hidden")
+    $card.removeEventListener("click", openBody)
+}
+$card.addEventListener("click", openBody)
+</script>
+{{ end }}

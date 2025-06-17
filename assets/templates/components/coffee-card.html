@@ -1,8 +1,7 @@
 {{ define "coffee-card" }}
-<article class="card card-side card-border bg-neutral w-full" 
+<article class="card card-side card-border bg-neutral w-full relative"
     hx-get="/coffees/{{ .ID }}"
     hx-push-url="/coffees/{{ .ID }}"
-    class="relative"
 >
     <figure>
         <img src="/{{ .Icon }}"

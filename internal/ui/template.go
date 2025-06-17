@@ -60,4 +60,10 @@ var templateFuncs = template.FuncMap{
 
 		return m
 	},
+	"bool": func(v bool) string {
+		if v {
+			return "true"
+		}
+		return "false"
+	},
 }

@@ -120,4 +120,10 @@
 {{ with .Data.Coffee.Roaster }}
     {{ template "roaster-card" . }}
 {{ end }}
+
+<h2>Recipes</h2>
+{{ range .Data.Coffee.Recipes }}
+    {{ template "recipe-card" (map "Recipe" .) }}
+{{ end }}
+
 {{ end }}
