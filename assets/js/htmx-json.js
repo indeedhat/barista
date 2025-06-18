@@ -1,8 +1,6 @@
 htmx.defineExtension('json-enc', (() => {
-    const buildObject  = (ob, params) => k => {
-        const values = params.getAll(k)
-
-        let key = k
+    const buildObject  = (ob, params) => key => {
+        const values = params.getAll(key)
         let int = false
         let rest = []
 
@@ -15,7 +13,7 @@ htmx.defineExtension('json-enc', (() => {
             [ key, ...rest ] = key.split(".")
         }
 
-        if (values.length == 1 || !key.endsWith('[]')) {
+        if (values.length == 1 && !key.endsWith('[]')) {
             const v = int ? ~~values[0] : values[0]
 
             if (rest.length) {
@@ -27,12 +25,14 @@ htmx.defineExtension('json-enc', (() => {
             } else {
                 ob[key] = v
             }
+
             return
         }
 
         if (key.endsWith('[]')) {
             key = key.slice(0, -2)
         }
+
         if (!(key in ob)) {
             ob[key] = []
         }
