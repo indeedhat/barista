@@ -96,46 +96,48 @@
         >
             <fieldset class="fieldset gap-4">
                 <label class="input w-full">
-                    <span class="label w-36">Name *</span>
-                    <input type="text" name="name" placeholder="Name *" value="{{ or .Form.Name .Recipe.Name }}" />
+                    <span class="label w-40">Name *</span>
+                    <input type="text" class="w-full" name="name" placeholder="Name *" value="{{ or .Form.Name .Recipe.Name }}" />
                 </label>
                 {{ template "field-error" .FieldErrors.name }}
 
                 <label class="input w-full">
-                    <span class="label w-42">Dose *</span>
+                    <span class="label w-50">Dose *</span>
                     <input type="number"
                         min="0"
                         step="1"
                         name="dose.int"
                         placeholder="Dose *"
                         value="{{ or .Form.Dose .Recipe.WeightIn }}"
+                        class="w-full"
                     />
                     <span class="label w-12">g</span>
                 </label>
                 {{ template "field-error" .FieldErrors.dose }}
 
                 <label class="input w-full">
-                    <span class="label w-36">Weight Out *</span>
+                    <span class="label w-40">Weight Out *</span>
                     <input type="number"
                         min="0"
                         step="1"
                         name="weight_out.int"
                         placeholder="Weight Out *"
                         value="{{ or .Form.WeightOut .Recipe.WeightOut }}"
+                        class="w-full"
                     />
                     <span class="label w-12">g</span>
                 </label>
                 {{ template "field-error" .FieldErrors.weight_out }}
 
                 <label class="input w-full">
-                    <span class="label w-36">Drink Type</span>
-                    <input type="string" name="drink" placeholder="Drink" value="{{ or .Form.Method .Recipe.Method }}" />
+                    <span class="label w-40">Drink Type</span>
+                    <input type="string" name="drink" placeholder="Drink" value="{{ or .Form.Method .Recipe.Method }}" class="w-full"/>
                 </label>
                 {{ template "field-error" .FieldErrors.drink }}
 
                 {{ $declump := or .Form.Declump .Recipe.Declump }}
                 <label class="input w-full">
-                    <span class="label w-36">Declump</span>
+                    <span class="label w-40">Declump</span>
                     <select class="w-full" name="declump">
                         <option value="" {{ selected $declump "" }}>Pick a Declump Method</option>
                         <option value="Blind Shaker" {{ selected $declump "Blind Shaker" }}>Blind Shaker</option>
@@ -145,15 +147,16 @@
                 {{ template "field-error" .FieldErrors.declump }}
 
                 <label class="input w-full">
-                    <span class="label w-50">RDT</span>
+                    <span class="label w-40">RDT</span>
                     <input type="number"
                         min="0"
                         step="1"
                         name="rdt.int"
                         placeholder="RDT"
                         value="{{ or .Form.RDT .Recipe.RDT }}"
+                        class="w-full"
                     />
-                    <span class="label w-22">sprays</span>
+                    <span class="label">sprays</span>
                 </label>
                 {{ template "field-error" .FieldErrors.rdt }}
 
@@ -165,27 +168,28 @@
                 {{ template "field-error" .FieldErrors.frozen }}
 
                 <label class="input w-full">
-                    <span class="label w-36">Grinder</span>
-                    <input type="string" name="grinder" placeholder="Grinder" value="{{ or .Form.Grinder .Recipe.Grinder }}" />
+                    <span class="label w-40">Grinder</span>
+                    <input type="string" name="grinder" placeholder="Grinder" value="{{ or .Form.Grinder .Recipe.Grinder }}" class="w-full" />
                 </label>
                 {{ template "field-error" .FieldErrors.grinder }}
 
                 <label class="input w-full">
-                    <span class="label w-36">Grind Size</span>
+                    <span class="label w-40">Grind Size</span>
                     <input type="number"
                         min="0"
                         step="0.1"
                         name="grind_size.int"
                         placeholder="Grind Size"
                         value="{{ or .Form.GrindSetting .Recipe.GrindSetting }}"
+                        class="w-full"
                     />
                 </label>
                 {{ template "field-error" .FieldErrors.grind_size }}
 
                 {{ $rating := or .Form.Rating .Recipe.Rating }}
                 <label class="input w-full">
-                    <span class="label w-26">Rating</span>
-                    <div class="rating">
+                    <span class="label w-40">Rating</span>
+                    <div class="rating w-full">
                         <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="1 star"
                             value="1"
                             {{ checked $rating 1 }}
@@ -220,7 +224,7 @@
                     {{ range (or .Form.Steps .Recipe.Steps) }}
                         <label class="input w-full">
                             <span class="label w-28">Title</span>
-                            <input type="text" name="steps[].title" placeholder="Title" value="{{ .Title }}" />
+                            <input type="text" name="steps[].title" placeholder="Title" value="{{ .Title }}" class="w-full"/>
                         </label>
                         <label class="input w-full">
                             <span class="label w-28">Time</span>
@@ -232,6 +236,7 @@
                                 {{ if .Time }}
                                     value="{{ seconds .Time }}"
                                 {{ end }}
+                                class="w-full"
                             />
                         </label>
                         <textarea class="w-full textarea"
@@ -242,7 +247,7 @@
                     {{ else }}
                         <label class="input w-full">
                             <span class="label w-28">Title</span>
-                            <input type="text" name="steps[].title" placeholder="Title" />
+                            <input type="text" name="steps[].title" placeholder="Title" class="w-full" />
                         </label>
                         <label class="input w-full">
                             <span class="label w-28">Time</span>
@@ -251,6 +256,7 @@
                                 step="1"
                                 name="steps[].time.int"
                                 placeholder="Title"
+                                class="w-full"
                             />
                         </label>
                         <textarea class="w-full textarea"
@@ -288,7 +294,7 @@ $card.querySelector(".add-step").addEventListener("click", () => {
     $card.querySelector("fieldset.steps-container").insertAdjacentHTML("beforeend", `
         <label class="input w-full">
             <span class="label w-28">Title</span>
-            <input type="text" name="steps[].title" placeholder="Title" />
+            <input type="text" name="steps[].title" placeholder="Title" class="w-full"/>
         </label>
         <label class="input w-full">
             <span class="label w-28">Time</span>
@@ -297,6 +303,7 @@ $card.querySelector(".add-step").addEventListener("click", () => {
                 step="1"
                 name="steps[].time.int"
                 placeholder="Title"
+                class="w-full"
             />
         </label>
         <textarea class="w-full textarea"

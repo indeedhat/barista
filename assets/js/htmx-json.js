@@ -40,14 +40,15 @@ htmx.defineExtension('json-enc', (() => {
         for (let i in values) {
             const v = int ? ~~values[i] : values[i]
 
-            if (rest.length) {
-                if (i < ob[key].length) {
-                    ob[key][i][rest.join(".")] = v
-                } else {
-                    ob[key].push({ [rest.join(".")]: v })
-                }
-            } else {
+            if (!rest.length) {
                 ob[key].push(v)
+                continue
+            }
+
+            if (i < ob[key].length) {
+                ob[key][i][rest.join(".")] = v
+            } else {
+                ob[key].push({ [rest.join(".")]: v })
             }
         }
     }
