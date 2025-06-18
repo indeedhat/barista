@@ -66,4 +66,7 @@ var templateFuncs = template.FuncMap{
 		}
 		return "false"
 	},
+	"seconds": func(v time.Duration) int {
+		return int(v.Seconds())
+	},
 }

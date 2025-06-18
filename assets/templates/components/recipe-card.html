@@ -14,7 +14,7 @@
             <ul class="list card-open hidden">
                 <li class="list-row">
                     <div>
-                        <div>Weight In</div>
+                        <div>Dose</div>
                         <div>{{ .Recipe.WeightIn }}g</div>
                     </div>
                 </li>
@@ -70,6 +70,9 @@
                         </ul>
                     </div>
                 </li>
+                <li class="list-row justify-end">
+                    <button class="btn btn-primary edit-button">Edit</button>
+                </li>
             </ul>
             <div class="card-actions justify-between">
                 <div class="rating">
@@ -93,9 +96,172 @@
         >
             <fieldset class="fieldset gap-4">
                 <label class="input w-full">
-                    <span class="label w-22">Name *</span>
-                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.name .Data.Roaster.Name }}" />
+                    <span class="label w-36">Name *</span>
+                    <input type="text" name="name" placeholder="Name *" value="{{ or .Form.Name .Recipe.Name }}" />
                 </label>
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="input w-full">
+                    <span class="label w-42">Dose *</span>
+                    <input type="number"
+                        min="0"
+                        step="1"
+                        name="dose.int"
+                        placeholder="Dose *"
+                        value="{{ or .Form.Dose .Recipe.WeightIn }}"
+                    />
+                    <span class="label w-12">g</span>
+                </label>
+                {{ template "field-error" .FieldErrors.dose }}
+
+                <label class="input w-full">
+                    <span class="label w-36">Weight Out *</span>
+                    <input type="number"
+                        min="0"
+                        step="1"
+                        name="weight_out.int"
+                        placeholder="Weight Out *"
+                        value="{{ or .Form.WeightOut .Recipe.WeightOut }}"
+                    />
+                    <span class="label w-12">g</span>
+                </label>
+                {{ template "field-error" .FieldErrors.weight_out }}
+
+                <label class="input w-full">
+                    <span class="label w-36">Drink Type</span>
+                    <input type="string" name="drink" placeholder="Drink" value="{{ or .Form.Method .Recipe.Method }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.drink }}
+
+                {{ $declump := or .Form.Declump .Recipe.Declump }}
+                <label class="input w-full">
+                    <span class="label w-36">Declump</span>
+                    <select class="w-full" name="declump">
+                        <option value="" {{ selected $declump "" }}>Pick a Declump Method</option>
+                        <option value="Blind Shaker" {{ selected $declump "Blind Shaker" }}>Blind Shaker</option>
+                        <option value="WDT" {{ selected $declump "WDT" }}>WDT</option>
+                    </select>
+                </label>
+                {{ template "field-error" .FieldErrors.declump }}
+
+                <label class="input w-full">
+                    <span class="label w-50">RDT</span>
+                    <input type="number"
+                        min="0"
+                        step="1"
+                        name="rdt.int"
+                        placeholder="RDT"
+                        value="{{ or .Form.RDT .Recipe.RDT }}"
+                    />
+                    <span class="label w-22">sprays</span>
+                </label>
+                {{ template "field-error" .FieldErrors.rdt }}
+
+                {{ $frozen := or .Form.Frozen .Recipe.Frozen }}
+                <label class="input w-full">
+                    <span class="label w-26">Frozen</span>
+                    <input type="checkbox" class="checkbox" name="frozen" {{ checked $frozen true }} />
+                </label>
+                {{ template "field-error" .FieldErrors.frozen }}
+
+                <label class="input w-full">
+                    <span class="label w-36">Grinder</span>
+                    <input type="string" name="grinder" placeholder="Grinder" value="{{ or .Form.Grinder .Recipe.Grinder }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.grinder }}
+
+                <label class="input w-full">
+                    <span class="label w-36">Grind Size</span>
+                    <input type="number"
+                        min="0"
+                        step="0.1"
+                        name="grind_size.int"
+                        placeholder="Grind Size"
+                        value="{{ or .Form.GrindSetting .Recipe.GrindSetting }}"
+                    />
+                </label>
+                {{ template "field-error" .FieldErrors.grind_size }}
+
+                {{ $rating := or .Form.Rating .Recipe.Rating }}
+                <label class="input w-full">
+                    <span class="label w-26">Rating</span>
+                    <div class="rating">
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="1 star"
+                            value="1"
+                            {{ checked $rating 1 }}
+                        />
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="2 star"
+                            value="2"
+                            {{ checked $rating 2 }}
+                        />
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="3 star"
+                            value="3"
+                            {{ checked $rating 3 }}
+                        />
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="4 star"
+                            value="4"
+                            {{ checked $rating 4 }}
+                        />
+                        <input type="radio" name="rating.int" class="mask mask-star-2 bg-orange-400" aria-label="5 star"
+                            value="5"
+                            {{ checked $rating 5 }}
+                        />
+                    </div>
+                </label>
+                {{ template "field-error" .FieldErrors.rating }}
+
+                <div class="flex justify-between">
+                    <h2 class="w-36"></h2>
+                    <button class="btn btn-primary add-step">Add Step</button>
+                </div>
+
+                <fieldset class="fieldset steps-container">
+                    <hr />
+                    {{ range (or .Form.Steps .Recipe.Steps) }}
+                        <label class="input w-full">
+                            <span class="label w-28">Title</span>
+                            <input type="text" name="steps[].title" placeholder="Title" value="{{ .Title }}" />
+                        </label>
+                        <label class="input w-full">
+                            <span class="label w-28">Time</span>
+                            <input type="number"
+                                min="0"
+                                step="1"
+                                name="steps[].time.int"
+                                placeholder="Time"
+                                {{ if .Time }}
+                                    value="{{ seconds .Time }}"
+                                {{ end }}
+                            />
+                        </label>
+                        <textarea class="w-full textarea"
+                            name="steps[].instructions"
+                            placeholder="Instructions"
+                        >{{ .Instructions }}</textarea>
+                        <hr />
+                    {{ else }}
+                        <label class="input w-full">
+                            <span class="label w-28">Title</span>
+                            <input type="text" name="steps[].title" placeholder="Title" />
+                        </label>
+                        <label class="input w-full">
+                            <span class="label w-28">Time</span>
+                            <input type="number"
+                                min="0"
+                                step="1"
+                                name="steps[].time.int"
+                                placeholder="Title"
+                            />
+                        </label>
+                        <textarea class="w-full textarea"
+                            name="steps[].instructions"
+                            placeholder="Instructions"
+                        ></textarea>
+                        <hr />
+                    {{ end }}
+                </fieldset>
+
+                <button type="submit" class="btn btn-primary">Save Recipe</button>
             </fieldset>
         </form>
     </div>
@@ -111,5 +277,34 @@ const openBody = () => {
     $card.removeEventListener("click", openBody)
 }
 $card.addEventListener("click", openBody)
+
+$card.querySelector(".edit-button").addEventListener("click", () => {
+    $body.classList.add("hidden")
+    $card.querySelector('.card-actions').classList.add("hidden")
+    $form.classList.remove("hidden")
+})
+
+$card.querySelector(".add-step").addEventListener("click", () => {
+    $card.querySelector("fieldset.steps-container").insertAdjacentHTML("beforeend", `
+        <label class="input w-full">
+            <span class="label w-28">Title</span>
+            <input type="text" name="steps[].title" placeholder="Title" />
+        </label>
+        <label class="input w-full">
+            <span class="label w-28">Time</span>
+            <input type="number"
+                min="0"
+                step="1"
+                name="steps[].time.int"
+                placeholder="Title"
+            />
+        </label>
+        <textarea class="w-full textarea"
+            name="steps[].instructions"
+            placeholder="Instructions"
+        ></textarea>
+        <hr />
+    `)
+})
 </script>
 {{ end }}
