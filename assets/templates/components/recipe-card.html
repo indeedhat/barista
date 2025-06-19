@@ -1,6 +1,7 @@
 {{ define "recipe-card" }}
-<article class="card card-side card-border bg-neutral w-full relative">
-    <div class="card-body" id="recipe_{{ .Recipe.ID }}">
+{{ $id := or .Recipe.ID (rand "r") }}
+<article class="card card-side card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
+    <div class="card-body">
         <section>
             <div class="absolute top-1 right-1">
                 {{ if .Recipe.Time }}
@@ -15,7 +16,7 @@
                 <li class="list-row">
                     <div>
                         <div>Dose</div>
-                        <div>{{ .Recipe.WeightIn }}g</div>
+                        <div>{{ .Recipe.Dose }}g</div>
                     </div>
                 </li>
                 <li class="list-row">
@@ -27,7 +28,7 @@
                 <li class="list-row">
                     <div>
                         <div>Method</div>
-                        <div>{{ .Recipe.Method }}g</div>
+                        <div>{{ .Recipe.Drink }}g</div>
                     </div>
                 </li>
                 <li class="list-row">
@@ -74,7 +75,7 @@
                     <button class="btn btn-primary edit-button">Edit</button>
                 </li>
             </ul>
-            <div class="card-actions justify-between">
+            <div class="card-actions justify-between {{ if .edit }}hidden{{ end }}">
                 <div class="rating">
                     <div class="mask mask-star" aria-label="1 star" {{ if eq .Recipe.Rating 1 }}aria-current="true"{{ end }}></div>
                     <div class="mask mask-star" aria-label="2 star" {{ if eq .Recipe.Rating 2 }}aria-current="true"{{ end }}></div>
@@ -86,13 +87,16 @@
         </section>
 
         <form
+            {{ if not .edit }}
             class="hidden"
-            {{ if .Recipe }}
+            {{ end }}
+            {{ if .Recipe.ID }}
             hx-patch="/coffees/{{ .Coffee.ID }}/recipes/{{ .Recipe.ID }}"
             {{ else }}
             hx-post="/coffees/{{ .Coffee.ID }}/recipes"
             {{ end }}
             hx-ext="json-enc"
+            hx-target="#recipe_{{ $id }}"
         >
             <fieldset class="fieldset gap-4">
                 <label class="input w-full">
@@ -108,7 +112,7 @@
                         step="1"
                         name="dose.int"
                         placeholder="Dose *"
-                        value="{{ or .Form.Dose .Recipe.WeightIn }}"
+                        value="{{ or .Form.Dose .Recipe.Dose }}"
                         class="w-full"
                     />
                     <span class="label w-12">g</span>
@@ -130,8 +134,8 @@
                 {{ template "field-error" .FieldErrors.weight_out }}
 
                 <label class="input w-full">
-                    <span class="label w-40">Drink Type</span>
-                    <input type="string" name="drink" placeholder="Drink" value="{{ or .Form.Method .Recipe.Method }}" class="w-full"/>
+                    <span class="label w-40">Drink Type *</span>
+                    <input type="string" name="drink" placeholder="Drink Type *" value="{{ or .Form.Drink .Recipe.Drink }}" class="w-full"/>
                 </label>
                 {{ template "field-error" .FieldErrors.drink }}
 
@@ -163,28 +167,28 @@
                 {{ $frozen := or .Form.Frozen .Recipe.Frozen }}
                 <label class="input w-full">
                     <span class="label w-26">Frozen</span>
-                    <input type="checkbox" class="checkbox" name="frozen" {{ checked $frozen true }} />
+                    <input type="checkbox" class="checkbox" name="frozen.bool" {{ checked $frozen true }} />
                 </label>
                 {{ template "field-error" .FieldErrors.frozen }}
 
                 <label class="input w-full">
-                    <span class="label w-40">Grinder</span>
-                    <input type="string" name="grinder" placeholder="Grinder" value="{{ or .Form.Grinder .Recipe.Grinder }}" class="w-full" />
+                    <span class="label w-40">Grinder *</span>
+                    <input type="string" name="grinder" placeholder="Grinder *" value="{{ or .Form.Grinder .Recipe.Grinder }}" class="w-full" />
                 </label>
                 {{ template "field-error" .FieldErrors.grinder }}
 
                 <label class="input w-full">
-                    <span class="label w-40">Grind Size</span>
+                    <span class="label w-40">Grind Size *</span>
                     <input type="number"
                         min="0"
                         step="0.1"
-                        name="grind_size.int"
-                        placeholder="Grind Size"
+                        name="grind_setting.int"
+                        placeholder="Grind Size *"
                         value="{{ or .Form.GrindSetting .Recipe.GrindSetting }}"
                         class="w-full"
                     />
                 </label>
-                {{ template "field-error" .FieldErrors.grind_size }}
+                {{ template "field-error" .FieldErrors.grind_setting }}
 
                 {{ $rating := or .Form.Rating .Recipe.Rating }}
                 <label class="input w-full">
@@ -216,7 +220,7 @@
 
                 <div class="flex justify-between">
                     <h2 class="w-36"></h2>
-                    <button class="btn btn-primary add-step">Add Step</button>
+                    <span class="btn btn-primary add-step">Add Step</span>
                 </div>
 
                 <fieldset class="fieldset steps-container">
@@ -274,7 +278,7 @@
 </article>
 
 <script type="module">
-const $card = $("#recipe_{{ .Recipe.ID }}")
+const $card = $("#recipe_{{ $id }}")
 const $body = $card.querySelector(".card-open")
 const $form = $card.querySelector("form")
 
@@ -282,7 +286,9 @@ const openBody = () => {
     $body.classList.remove("hidden")
     $card.removeEventListener("click", openBody)
 }
-$card.addEventListener("click", openBody)
+{{ if not .edit }}
+    $card.addEventListener("click", openBody)
+{{ end }}
 
 $card.querySelector(".edit-button").addEventListener("click", () => {
     $body.classList.add("hidden")

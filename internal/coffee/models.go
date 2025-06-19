@@ -69,10 +69,10 @@ type Recipe struct {
 	model.SoftDelete
 
 	Name         string
-	WeightIn     float64
+	Dose         float64
 	WeightOut    float64
 	Time         time.Duration
-	Method       string
+	Drink        string
 	Declump      string
 	RDT          uint8
 	Frozen       bool

@@ -121,9 +121,21 @@
     {{ template "roaster-card" . }}
 {{ end }}
 
-<h2>Recipes</h2>
-{{ range .Data.Coffee.Recipes }}
-    {{ template "recipe-card" (map "Recipe" .) }}
-{{ end }}
-
+<div class="flex justify-between">
+    <h2>Recipes</h2>
+    <button class="btn btn-primary"
+        hx-get="/coffees/{{ .Data.Coffee.ID }}/recipes"
+        hx-target="#recipes"
+        hx-swap="afterbegin"
+    >
+        Add
+    </button>
+</div>
+<section id="recipes">
+    {{ range .Data.Coffee.Recipes }}
+        {{ template "recipe-card" (map "Recipe" .) }}
+    {{ else }}
+    <div class="alert alert-notice">No Recipes yet</div>
+    {{ end }}
+</section>
 {{ end }}

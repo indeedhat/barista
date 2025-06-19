@@ -2,8 +2,57 @@ package ui
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 )
+
+type Former interface {
+	SetForm(v any)
+}
+
+type ErrorFielder interface {
+	SetFieldErrors(v map[string][]string)
+}
+
+type ComponentData map[string]any
+
+func NewComponentData(component string, d ...ComponentData) ComponentData {
+	var data ComponentData
+	if len(d) > 0 {
+		data = d[0]
+		data["Component"] = component
+	} else {
+		data = ComponentData{
+			"Component": component,
+		}
+	}
+
+	return data
+}
+
+// SetRequest implements Requester.
+func (c ComponentData) SetForm(v any) {
+	c["Form"] = v
+}
+
+// SetFieldErrors implements Fielder.
+func (c ComponentData) SetFieldErrors(v map[string][]string) {
+	c["FieldErrors"] = v
+}
+
+var _ Former = (*ComponentData)(nil)
+var _ ErrorFielder = (*ComponentData)(nil)
+
+func RenderComponent(w http.ResponseWriter, data ComponentData) error {
+	var component string
+	if c, found := data["Component"].(string); found {
+		component = c
+	} else {
+		return errors.New("Component not set")
+	}
+
+	return tmpls.ExecuteTemplate(w, component, data)
+}
 
 type PageData struct {
 	Title       string
@@ -29,6 +78,19 @@ func NewPageData(title, page string, user ...any) PageData {
 
 	return d
 }
+
+// SetRequest implements Requester.
+func (p *PageData) SetForm(v any) {
+	p.Form = v
+}
+
+// SetFieldErrors implements Fielder.
+func (p *PageData) SetFieldErrors(v map[string][]string) {
+	p.FieldErrors = v
+}
+
+var _ Former = (*ComponentData)(nil)
+var _ ErrorFielder = (*ComponentData)(nil)
 
 func RenderGuest(w http.ResponseWriter, r *http.Request, data PageData) error {
 	if r.Header.Get("HX-Request") == "true" {

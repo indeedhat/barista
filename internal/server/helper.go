@@ -35,7 +35,7 @@ func Body(r *http.Request) []byte {
 // UnmarshalBody unmarshales the request body into the provided data structure
 //
 // NB: this is JSON only
-func UnmarshalBody(r *http.Request, v any, pageData ...*ui.PageData) error {
+func UnmarshalBody(r *http.Request, v any, pageData ...ui.Former) error {
 	data := Body(r)
 	if data == nil {
 		return errors.New("could not read request body")
@@ -44,14 +44,14 @@ func UnmarshalBody(r *http.Request, v any, pageData ...*ui.PageData) error {
 	err := json.Unmarshal(data, v)
 
 	if err == nil && len(pageData) > 0 {
-		pageData[0].Form = v
+		pageData[0].SetForm(v)
 	}
 
 	return err
 }
 
 // ValidateRequest runs the provided struct against its validation tags
-func ValidateRequest(v any, pageData ...*ui.PageData) error {
+func ValidateRequest(v any, pageData ...ui.ErrorFielder) error {
 	checker := validator.New()
 	checker.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
@@ -64,7 +64,7 @@ func ValidateRequest(v any, pageData ...*ui.PageData) error {
 
 	err := checker.Struct(v)
 	if err != nil && len(pageData) > 0 {
-		pageData[0].FieldErrors = ExtractFIeldErrors(err).Fields
+		pageData[0].SetFieldErrors(ExtractFIeldErrors(err).Fields)
 	}
 
 	return err
@@ -124,8 +124,12 @@ func ExtractFIeldErrors(errs error) fieldErrorsResponse {
 	return resp
 }
 
-func PathID(r *http.Request) (uint, error) {
-	id := r.PathValue("id")
+func PathID(r *http.Request, k ...string) (uint, error) {
+	if len(k) == 0 {
+		k = append(k, "id")
+	}
+
+	id := r.PathValue(k[0])
 	if id == "" {
 		return 0, errors.New("id not found in path")
 	}

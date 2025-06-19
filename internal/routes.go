@@ -28,6 +28,7 @@ func buildApiRoutes(
 	authController auth.Controller,
 	authRepo auth.Repository,
 ) {
+	// TODO: these are all unimplemented in the new htmx based ui
 	guest := r.Group("/api", auth.IsGuestMiddleware(auth.API, authRepo))
 	{
 		guest.HandleFunc("POST /auth/login", authController.Login)
@@ -37,9 +38,6 @@ func buildApiRoutes(
 	{
 		private.HandleFunc("POST /me", authController.GetLoggedInUser)
 
-		private.HandleFunc("POST /coffee", coffeeController.CreateCoffee)
-		private.HandleFunc("PUT /coffee/{id}", coffeeController.UpdateCoffee)
-		private.HandleFunc("POST /coffee/{id}/image", coffeeController.UpdateCoffeeImage)
 		private.HandleFunc("DELETE /coffee/{id}", coffeeController.DeleteCoffee)
 
 		private.HandleFunc("DELETE /roaster/{id}", coffeeController.DeleteRoaster)
@@ -93,6 +91,8 @@ func buildUiRoutes(
 		private.HandleFunc("GET /coffees/{id}", coffeeController.ViewCoffee)
 		private.HandleFunc("POST /coffees/{id}", coffeeController.UpdateCoffee)
 		private.HandleFunc("POST /coffees/{id}/icon", coffeeController.UpdateCoffeeImage)
+		private.HandleFunc("GET /coffees/{id}/recipes", coffeeController.NewRecipe)
+		private.HandleFunc("POST /coffees/{id}/recipes", coffeeController.CreateRecipe)
 
 		private.HandleFunc("GET /flavours", coffeeController.ViewFlavours)
 		private.HandleFunc("POST /flavours", coffeeController.CreateFlavourProfile)

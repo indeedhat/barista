@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -68,5 +69,13 @@ var templateFuncs = template.FuncMap{
 	},
 	"seconds": func(v time.Duration) int {
 		return int(v.Seconds())
+	},
+	"rand": func(prefix ...string) string {
+		n := rand.Intn(1e8)
+		if len(prefix) > 0 {
+			return fmt.Sprint(prefix[0], n)
+		}
+
+		return fmt.Sprint(n)
 	},
 }

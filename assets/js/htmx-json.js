@@ -1,12 +1,26 @@
 htmx.defineExtension('json-enc', (() => {
+    const parseValue = (v, type) => {
+        switch (type) {
+        case "int":
+            return ~~v
+        case "bool":
+            return !!v
+        default:
+            return v
+        }
+    }
+
     const buildObject  = (ob, params) => key => {
         const values = params.getAll(key)
-        let int = false
+        let type = 'str'
         let rest = []
 
         if (key.endsWith(".int")) {
-            int = true
+            type = "int"
             key = key.slice(0, -4)
+        } else if (key.endsWith(".bool")) {
+            type = "bool"
+            key = key.slice(0, -5)
         }
 
         if (key.includes(".")) {
@@ -14,7 +28,7 @@ htmx.defineExtension('json-enc', (() => {
         }
 
         if (values.length == 1 && !key.endsWith('[]')) {
-            const v = int ? ~~values[0] : values[0]
+            const v = parseValue(values[0], type)
 
             if (rest.length) {
                 if (key in ob) {
@@ -38,7 +52,7 @@ htmx.defineExtension('json-enc', (() => {
         }
 
         for (let i in values) {
-            const v = int ? ~~values[i] : values[i]
+            const v = parseValue(values[i], type)
 
             if (!rest.length) {
                 ob[key].push(v)
