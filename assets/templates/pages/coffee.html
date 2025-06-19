@@ -131,9 +131,12 @@
         Add
     </button>
 </div>
-<section id="recipes">
+<section id="recipes" class="flex flex-col gap-2">
     {{ range .Data.Coffee.Recipes }}
-        {{ template "recipe-card" (map "Recipe" .) }}
+        {{ template "recipe-card" (map
+            "Recipe" .
+            "Coffee" $.Data.Coffee
+        ) }}
     {{ else }}
     <div class="alert alert-notice">No Recipes yet</div>
     {{ end }}
