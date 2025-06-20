@@ -86,7 +86,7 @@
                     hx-delete="/coffees/{{ .Coffee.ID }}/recipes/{{ .Recipe.ID }}"
                     hx-confirm="Are you sure you want to delete this recipe?"
                     hx-target="#recipe_{{ $id }}"
-                    hx-swap="delete"
+                    hx-swap="outerHTML"
                 >
                     Delete
                 </button>

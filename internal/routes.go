@@ -29,6 +29,7 @@ func buildApiRoutes(
 	authRepo auth.Repository,
 ) {
 	// TODO: these are all unimplemented in the new htmx based ui
+	//       once they have this whole function will be removed
 	guest := r.Group("/api", auth.IsGuestMiddleware(auth.API, authRepo))
 	{
 		guest.HandleFunc("POST /auth/login", authController.Login)
@@ -37,10 +38,6 @@ func buildApiRoutes(
 	private := r.Group("/api", auth.IsLoggedInMiddleware(auth.API, authRepo))
 	{
 		private.HandleFunc("POST /me", authController.GetLoggedInUser)
-
-		private.HandleFunc("DELETE /coffee/{id}", coffeeController.DeleteCoffee)
-
-		private.HandleFunc("DELETE /roaster/{id}", coffeeController.DeleteRoaster)
 	}
 
 	self := r.Group("/api", auth.AdminOrSelfMiddleware(auth.API, authRepo))
@@ -75,11 +72,11 @@ func buildUiRoutes(
 	{
 		private.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path != "/" && r.URL.Path != "/home" {
-				pageData := ui.NewPageData("404 Not Found", "404")
-				pageData.User = r.Context().Value("user").(*auth.User)
 				ui.Toast(w, ui.Warning, "Not Found")
 				w.WriteHeader(http.StatusNotFound)
-				ui.RenderUser(w, r, pageData)
+				ui.RenderUser(w, r,
+					ui.NewPageData("404 Not Found", "404", r.Context().Value("user").(*auth.User)),
+				)
 				return
 			}
 
@@ -91,6 +88,7 @@ func buildUiRoutes(
 		private.HandleFunc("GET /coffees/{id}", coffeeController.ViewCoffee)
 		private.HandleFunc("PUT /coffees/{id}", coffeeController.UpdateCoffee)
 		private.HandleFunc("POST /coffees/{id}/icon", coffeeController.UpdateCoffeeImage)
+		private.HandleFunc("DELETE /coffee/{id}", coffeeController.DeleteCoffee)
 
 		private.HandleFunc("GET /coffees/{id}/recipes", coffeeController.NewRecipe)
 		private.HandleFunc("POST /coffees/{id}/recipes", coffeeController.CreateRecipe)
@@ -107,6 +105,7 @@ func buildUiRoutes(
 		private.HandleFunc("GET /roasters/{id}", coffeeController.ViewRoaster)
 		private.HandleFunc("PUT /roasters/{id}", coffeeController.UpdateRoaster)
 		private.HandleFunc("POST /roasters/{id}/icon", coffeeController.UpdateRoasterImage)
+		private.HandleFunc("DELETE /roaster/{id}", coffeeController.DeleteRoaster)
 
 		private.HandleFunc("POST /logout", authController.Logout)
 	}

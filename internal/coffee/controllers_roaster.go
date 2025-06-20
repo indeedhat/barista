@@ -173,32 +173,36 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 
 func (c Controller) DeleteRoaster(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
+	pageData := ui.NewPageData("Roaster", "roaster", user)
+	defer func() {
+		ui.RenderUser(rw, r, pageData)
+	}()
 
 	id, err := server.PathID(r)
 	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, nil)
+		ui.Toast(rw, ui.Warning, "Roaster not found")
 		return
 	}
 
 	roaster, err := c.repo.FindRoaster(id, user.ID)
 	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, errors.New("Roaster not found"))
+		ui.Toast(rw, ui.Warning, "Roaster not found")
 		return
 	}
 
+	pageData.Title = roaster.Name
+	pageData.Data["Roaster"] = roaster
+
 	if len(roaster.Coffees) > 0 {
-		server.WriteResponse(
-			rw,
-			http.StatusNotFound,
-			errors.New("Cannot delete a roaster that still has assigned coffees"),
-		)
+		ui.Toast(rw, ui.Warning, "Roaster cannot be deleted while it still has coffees")
 		return
 	}
 
 	if err := c.repo.DeleteRoaster(roaster); err != nil {
-		server.WriteResponse(rw, http.StatusInternalServerError, nil)
+		ui.Toast(rw, ui.Warning, "Failed to delete roaster")
 		return
 	}
 
-	server.WriteResponse(rw, http.StatusNoContent, nil)
+	ui.Toast(rw, ui.Success, "Roaster deleted")
+	server.Redirect(rw, r, "/roasters")
 }
