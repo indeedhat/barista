@@ -24,6 +24,7 @@ type Repository interface {
 
 	IndexRecipesForUser(user *auth.User) []Recipe
 	SaveRecipe(*Recipe) error
+	DeleteRecipe(*Recipe) error
 }
 
 type SqliteRepository struct {
@@ -176,6 +177,10 @@ func (r SqliteRepository) SaveRoaster(roaster *Roaster) error {
 
 func (r SqliteRepository) SaveRecipe(recipe *Recipe) error {
 	return r.db.Save(recipe).Error
+}
+
+func (r SqliteRepository) DeleteRecipe(recipe *Recipe) error {
+	return r.db.Delete(recipe).Error
 }
 
 var _ Repository = (*SqliteRepository)(nil)

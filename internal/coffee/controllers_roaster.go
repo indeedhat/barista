@@ -19,10 +19,16 @@ func (c Controller) ViewRoasters(rw http.ResponseWriter, r *http.Request) {
 	ui.RenderUser(rw, r, pageData)
 }
 
-type createRoasterRequest struct {
+type upsertRoasterRequest struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description"`
 	URL         string `json:"url" validate:"omitempty,url"`
+}
+
+func (r upsertRoasterRequest) apply(roaster *Roaster) {
+	roaster.Name = r.Name
+	roaster.Description = r.Description
+	roaster.URL = r.URL
 }
 
 func (c Controller) CreateRoaster(rw http.ResponseWriter, r *http.Request) {
@@ -30,39 +36,34 @@ func (c Controller) CreateRoaster(rw http.ResponseWriter, r *http.Request) {
 	pageData := ui.NewPageData("Roasters", "roasters", user)
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["open"] = true
+	defer func() {
+		ui.RenderUser(rw, r, pageData)
+	}()
 
-	var req createRoasterRequest
+	var req upsertRoasterRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	if err := server.ValidateRequest(req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create roaster")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
-	roaster := Roaster{
-		Name:        req.Name,
-		Description: req.Description,
-		URL:         req.URL,
-		User:        *user,
-	}
+	roaster := Roaster{User: *user}
+	req.apply(&roaster)
 
 	if err := c.repo.SaveRoaster(&roaster); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create roaster")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["open"] = false
-	pageData.Form = createRoasterRequest{}
+	pageData.Form = upsertRoasterRequest{}
 
 	ui.Toast(rw, ui.Success, "Roaster created")
-	ui.RenderUser(rw, r, pageData)
 }
 
 func (c Controller) ViewRoaster(rw http.ResponseWriter, r *http.Request) {
@@ -87,82 +88,70 @@ func (c Controller) ViewRoaster(rw http.ResponseWriter, r *http.Request) {
 	ui.RenderUser(rw, r, pageData)
 }
 
-type updateRoasterRequest struct {
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description"`
-	URL         string `json:"url" validate:"omitempty,url"`
-}
-
 func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("Roaster", "roaster", user)
+	defer func() {
+		ui.RenderUser(rw, r, pageData)
+	}()
 
 	id, err := server.PathID(r)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Roaster not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	roaster, err := c.repo.FindRoaster(id)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Roaster not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	pageData.Title = roaster.Name
 	pageData.Data["Roaster"] = roaster
 
-	var req updateRoasterRequest
+	var req upsertRoasterRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	if err := server.ValidateRequest(req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create roaster")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	if roaster.UserID != user.ID {
 		ui.Toast(rw, ui.Warning, "Roaster does not belong to you")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
-	roaster.Name = req.Name
-	roaster.Description = req.Description
-	roaster.URL = req.URL
-
+	req.apply(roaster)
 	if err := c.repo.SaveRoaster(roaster); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create roaster")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	pageData.Title = roaster.Name
 	ui.Toast(rw, ui.Success, "Roaster Updated")
-	ui.RenderUser(rw, r, pageData)
 }
 
 func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("Roaster", "roaster", user)
+	defer func() {
+		ui.RenderUser(rw, r, pageData)
+	}()
 
 	id, err := server.PathID(r)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Roaster not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	roaster, err := c.repo.FindRoaster(id)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Roaster not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -171,7 +160,6 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 
 	if roaster.UserID != user.ID {
 		ui.Toast(rw, ui.Warning, "Roaster does not belong to you")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -181,7 +169,6 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 	})
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to upload image")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -189,10 +176,9 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 		roaster.Icon = savePath
 		if err := c.repo.SaveRoaster(roaster); err != nil {
 			ui.Toast(rw, ui.Warning, "Failed to save image")
+			return
 		}
 	}
-
-	ui.RenderUser(rw, r, pageData)
 }
 
 func (c Controller) DeleteRoaster(rw http.ResponseWriter, r *http.Request) {

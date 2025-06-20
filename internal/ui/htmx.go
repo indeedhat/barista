@@ -45,7 +45,7 @@ var _ ErrorFielder = (*ComponentData)(nil)
 
 func RenderComponent(w http.ResponseWriter, data ComponentData) error {
 	var component string
-	if c, found := data["Component"].(string); found {
+	if c, found := data["Component"].(string); found && c != "" {
 		component = c
 	} else {
 		return errors.New("Component not set")

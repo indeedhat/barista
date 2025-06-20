@@ -15,23 +15,23 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 		"Recipe": map[string]struct{}{},
 		"edit":   true,
 	})
+	defer func() {
+		ui.RenderComponent(rw, comData)
+	}()
 
 	id, err := server.PathID(r)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 
 	coffee, err := c.repo.FindCoffee(id)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderComponent(rw, comData)
 		return
 	}
-	comData["Coffee"] = coffee
 
-	ui.RenderComponent(rw, comData)
+	comData["Coffee"] = coffee
 }
 
 func (c Controller) ViewRecipes(rw http.ResponseWriter, r *http.Request) {
@@ -56,6 +56,20 @@ type upsertRecipeRequest struct {
 	Rating       uint8               `json:"rating"`
 }
 
+func (r upsertRecipeRequest) apply(recipe *Recipe) {
+	recipe.Name = r.Name
+	recipe.Dose = r.Dose
+	recipe.WeightOut = r.WeightOut
+	recipe.Drink = r.Drink
+	recipe.Declump = r.Declump
+	recipe.RDT = r.RDT
+	recipe.Frozen = r.Frozen
+	recipe.GrindSetting = r.GrindSetting
+	recipe.Grinder = r.Grinder
+	recipe.Rating = r.Rating
+	assignSteps(recipe, r.Steps)
+}
+
 type recipeStepRequest struct {
 	Time         int    `json:"time"`
 	Title        string `json:"title"`
@@ -73,18 +87,19 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
 		"edit": true,
 	})
+	defer func() {
+		ui.RenderComponent(rw, comData)
+	}()
 
 	id, err := server.PathID(r)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 
 	coffee, err := c.repo.FindCoffee(id)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 	comData["Coffee"] = coffee
@@ -92,36 +107,23 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 	var req upsertRecipeRequest
 	if err := server.UnmarshalBody(r, &req, &comData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 
 	if err := server.ValidateRequest(req, &comData); err != nil {
 		ui.Toast(rw, ui.Warning, "Bad request")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 
 	recipe := Recipe{
-		Name:         req.Name,
-		Dose:         req.Dose,
-		WeightOut:    req.WeightOut,
-		Drink:        req.Drink,
-		Declump:      req.Declump,
-		RDT:          req.RDT,
-		Frozen:       req.Frozen,
-		GrindSetting: req.GrindSetting,
-		Grinder:      req.Grinder,
-		Rating:       req.Rating,
-		User:         *user,
-		Coffee:       *coffee,
+		User:   *user,
+		Coffee: *coffee,
 	}
-	assignSteps(&recipe, req.Steps)
+	req.apply(&recipe)
 
 	coffee.Recipes = append(coffee.Recipes, recipe)
 	if err := c.repo.SaveRecipe(&recipe); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create recipe")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 
@@ -130,40 +132,33 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 	comData.SetForm(upsertRecipeRequest{})
 
 	ui.Toast(rw, ui.Success, "Recipe created")
-	ui.RenderComponent(rw, comData)
 }
 
 func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
 		"edit": true,
 	})
-
-	coffeeId, err := server.PathID(r, "coffee_id")
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Coffee not found")
+	defer func() {
 		ui.RenderComponent(rw, comData)
+	}()
+
+	coffeeId, _ := server.PathID(r, "coffee_id")
+	recipeId, _ := server.PathID(r, "recipe_id")
+	if coffeeId == 0 || recipeId == 0 {
+		ui.Toast(rw, ui.Warning, "Recipe not found")
 		return
 	}
 
 	coffee, err := c.repo.FindCoffee(coffeeId)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 	comData["Coffee"] = coffee
 
-	recipeId, err := server.PathID(r, "recipe_id")
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Recipe not found")
-		ui.RenderComponent(rw, comData)
-		return
-	}
-
 	recipe := coffee.Recipe(recipeId)
-	if err != nil {
+	if recipe == nil {
 		ui.Toast(rw, ui.Warning, "Recipe not found")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 	comData["Recipe"] = recipe
@@ -171,31 +166,18 @@ func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 	var req upsertRecipeRequest
 	if err := server.UnmarshalBody(r, &req, &comData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 
 	if err := server.ValidateRequest(req, &comData); err != nil {
 		ui.Toast(rw, ui.Warning, "Bad request")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 
-	recipe.Name = req.Name
-	recipe.Dose = req.Dose
-	recipe.WeightOut = req.WeightOut
-	recipe.Drink = req.Drink
-	recipe.Declump = req.Declump
-	recipe.RDT = req.RDT
-	recipe.Frozen = req.Frozen
-	recipe.GrindSetting = req.GrindSetting
-	recipe.Grinder = req.Grinder
-	recipe.Rating = req.Rating
-	assignSteps(recipe, req.Steps)
+	req.apply(recipe)
 
 	if err := c.repo.SaveRecipe(recipe); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to save recipe")
-		ui.RenderComponent(rw, comData)
 		return
 	}
 
@@ -205,7 +187,44 @@ func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 	comData.SetForm(upsertRecipeRequest{})
 
 	ui.Toast(rw, ui.Success, "Recipe updated")
-	ui.RenderComponent(rw, comData)
+}
+
+func (c Controller) DeleteRecipe(rw http.ResponseWriter, r *http.Request) {
+	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
+		"open": true,
+	})
+	defer func() {
+		ui.RenderComponent(rw, comData)
+	}()
+
+	coffeeId, _ := server.PathID(r, "coffee_id")
+	recipeId, _ := server.PathID(r, "recipe_id")
+	if coffeeId == 0 || recipeId == 0 {
+		ui.Toast(rw, ui.Warning, "Recipe not found")
+		return
+	}
+
+	coffee, err := c.repo.FindCoffee(coffeeId)
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Coffee not found")
+		return
+	}
+	comData["Coffee"] = coffee
+
+	recipe := coffee.Recipe(recipeId)
+	if recipe == nil {
+		ui.Toast(rw, ui.Warning, "Recipe not found")
+		return
+	}
+	comData["Recipe"] = recipe
+
+	if err := c.repo.SaveRecipe(recipe); err != nil {
+		ui.Toast(rw, ui.Warning, "Failed to delete recipe")
+		return
+	}
+
+	comData["Component"] = ""
+	ui.Toast(rw, ui.Success, "Recipe deleted")
 }
 
 func assignSteps(recipe *Recipe, steps []recipeStepRequest) {

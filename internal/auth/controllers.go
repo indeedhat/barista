@@ -102,6 +102,48 @@ func (c Controller) UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	server.WriteResponse(rw, http.StatusNoContent, nil)
 }
 
+func (c Controller) Logout(rw http.ResponseWriter, r *http.Request) {
+	http.SetCookie(rw, &http.Cookie{
+		Name:     sessionCookie,
+		Value:    "",
+		HttpOnly: true,
+		Domain:   r.URL.Host,
+		Path:     "/",
+		MaxAge:   0,
+	})
+	ui.Redirect(rw, "/login")
+}
+
+// GetLoggedInUser returns the json representation of the logged in user
+func (c Controller) GetLoggedInUser(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*User)
+	server.WriteResponse(rw, http.StatusOK, user)
+}
+
+// ForceLogoutUser resets the users JwtKillSwitch field invalidating all existing logins
+func (c Controller) ForceLogoutUser(rw http.ResponseWriter, r *http.Request) {
+	id, err := server.PathID(r)
+	if err != nil {
+		server.WriteResponse(rw, http.StatusNotFound, nil)
+		return
+	}
+
+	user, err := c.repo.FindUser(id)
+	if err != nil {
+		server.WriteResponse(rw, http.StatusNotFound, errors.New("User not found"))
+		return
+	}
+
+	user.JwtKillSwitch = time.Now().Unix()
+
+	if err := c.repo.SaveUser(user); err != nil {
+		server.WriteResponse(rw, http.StatusInternalServerError, nil)
+		return
+	}
+
+	server.WriteResponse(rw, http.StatusNoContent, nil)
+}
+
 type changeUserPasswordRequest struct {
 	Password string `json:"password" validate:"required"`
 }
@@ -153,6 +195,9 @@ type loginRequest struct {
 // Login handles user login attempts
 func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 	pageData := ui.NewPageData("Login", "login")
+	defer func() {
+		ui.RenderGuest(rw, r, pageData)
+	}()
 
 	var req loginRequest
 	if err := server.UnmarshalBody(r, &req); err != nil {
@@ -164,7 +209,6 @@ func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 		pageData.FieldErrors = server.ExtractFIeldErrors(err).Fields
 		pageData.Data["name"] = req.Name
 		ui.Toast(rw, ui.Warning, "Login failed")
-		ui.RenderGuest(rw, r, pageData)
 		return
 	}
 
@@ -172,7 +216,6 @@ func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		pageData.Data["name"] = req.Name
 		ui.Toast(rw, ui.Warning, "Login failed")
-		ui.RenderGuest(rw, r, pageData)
 		return
 	}
 
@@ -192,46 +235,4 @@ func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 	})
 
 	ui.Redirect(rw, "/")
-}
-
-func (c Controller) Logout(rw http.ResponseWriter, r *http.Request) {
-	http.SetCookie(rw, &http.Cookie{
-		Name:     sessionCookie,
-		Value:    "",
-		HttpOnly: true,
-		Domain:   r.URL.Host,
-		Path:     "/",
-		MaxAge:   0,
-	})
-	ui.Redirect(rw, "/login")
-}
-
-// GetLoggedInUser returns the json representation of the logged in user
-func (c Controller) GetLoggedInUser(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*User)
-	server.WriteResponse(rw, http.StatusOK, user)
-}
-
-// ForceLogoutUser resets the users JwtKillSwitch field invalidating all existing logins
-func (c Controller) ForceLogoutUser(rw http.ResponseWriter, r *http.Request) {
-	id, err := server.PathID(r)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, nil)
-		return
-	}
-
-	user, err := c.repo.FindUser(id)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusNotFound, errors.New("User not found"))
-		return
-	}
-
-	user.JwtKillSwitch = time.Now().Unix()
-
-	if err := c.repo.SaveUser(user); err != nil {
-		server.WriteResponse(rw, http.StatusInternalServerError, nil)
-		return
-	}
-
-	server.WriteResponse(rw, http.StatusNoContent, nil)
 }

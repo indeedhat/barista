@@ -33,6 +33,15 @@ type upsertCoffeeRequest struct {
 	Flavours []uint `json:"flavours"`
 }
 
+func (r upsertCoffeeRequest) apply(coffee *Coffee) {
+	coffee.Name = r.Name
+	coffee.Roast = RoastLevel(r.Roast)
+	coffee.Caffeine = CaffeineLevel(r.Caffeine)
+	coffee.Rating = r.Rating
+	coffee.Notes = r.Notes
+	coffee.URL = r.URL
+}
+
 func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("Coffees", "coffees", user)
@@ -40,24 +49,24 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
 	pageData.Data["open"] = true
+	defer func() {
+		ui.RenderUser(rw, r, pageData)
+	}()
 
 	var req upsertCoffeeRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	if err := server.ValidateRequest(req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "Bad request")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	roaster, err := c.repo.FindRoaster(req.Roaster)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Roaster not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -65,26 +74,19 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	if len(req.Flavours) > 0 {
 		if flavours, err = c.repo.FindFlavourProfiles(req.Flavours); err != nil {
 			ui.Toast(rw, ui.Warning, "One or more flavours not found")
-			ui.RenderUser(rw, r, pageData)
 			return
 		}
 	}
 
 	coffee := Coffee{
-		Name:     req.Name,
 		Roaster:  *roaster,
-		Roast:    RoastLevel(req.Roast),
-		Caffeine: CaffeineLevel(req.Caffeine),
-		Rating:   req.Rating,
-		Notes:    req.Notes,
-		URL:      req.URL,
 		Flavours: flavours,
 		User:     *user,
 	}
+	req.apply(&coffee)
 
 	if err := c.repo.SaveCoffee(&coffee); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create coffee")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -93,7 +95,6 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Form = upsertCoffeeRequest{}
 
 	ui.Toast(rw, ui.Success, "Coffee created")
-	ui.RenderUser(rw, r, pageData)
 }
 
 func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
@@ -127,18 +128,19 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("Coffee", "coffee", user)
+	defer func() {
+		ui.RenderUser(rw, r, pageData)
+	}()
 
 	id, err := server.PathID(r)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	coffee, err := c.repo.FindCoffee(id)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -151,7 +153,6 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	//       of a good way of doing it right now without loading in the model twice
 	if coffee.UserID != user.ID {
 		ui.Toast(rw, ui.Warning, "Coffee does not belong to you")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -161,7 +162,6 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to upload image")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -169,28 +169,29 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 		coffee.Icon = savePath
 		if err := c.repo.SaveCoffee(coffee); err != nil {
 			ui.Toast(rw, ui.Warning, "Failed to save image")
+			return
 		}
 	}
 
 	ui.Toast(rw, ui.Success, "Image Updated")
-	ui.RenderUser(rw, r, pageData)
 }
 
 func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("Coffee", "coffee", user)
+	defer func() {
+		ui.RenderUser(rw, r, pageData)
+	}()
 
 	id, err := server.PathID(r)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	coffee, err := c.repo.FindCoffee(id)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -202,26 +203,22 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	var req upsertCoffeeRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	if err := server.ValidateRequest(req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to update coffee")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	if coffee.UserID != user.ID {
 		ui.Toast(rw, ui.Warning, "Coffee does not belong to you")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	roaster, err := c.repo.FindRoaster(req.Roaster)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
@@ -229,29 +226,20 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	if len(req.Flavours) > 0 {
 		if flavours, err = c.repo.FindFlavourProfiles(req.Flavours); err != nil {
 			ui.Toast(rw, ui.Warning, "One or more flavours not found")
-			ui.RenderUser(rw, r, pageData)
 			return
 		}
 	}
 
-	coffee.Name = req.Name
-	coffee.Roaster = *roaster
-	coffee.Roast = RoastLevel(req.Roast)
-	coffee.Caffeine = CaffeineLevel(req.Caffeine)
-	coffee.Rating = req.Rating
-	coffee.Notes = req.Notes
-	coffee.URL = req.URL
 	coffee.Flavours = flavours
-
+	coffee.Roaster = *roaster
+	req.apply(coffee)
 	if err := c.repo.SaveCoffee(coffee); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to update coffee")
-		ui.RenderUser(rw, r, pageData)
 		return
 	}
 
 	pageData.Title = coffee.Name
 	ui.Toast(rw, ui.Success, "Coffee Updated")
-	ui.RenderUser(rw, r, pageData)
 }
 
 func (c Controller) DeleteCoffee(rw http.ResponseWriter, r *http.Request) {

@@ -1,7 +1,11 @@
 {{ define "recipe-card" }}
 {{ $id := or .Recipe.ID (rand "r") }}
 <article class="collapse border border-base-300 card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
-    <input type="radio" name="recipe-card-c" />
+    <input type="radio" name="recipe-card-c" 
+        {{ if or .open .edit }}
+            checked="checked"
+        {{ end }}
+    />
     <div class="collapse-title w-full relative">
         <div class="absolute top-2 right-2 flex flex-col gap-2 items-end">
             {{ if .Recipe.Drink }}
