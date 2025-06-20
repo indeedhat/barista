@@ -7,12 +7,12 @@ import (
 
 type Repository interface {
 	IndexCoffeesForUser(*auth.User) []Coffee
-	FindCoffee(uint) (*Coffee, error)
+	FindCoffee(uint, ...uint) (*Coffee, error)
 	SaveCoffee(*Coffee) error
 	DeleteCoffee(*Coffee) error
 
 	IndexRoastersForUser(*auth.User) []Roaster
-	FindRoaster(uint) (*Roaster, error)
+	FindRoaster(uint, ...uint) (*Roaster, error)
 	SaveRoaster(*Roaster) error
 	DeleteRoaster(*Roaster) error
 
@@ -81,14 +81,18 @@ func (r SqliteRepository) IndexRecipesForUser(user *auth.User) []Recipe {
 }
 
 // FindCoffee implements Repository.
-func (r SqliteRepository) FindCoffee(id uint) (*Coffee, error) {
+func (r SqliteRepository) FindCoffee(id uint, userId ...uint) (*Coffee, error) {
 	var coffee Coffee
 
-	err := r.db.Preload("Roaster").
+	tx := r.db.Preload("Roaster").
 		Preload("Flavours").
-		Preload("Recipes").
-		First(&coffee, id).Error
-	if err != nil {
+		Preload("Recipes")
+
+	if len(userId) > 0 {
+		tx = tx.Where("user_id = ?", userId[0])
+	}
+
+	if err := tx.First(&coffee, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -118,10 +122,15 @@ func (r SqliteRepository) FindFlavourProfiles(ids []uint) ([]FlavourProfile, err
 }
 
 // FindRoaster implements Repository.
-func (r SqliteRepository) FindRoaster(id uint) (*Roaster, error) {
+func (r SqliteRepository) FindRoaster(id uint, userId ...uint) (*Roaster, error) {
 	var roaster Roaster
 
-	if err := r.db.Preload("Coffees").First(&roaster, id).Error; err != nil {
+	tx := r.db.Preload("Coffees")
+	if len(userId) > 0 {
+		tx = tx.Where("user_id = ?", userId[0])
+	}
+
+	if err := tx.First(&roaster, id).Error; err != nil {
 		return nil, err
 	}
 

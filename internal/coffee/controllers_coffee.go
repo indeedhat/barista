@@ -107,7 +107,7 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee Not Found")
 		ui.RenderUser(rw, r, ui.NewPageData("Coffee Not Found", "404", user))
@@ -138,7 +138,7 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
@@ -148,13 +148,6 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	pageData.Data["Coffee"] = coffee
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-
-	// TODO: i should probably find a nice way of doing this check with middleware but i cant think
-	//       of a good way of doing it right now without loading in the model twice
-	if coffee.UserID != user.ID {
-		ui.Toast(rw, ui.Warning, "Coffee does not belong to you")
-		return
-	}
 
 	savePath, err := server.UploadFile(r, "image", fmt.Sprint(CoffeeImagePath, coffee.ID), &server.UploadProps{
 		Ext:  []string{".jpg", ".jpeg", ".png"},
@@ -189,7 +182,7 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
@@ -208,11 +201,6 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 
 	if err := server.ValidateRequest(req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to update coffee")
-		return
-	}
-
-	if coffee.UserID != user.ID {
-		ui.Toast(rw, ui.Warning, "Coffee does not belong to you")
 		return
 	}
 
@@ -251,14 +239,9 @@ func (c Controller) DeleteCoffee(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(id, user.ID)
 	if err != nil {
 		server.WriteResponse(rw, http.StatusNotFound, errors.New("Coffee not found"))
-		return
-	}
-
-	if coffee.User.ID != user.ID {
-		server.WriteResponse(rw, http.StatusForbidden, nil)
 		return
 	}
 

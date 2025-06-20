@@ -76,7 +76,7 @@ func (c Controller) ViewRoaster(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roaster, err := c.repo.FindRoaster(id)
+	roaster, err := c.repo.FindRoaster(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Roaster Not Found")
 		ui.RenderUser(rw, r, ui.NewPageData("Roaster Not Found", "404", user))
@@ -101,7 +101,7 @@ func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roaster, err := c.repo.FindRoaster(id)
+	roaster, err := c.repo.FindRoaster(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Roaster not found")
 		return
@@ -118,11 +118,6 @@ func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 
 	if err := server.ValidateRequest(req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create roaster")
-		return
-	}
-
-	if roaster.UserID != user.ID {
-		ui.Toast(rw, ui.Warning, "Roaster does not belong to you")
 		return
 	}
 
@@ -149,7 +144,7 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	roaster, err := c.repo.FindRoaster(id)
+	roaster, err := c.repo.FindRoaster(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Roaster not found")
 		return
@@ -157,11 +152,6 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 
 	pageData.Title = roaster.Name
 	pageData.Data["Roaster"] = roaster
-
-	if roaster.UserID != user.ID {
-		ui.Toast(rw, ui.Warning, "Roaster does not belong to you")
-		return
-	}
 
 	savePath, err := server.UploadFile(r, "image", fmt.Sprint(RoasterImagePath, roaster.ID), &server.UploadProps{
 		Ext:  []string{".jpg", ".jpeg", ".png"},
@@ -190,14 +180,9 @@ func (c Controller) DeleteRoaster(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roaster, err := c.repo.FindRoaster(id)
+	roaster, err := c.repo.FindRoaster(id, user.ID)
 	if err != nil {
 		server.WriteResponse(rw, http.StatusNotFound, errors.New("Roaster not found"))
-		return
-	}
-
-	if roaster.UserID != user.ID {
-		server.WriteResponse(rw, http.StatusForbidden, nil)
 		return
 	}
 
