@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	CoffeeImagePath  = "uploads/coffee/"
-	RoasterImagePath = "uploads/roaster/"
+	CoffeeImagePath  = "data/uploads/coffee/"
+	RoasterImagePath = "data/uploads/roaster/"
 )
 
 type Controller struct {
