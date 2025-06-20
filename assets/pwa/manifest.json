@@ -1,0 +1,15 @@
+{
+  "name": "Barista Coffee Companion",
+  "short_name": "Barista",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#261b25",
+  "theme_color": "#120a11",
+  "icons": [
+    {
+      "src": "/assets/pwa/icon-240.png",
+      "sizes": "240x240",
+      "type": "image/png"
+    }
+  ]
+}

@@ -10,6 +10,35 @@
         <script src="/assets/js/toast.js"></script>
         <link rel="stylesheet" href="/assets/css/app.css?{{ unix }}" />
         <script>var $ = (selector) => document.querySelector(selector)</script>
+
+        <link rel="manifest" href="/assets/pwa/manifest.json">
+        <meta name="theme-color" content="#120a11">
+        <script type="module">
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/assets/pwa/sw.js')
+                .catch((err) => console.error('Service Worker registration failed:', err))
+        }
+
+        let deferredPrompt
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault()
+            deferredPrompt = e
+
+            const $installUl = $("#install-ul")
+            $installUl.classList.remove("hidden")
+
+            $("#install").addEventListener('click', () => {
+                if (!deferredPrompt) {
+                    return
+                }
+                deferredPrompt.prompt()
+
+                deferredPrompt.userChoice.then((choiceResult) => deferredPrompt = null)
+            })
+        })
+        </script>
+
     </head>
     <body hx-boost="true" hx-target="body" data-theme="coffee">
         <div class="drawer drawer-end">
@@ -54,8 +83,11 @@
                         <li><a href="/flavours" hx-target="main">Flavours</a></li>
                     </ul>
                     <div class="flex-grow"></div>
+                    <ul class="menu bg-base-300 rounded-field w-56 hidden" id="install-ul">
+                        <li><a id="install">Install App</a></li>
+                    </ul>
                     <ul class="menu bg-base-200 rounded-field w-56">
-                        <li><a hx-post="/logout">Logout</a></li>
+                        <li><a href="/logout" hx-target="main">Logout</a></li>
                     </ul>
                 </aside>
             </div>
