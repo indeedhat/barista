@@ -91,9 +91,11 @@ func buildUiRoutes(
 		private.HandleFunc("GET /coffees/{id}", coffeeController.ViewCoffee)
 		private.HandleFunc("PUT /coffees/{id}", coffeeController.UpdateCoffee)
 		private.HandleFunc("POST /coffees/{id}/icon", coffeeController.UpdateCoffeeImage)
+
 		private.HandleFunc("GET /coffees/{id}/recipes", coffeeController.NewRecipe)
 		private.HandleFunc("POST /coffees/{id}/recipes", coffeeController.CreateRecipe)
 		private.HandleFunc("PUT /coffees/{coffee_id}/recipes/{recipe_id}", coffeeController.UpdateRecipe)
+		private.HandleFunc("DELETE /coffees/{coffee_id}/recipes/{recipe_id}", coffeeController.DeleteRecipe)
 
 		private.HandleFunc("GET /recipes", coffeeController.ViewRecipes)
 

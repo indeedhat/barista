@@ -218,7 +218,7 @@ func (c Controller) DeleteRecipe(rw http.ResponseWriter, r *http.Request) {
 	}
 	comData["Recipe"] = recipe
 
-	if err := c.repo.SaveRecipe(recipe); err != nil {
+	if err := c.repo.DeleteRecipe(recipe); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to delete recipe")
 		return
 	}
