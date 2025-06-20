@@ -10,7 +10,7 @@
 <div class="card card-border bg-neutral w-full" id="update-card">
     <div class="card-body">
         {{ template "icon-upload" (map
-            "action" "/coffees/{{.Data.Coffee.ID}}/icon"
+            "action" ( print "/coffees/" .Data.Coffee.ID "/icon" )
             "icon" .Data.Coffee.Icon
             "alt" .Data.Coffee.Name
         ) }}

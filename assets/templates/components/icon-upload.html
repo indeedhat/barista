@@ -1,9 +1,16 @@
 {{ define "icon-upload" }}
 <div class="flex justify-center">
     <div class="relative h-full object-contain rounded-field border max-w-[50%] overflow-hidden"
-        onclick="upload_icon_modal.showModal()"
+        onclick="icon_input.click()"
     >
-        <img src="/{{ or .Icon "assets/img/coffee.png" }}"
+        <input type="file"
+            class="file-input hidden"
+            name="image"
+            hx-encoding="multipart/form-data"
+            hx-post="{{ .action }}"
+            id="icon_input"
+        />
+        <img src="/{{ or .icon "assets/img/coffee.png" }}"
             onerror="if (this.src != '/assets/img/coffee.png') this.src = '/assets/img/coffee.png'"
             alt="coffee"
         />
@@ -11,24 +18,5 @@
             <img src="/assets/img/edit.png" alt="{{ .alt }}" />
         </div>
     </div>
-
-    <dialog id="upload_icon_modal" class="modal">
-        <div class="modal-box">
-            <h3 class="text-lg font-bold">Replace Icon</h3>
-            <fieldset class="fieldset">
-                <input type="file"
-                    class="file-input"
-                    name="image"
-                    hx-encoding="multipart/form-data"
-                    hx-post="{{ .action }}"
-                />
-            </fieldset>
-            <div class="modal-action">
-                <form method="dialog">
-                    <button class="btn">Close</button>
-                </form>
-            </div>
-        </div>
-    </dialog>
 </div>
 {{ end }}

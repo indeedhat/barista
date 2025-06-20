@@ -172,6 +172,7 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	ui.Toast(rw, ui.Success, "Image Updated")
 	ui.RenderUser(rw, r, pageData)
 }
 

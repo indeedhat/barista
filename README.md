@@ -4,9 +4,10 @@ Wierd coffe person companion app
 ## TODO
 - [x] update recipes
 - [ ] delete methods
+- [ ] fix toast styling
 - [x] ~~toggle close cards~~  
       using an acordian
-- [ ] home page showing recipes
+- [x] home page showing recipes
 - [ ] filter on recipes
 - [x] make drink type a select
 - [ ] maybe add user settings for things like default grinder
@@ -16,4 +17,4 @@ Wierd coffe person companion app
 - [ ] lots of ux
 - [ ] water recipes maybe
 - [ ] prompt to save to home screen?
-- [ ] auto open camera on image edit
+- [x] auto open camera on image edit

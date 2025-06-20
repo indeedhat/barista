@@ -1,8 +1,6 @@
 package coffee
 
 import (
-	"log"
-
 	"github.com/indeedhat/barista/internal/auth"
 	"gorm.io/gorm"
 )
@@ -150,10 +148,8 @@ func (r SqliteRepository) SaveCoffee(coffee *Coffee) error {
 	tx := r.db.Begin()
 	defer func() {
 		if err != nil {
-			log.Print("rollback")
 			tx.Rollback()
 		} else {
-			log.Print("commit")
 			tx.Commit()
 		}
 	}()
