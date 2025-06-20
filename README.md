@@ -2,11 +2,12 @@
 Wierd coffe person companion app
 
 ## TODO
+- [ ] update recipes
 - [ ] delete methods
 - [ ] toggle close cards
 - [ ] home page showing recipes
 - [ ] filter on recipes
-- [ ] make drink type a select
+- [x] make drink type a select
 - [ ] maybe add user settings for things like default grinder
 - [ ] user management ui
 - [ ] option to make recipes/roasters/coffeees public

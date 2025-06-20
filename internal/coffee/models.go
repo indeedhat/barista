@@ -65,6 +65,27 @@ func (c Coffee) FlavourIds() []uint {
 	return ids
 }
 
+func (c Coffee) Recipe(id uint) *Recipe {
+	for _, r := range c.Recipes {
+		if r.ID == id {
+			return &r
+		}
+	}
+
+	return nil
+}
+
+func (c Coffee) AddRecipe(recipe Recipe) {
+	for i, r := range c.Recipes {
+		if r.ID == recipe.ID {
+			c.Recipes[i] = recipe
+			return
+		}
+	}
+
+	c.Recipes = append(c.Recipes, recipe)
+}
+
 type Recipe struct {
 	model.SoftDelete
 

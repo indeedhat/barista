@@ -14,7 +14,7 @@ func (c Controller) ViewCoffees(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 
 	pageData := ui.NewPageData("Coffees", "coffees", user)
-	pageData.Form = createCoffeeRequest{}
+	pageData.Form = upsertCoffeeRequest{}
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
@@ -22,7 +22,7 @@ func (c Controller) ViewCoffees(rw http.ResponseWriter, r *http.Request) {
 	ui.RenderUser(rw, r, pageData)
 }
 
-type createCoffeeRequest struct {
+type upsertCoffeeRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Roaster  uint   `json:"roaster" validate:"required"`
 	Roast    uint8  `json:"roast" validate:"required"`    // TODO: validate level
@@ -41,7 +41,7 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
 	pageData.Data["open"] = true
 
-	var req createCoffeeRequest
+	var req upsertCoffeeRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
 		ui.RenderUser(rw, r, pageData)
@@ -90,7 +90,7 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 
 	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
 	pageData.Data["open"] = false
-	pageData.Form = createCoffeeRequest{}
+	pageData.Form = upsertCoffeeRequest{}
 
 	ui.Toast(rw, ui.Success, "Coffee created")
 	ui.RenderUser(rw, r, pageData)
@@ -117,7 +117,7 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Data["Coffee"] = coffee
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-	pageData.Form = updateCoffeeRequest{
+	pageData.Form = upsertCoffeeRequest{
 		Flavours: coffee.FlavourIds(),
 	}
 
@@ -175,17 +175,6 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	ui.RenderUser(rw, r, pageData)
 }
 
-type updateCoffeeRequest struct {
-	Name     string `json:"name" validate:"required"`
-	Roaster  uint   `json:"roaster" validate:"required"`
-	Roast    uint8  `json:"roast" validate:"required"`    // TODO: validate level
-	Caffeine uint8  `json:"caffeine" validate:"required"` // TODO: validate level
-	Rating   uint8  `json:"rating"`
-	Notes    string `json:"notes"`
-	URL      string `json:"url"`
-	Flavours []uint `json:"flavours"`
-}
-
 func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("Coffee", "coffee", user)
@@ -209,7 +198,7 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
 
-	var req updateCoffeeRequest
+	var req upsertCoffeeRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
 		ui.RenderUser(rw, r, pageData)

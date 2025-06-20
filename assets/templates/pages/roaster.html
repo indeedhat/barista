@@ -16,7 +16,7 @@
         ) }}
 
         <form
-            hx-post="/roasters/{{ .Data.Roaster.ID }}"
+            hx-put="/roasters/{{ .Data.Roaster.ID }}"
             hx-ext="json-enc"
         >
             <fieldset class="fieldset gap-4">

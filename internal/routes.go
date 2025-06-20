@@ -89,10 +89,11 @@ func buildUiRoutes(
 		private.HandleFunc("GET /coffees", coffeeController.ViewCoffees)
 		private.HandleFunc("POST /coffees", coffeeController.CreateCoffee)
 		private.HandleFunc("GET /coffees/{id}", coffeeController.ViewCoffee)
-		private.HandleFunc("POST /coffees/{id}", coffeeController.UpdateCoffee)
+		private.HandleFunc("PUT /coffees/{id}", coffeeController.UpdateCoffee)
 		private.HandleFunc("POST /coffees/{id}/icon", coffeeController.UpdateCoffeeImage)
 		private.HandleFunc("GET /coffees/{id}/recipes", coffeeController.NewRecipe)
 		private.HandleFunc("POST /coffees/{id}/recipes", coffeeController.CreateRecipe)
+		private.HandleFunc("PUT /coffees/{coffee_id}/recipes/{recipe_id}", coffeeController.UpdateRecipe)
 
 		private.HandleFunc("GET /flavours", coffeeController.ViewFlavours)
 		private.HandleFunc("POST /flavours", coffeeController.CreateFlavourProfile)
@@ -100,7 +101,7 @@ func buildUiRoutes(
 		private.HandleFunc("GET /roasters", coffeeController.ViewRoasters)
 		private.HandleFunc("POST /roasters", coffeeController.CreateRoaster)
 		private.HandleFunc("GET /roasters/{id}", coffeeController.ViewRoaster)
-		private.HandleFunc("POST /roasters/{id}", coffeeController.UpdateRoaster)
+		private.HandleFunc("PUT /roasters/{id}", coffeeController.UpdateRoaster)
 		private.HandleFunc("POST /roasters/{id}/icon", coffeeController.UpdateRoasterImage)
 
 		private.HandleFunc("POST /logout", authController.Logout)

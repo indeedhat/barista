@@ -1,16 +1,39 @@
 package coffee
 
 import (
-	"log"
 	"net/http"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
-type createRecipeRequest struct {
+func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
+	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
+		"Form":   map[string]struct{}{},
+		"Recipe": map[string]struct{}{},
+		"edit":   true,
+	})
+
+	id, err := server.PathID(r)
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Coffee not found")
+		ui.RenderComponent(rw, comData)
+		return
+	}
+
+	coffee, err := c.repo.FindCoffee(id)
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Coffee not found")
+		ui.RenderComponent(rw, comData)
+		return
+	}
+	comData["Coffee"] = coffee
+
+	ui.RenderComponent(rw, comData)
+}
+
+type upsertRecipeRequest struct {
 	Name         string              `json:"name" validate:"required"`
 	Dose         float64             `json:"dose" validate:"required"`
 	WeightOut    float64             `json:"weight_out" validate:"required"`
@@ -56,17 +79,14 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 	}
 	comData["Coffee"] = coffee
 
-	var req createRecipeRequest
+	var req upsertRecipeRequest
 	if err := server.UnmarshalBody(r, &req, &comData); err != nil {
-		log.Print("unmarshal", err)
 		ui.Toast(rw, ui.Warning, "The server did not understand the request")
 		ui.RenderComponent(rw, comData)
 		return
 	}
 
 	if err := server.ValidateRequest(req, &comData); err != nil {
-		log.Print(err)
-		spew.Dump(comData)
 		ui.Toast(rw, ui.Warning, "Bad request")
 		ui.RenderComponent(rw, comData)
 		return
@@ -88,35 +108,32 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 
 	coffee.Recipes = append(coffee.Recipes, recipe)
 	if err := c.repo.SaveCoffee(coffee); err != nil {
-		ui.Toast(rw, ui.Warning, "Failed to create coffee")
+		ui.Toast(rw, ui.Warning, "Failed to create recipe")
 		ui.RenderComponent(rw, comData)
 		return
 	}
 
 	comData["Recipe"] = recipe
 	comData["edit"] = false
-	comData.SetForm(createRecipeRequest{})
+	comData.SetForm(upsertRecipeRequest{})
 
 	ui.Toast(rw, ui.Success, "Recipe created")
 	ui.RenderComponent(rw, comData)
 }
 
-func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
-	log.Print("got to controller")
+func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
-		"Form":   map[string]struct{}{},
-		"Recipe": map[string]struct{}{},
-		"edit":   true,
+		"edit": true,
 	})
 
-	id, err := server.PathID(r)
+	coffeeId, err := server.PathID(r, "coffee_id")
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		ui.RenderComponent(rw, comData)
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(coffeeId)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		ui.RenderComponent(rw, comData)
@@ -124,12 +141,63 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 	}
 	comData["Coffee"] = coffee
 
+	recipeId, err := server.PathID(r, "recipe_id")
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Recipe not found")
+		ui.RenderComponent(rw, comData)
+		return
+	}
+
+	recipe := coffee.Recipe(recipeId)
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Recipe not found")
+		ui.RenderComponent(rw, comData)
+		return
+	}
+	comData["Recipe"] = recipe
+
+	var req upsertRecipeRequest
+	if err := server.UnmarshalBody(r, &req, &comData); err != nil {
+		ui.Toast(rw, ui.Warning, "The server did not understand the request")
+		ui.RenderComponent(rw, comData)
+		return
+	}
+
+	if err := server.ValidateRequest(req, &comData); err != nil {
+		ui.Toast(rw, ui.Warning, "Bad request")
+		ui.RenderComponent(rw, comData)
+		return
+	}
+
+	recipe.Name = req.Name
+	recipe.Dose = req.Dose
+	recipe.WeightOut = req.WeightOut
+	recipe.Drink = req.Drink
+	recipe.Declump = req.Declump
+	recipe.RDT = req.RDT
+	recipe.Frozen = req.Frozen
+	recipe.GrindSetting = req.GrindSetting
+	recipe.Grinder = req.Grinder
+	recipe.Rating = req.Rating
+	assignSteps(recipe, req.Steps)
+
+	coffee.AddRecipe(*recipe)
+	if err := c.repo.SaveCoffee(coffee); err != nil {
+		ui.Toast(rw, ui.Warning, "Failed to save recipe")
+		ui.RenderComponent(rw, comData)
+		return
+	}
+
+	comData["Recipe"] = recipe
+	comData["edit"] = false
+	comData.SetForm(upsertRecipeRequest{})
+
+	ui.Toast(rw, ui.Success, "Recipe updated")
 	ui.RenderComponent(rw, comData)
 }
 
 func assignSteps(recipe *Recipe, steps []recipeStepRequest) {
 	recipe.Steps = RecipeSteps{}
-	spew.Dump(steps)
 
 	for _, step := range steps {
 		if step.empty() {
