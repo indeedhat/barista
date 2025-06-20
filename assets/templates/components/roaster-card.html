@@ -4,11 +4,22 @@
     hx-push-url="/roasters/{{ .ID }}"
 >
     <figure>
-        <img src="/{{ or .Icon "assets/img/coffee.png" }}"
-            onerror="if (this.src == '/assets/img/coffee.png') return;this.src = '/assets/img/coffee.png';this.classList.remove('object-fit');this.classList.add('object-contain')"
-            alt="roaster"
-            class="h-full object-fit w-[100px] rounded-box"
-        />
+        {{ if .Icon }}
+            <img src="/{{ .Icon }}"
+                onerror="if (this.src == '/assets/img/coffee.png') return;
+                    this.src = '/assets/img/coffee.png';
+                    this.classList.remove('object-fit');
+                    this.classList.add('object-contain');
+                "
+                alt="roaster"
+                class="h-full object-fit w-[100px] rounded-box"
+            />
+        {{ else }}
+            <img src="/assets/img/coffee.png"
+                alt="roaster"
+                class="h-full object-contain w-[100px] rounded-box"
+            />
+        {{ end }}
     </figure>
     <div class="card-body">
         <div class="card-title">{{ .Name }}</div>
