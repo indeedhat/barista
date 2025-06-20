@@ -1,7 +1,6 @@
 package coffee
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
