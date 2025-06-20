@@ -63,7 +63,7 @@ func buildUiRoutes(
 	authRepo auth.Repository,
 ) {
 	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Public))))
-	r.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("uploads"))))
+	r.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("data/uploads"))))
 
 	guest := r.Group("", auth.IsGuestMiddleware(auth.UI, authRepo))
 	{

@@ -18,3 +18,4 @@ Wierd coffe person companion app
 - [ ] water recipes maybe
 - [ ] prompt to save to home screen?
 - [x] auto open camera on image edit
+- [ ] docker
