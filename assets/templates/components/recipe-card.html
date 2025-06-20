@@ -63,10 +63,10 @@
                 <h3>Steps</h3>
                 <ul class="list w-full">
                     {{ range .Recipe.Steps }}
-                        <li class="list-row w-full">
-                            <div>
-                                <div class="flex justify-between w-full">
-                                    <span>{{ .Title }}</span>
+                        <li class="list-row flex">
+                            <div class="flex-grow">
+                                <div class="flex justify-between">
+                                    <span class="font-bold">{{ .Title }}</span>
                                     {{ if .Time }}
                                         <span class="badge badge-soft">{{ .Time }}</span>
                                     {{ end }}
