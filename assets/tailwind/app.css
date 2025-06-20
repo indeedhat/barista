@@ -1,15 +1,23 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-    themes: coffee --default;
+  themes: coffee --default;
 }
 
 .input-error {
-    color: var(--color-error);
+  color: var(--color-error);
 }
 .input-error:empty {
-    display:none;
+  display:none;
 }
 
 .input[list]::-webkit-calendar-picker-indicator {
   line-height: 1em;
+}
+
+.stats + .stats {
+  border-top: var(--border) dashed currentColor;
+  border-top-radius: none;
+  @supports (color: color-mix(in lab, red, red)) {
+    border-top: var(--border) dashed color-mix(in oklab, currentColor 10%, #0000);
+  }
 }

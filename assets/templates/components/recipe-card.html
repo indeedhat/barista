@@ -2,7 +2,7 @@
 {{ $id := or .Recipe.ID (rand "r") }}
 <article class="collapse collapse-arrow border border-base-300 card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
     <input type="radio" name="recipe-card-c" />
-    <div class="collapse-title">
+    <div class="collapse-title w-full relative">
         <div class="absolute top-1 right-10">
             {{ if .Recipe.Time }}
                 <div class="badge badge-soft badge-accent">{{ .Recipe.Time }}</div>
@@ -17,68 +17,51 @@
 
     <div class="collapse-content">
         <section>
-            <section class="card-open relative {{ if .edit }}hidden{{ end }}">
+            <section class="card-stats relative {{ if .edit }}hidden{{ end }}">
+                <div class="stats w-full grid-cols-2">
+                    <div class="stat">
+                        <div class="stat-title">Dose</div>
+                        <div class="stat-value">{{ .Recipe.Dose }}g</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-title">Liquid Out</div>
+                        <div class="stat-value">{{ .Recipe.WeightOut }}g</div>
+                    </div>
+                </div>
+                <div class="stats w-full grid-cols-2 rounded-none">
+                    <div class="stat">
+                        <div class="stat-title">Declump Method</div>
+                        <div class="stat-value whitespace-wrap">{{ .Recipe.Declump }}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-title">RDT</div>
+                        <div class="stat-value">{{ or .Recipe.RDT "No" }} sprays</div>
+                    </div>
+                </div>
+                <div class="stats w-full grid-cols-2 rounded-none">
+                    <div class="stat">
+                        <div class="stat-title">Grinder</div>
+                        <div class="stat-value">{{ or .Recipe.Grinder }}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-title">Grind Size</div>
+                        <div class="stat-value">{{ or .Recipe.GrindSetting }}</div>
+                    </div>
+                </div>
                 <ul class="list">
-                    <li class="list-row">
-                        <div>
-                            <div>Dose</div>
-                            <div>{{ .Recipe.Dose }}g</div>
-                        </div>
-                    </li>
-                    <li class="list-row">
-                        <div>
-                            <div>Weight Out</div>
-                            <div>{{ .Recipe.WeightOut }}g</div>
-                        </div>
-                    </li>
-                    <li class="list-row">
-                        <div>
-                            <div>Drink Type</div>
-                            <div>{{ .Recipe.Drink }}g</div>
-                        </div>
-                    </li>
-                    <li class="list-row">
-                        <div>
-                            <div>Declump</div>
-                            <div>{{ .Recipe.Declump }}g</div>
-                        </div>
-                    </li>
-                    {{ if .Recipe.RDT }}
+                    {{ range .Recipe.Steps }}
                         <li class="list-row">
                             <div>
-                                <div>RDT</div>
-                                <div>{{ .Recipe.RDT }} sprays</div>
+                                <div class="flex justify-between">
+                                    <span>{{ .Title }}</span>
+                                    {{ if .Time }}
+                                        <span class="badge badge-soft">{{ .Time }}</span>
+                                    {{ end }}
+                                </div>
+                                <div>{{ .Instructions }}</div>
                             </div>
                         </li>
-                    {{ end}}
-                    <li class="list-row">
-                        <div>
-                            <div>Grind</div>
-                            <div>{{ .Recipe.GrindSetting }} ({{ .Recipe.Grinder }})</div>
-                        </div>
-                    </li>
-                    <li class="list-row">
-                        <div>
-                            <div>Steps</div>
-                            <ul class="list">
-                                {{ range .Recipe.Steps }}
-                                    <li class="list-row">
-                                        <div>
-                                            <div class="flex justify-between">
-                                                <span>{{ .Title }}</span>
-                                                {{ if .Time }}
-                                                    <span class="badge badge-soft">{{ .Time }}</span>
-                                                {{ end }}
-                                            </div>
-                                            <div>{{ .Instructions }}</div>
-                                        </div>
-                                    </li>
-                                {{ end }}
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="list-row justify-end">
-                    </li>
+                    {{ end }}
                 </ul>
                 <button class="btn btn-primary absolute top-0 right-0 edit-button">Edit</button>
             </section>
@@ -172,7 +155,7 @@
                     <span class="label w-40">Declump</span>
                     <select class="w-full" name="declump">
                         <option value="" {{ selected $declump "" }}>Pick a Declump Method</option>
-                        <option value="Blind Shaker" {{ selected $declump "Blind Shaker" }}>Blind Shaker</option>
+                        <option value="Shaker" {{ selected $declump "Shaker" }}>Shaker</option>
                         <option value="WDT" {{ selected $declump "WDT" }}>WDT</option>
                     </select>
                 </label>
@@ -210,7 +193,7 @@
                     <input type="number"
                         min="0"
                         step="0.1"
-                        name="grind_setting.int"
+                        name="grind_setting.float"
                         placeholder="Grind Size *"
                         value="{{ or .Form.GrindSetting .Recipe.GrindSetting }}"
                         class="w-full"
@@ -307,11 +290,11 @@
 
 <script type="module">
 const $card = $("#recipe_{{ $id }}")
-const $body = $card.querySelector(".card-open")
+const $stats = $card.querySelector(".card-stats")
 const $form = $card.querySelector("form")
 
 $card.querySelector(".edit-button").addEventListener("click", () => {
-    $body.classList.add("hidden")
+    $stats.classList.add("hidden")
     $card.querySelector('.card-actions').classList.add("hidden")
     $form.classList.remove("hidden")
 })

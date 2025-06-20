@@ -3,6 +3,8 @@ htmx.defineExtension('json-enc', (() => {
         switch (type) {
         case "int":
             return parseInt(v)
+        case "float":
+            return parseFloat(v)
         case "bool":
             return !!v
         default:
@@ -18,6 +20,9 @@ htmx.defineExtension('json-enc', (() => {
         if (key.endsWith(".int")) {
             type = "int"
             key = key.slice(0, -4)
+        } else if (key.endsWith(".float")) {
+            type = "float"
+            key = key.slice(0, -6)
         } else if (key.endsWith(".bool")) {
             type = "bool"
             key = key.slice(0, -5)

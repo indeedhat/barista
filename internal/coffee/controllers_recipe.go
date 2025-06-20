@@ -198,6 +198,7 @@ func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 
 func assignSteps(recipe *Recipe, steps []recipeStepRequest) {
 	recipe.Steps = RecipeSteps{}
+	recipe.Time = 0
 
 	for _, step := range steps {
 		if step.empty() {
