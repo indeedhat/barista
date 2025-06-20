@@ -4,7 +4,7 @@ Wierd coffe person companion app
 ## TODO
 - [x] update recipes
 - [ ] delete methods
-- [ ] fix toast styling
+- [x] fix toast styling
 - [x] ~~toggle close cards~~  
       using an acordian
 - [x] home page showing recipes
