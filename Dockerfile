@@ -13,16 +13,14 @@ RUN npx @tailwindcss/cli -i ./assets/tailwind/app.css -o ./assets/css/app.css
 
 ####
 # Build server
-FROM golang:1.21 AS go
+FROM golang:1.24 AS go
 
 WORKDIR /app
 
 COPY go.mod go.sum .
 RUN go mod download
 
-# Copy the rest of the Go source
 COPY . .
-
 COPY --from=tailwind /app/assets ./assets
 
 RUN CGO_ENABLED=0 go build -o barista ./cmd/barista/main.go
