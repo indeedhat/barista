@@ -2,7 +2,7 @@ htmx.defineExtension('json-enc', (() => {
     const parseValue = (v, type) => {
         switch (type) {
         case "int":
-            return ~~v
+            return parseInt(v)
         case "bool":
             return !!v
         default:
@@ -77,6 +77,7 @@ htmx.defineExtension('json-enc', (() => {
             xhr.overrideMimeType('text/json')
             let ob = {}
 
+            console.log(JSON.stringify(parameters))
             parameters.keys().forEach(buildObject(ob, parameters))
 
             return JSON.stringify(ob)

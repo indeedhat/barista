@@ -29,7 +29,7 @@
                     </li>
                     <li class="list-row">
                         <div>
-                            <div>Method</div>
+                            <div>Drink Type</div>
                             <div>{{ .Recipe.Drink }}g</div>
                         </div>
                     </li>
@@ -142,7 +142,7 @@
                 {{ $drink := or .Form.Drink .Recipe.Drink }}
                 <label class="input w-full">
                     <span class="label w-40">Drink Type *</span>
-                    <select class="w-full" name="declump">
+                    <select class="w-full" name="drink">
                         <option value="" {{ selected $drink "" }}>Pick a Drink TYpe</option>
                         <option value="Americano" {{ selected $drink "Americano" }}>Americano</option>
                         <option value="Cafetiere" {{ selected $drink "Cafetiere" }}>Cafetiere</option>

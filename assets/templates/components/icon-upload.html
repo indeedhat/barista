@@ -3,7 +3,10 @@
     <div class="relative h-full object-contain rounded-field border max-w-[50%] overflow-hidden"
         onclick="upload_icon_modal.showModal()"
     >
-        <img src="/{{ .icon }}" onerror="this.src = '/assets/img/coffee.png'" alt="coffee" />
+        <img src="/{{ or .Icon "assets/img/coffee.png" }}"
+            onerror="if (this.src != '/assets/img/coffee.png') this.src = '/assets/img/coffee.png'"
+            alt="coffee"
+        />
         <div class="absolute bottom-[-1px] right-[-1px] rounded-field bg-neutral border">
             <img src="/assets/img/edit.png" alt="{{ .alt }}" />
         </div>

@@ -107,7 +107,7 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 	assignSteps(&recipe, req.Steps)
 
 	coffee.Recipes = append(coffee.Recipes, recipe)
-	if err := c.repo.SaveCoffee(coffee); err != nil {
+	if err := c.repo.SaveRecipe(&recipe); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create recipe")
 		ui.RenderComponent(rw, comData)
 		return
@@ -181,13 +181,13 @@ func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 	recipe.Rating = req.Rating
 	assignSteps(recipe, req.Steps)
 
-	coffee.AddRecipe(*recipe)
-	if err := c.repo.SaveCoffee(coffee); err != nil {
+	if err := c.repo.SaveRecipe(recipe); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to save recipe")
 		ui.RenderComponent(rw, comData)
 		return
 	}
 
+	coffee.AddRecipe(*recipe)
 	comData["Recipe"] = recipe
 	comData["edit"] = false
 	comData.SetForm(upsertRecipeRequest{})

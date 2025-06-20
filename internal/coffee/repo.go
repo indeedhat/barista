@@ -1,6 +1,8 @@
 package coffee
 
 import (
+	"log"
+
 	"github.com/indeedhat/barista/internal/auth"
 	"gorm.io/gorm"
 )
@@ -21,6 +23,8 @@ type Repository interface {
 	FindFlavourProfiles([]uint) ([]FlavourProfile, error)
 	SaveFlavourProfile(*FlavourProfile) error
 	DeleteFlavourProfile(*FlavourProfile) error
+
+	SaveRecipe(*Recipe) error
 }
 
 type SqliteRepository struct {
@@ -129,13 +133,26 @@ func (r SqliteRepository) DeleteRoaster(roaster *Roaster) error {
 
 // SaveCoffe implements Repository.
 func (r SqliteRepository) SaveCoffee(coffee *Coffee) error {
+	var err error
+	tx := r.db.Begin()
+	defer func() {
+		if err != nil {
+			log.Print("rollback")
+			tx.Rollback()
+		} else {
+			log.Print("commit")
+			tx.Commit()
+		}
+	}()
+
 	if coffee.ID != 0 {
-		if err := r.db.Model(&coffee).Association("Flavours").Replace(coffee.Flavours); err != nil {
+		if err = tx.Model(&coffee).Association("Flavours").Replace(coffee.Flavours); err != nil {
 			return err
 		}
 	}
 
-	return r.db.Save(coffee).Error
+	err = tx.Save(coffee).Error
+	return err
 }
 
 // SaveFlavourProfile implements Repository.
@@ -146,6 +163,10 @@ func (r SqliteRepository) SaveFlavourProfile(flavour *FlavourProfile) error {
 // SaveRoaster implements Repository.
 func (r SqliteRepository) SaveRoaster(roaster *Roaster) error {
 	return r.db.Save(roaster).Error
+}
+
+func (r SqliteRepository) SaveRecipe(recipe *Recipe) error {
+	return r.db.Save(recipe).Error
 }
 
 var _ Repository = (*SqliteRepository)(nil)
