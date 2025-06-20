@@ -1,9 +1,12 @@
 {{ define "recipe-card" }}
 {{ $id := or .Recipe.ID (rand "r") }}
-<article class="collapse collapse-arrow border border-base-300 card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
+<article class="collapse border border-base-300 card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
     <input type="radio" name="recipe-card-c" />
     <div class="collapse-title w-full relative">
-        <div class="absolute top-1 right-10">
+        <div class="absolute top-2 right-2 flex flex-col gap-2 items-end">
+            {{ if .Recipe.Drink }}
+                <div class="badge">{{ .Recipe.Drink }}</div>
+            {{ end }}
             {{ if .Recipe.Time }}
                 <div class="badge badge-soft badge-accent">{{ .Recipe.Time }}</div>
             {{ end }}
@@ -12,7 +15,16 @@
             {{ end }}
         </div>
         <h2 class="card-title">{{ .Recipe.Name }}</h2>
-        <p>{{ .Coffee.Name }}</p>
+        <p>{{ html (or .Coffee.Name "&nbsp;") }}</p>
+        <div class="flex justify-between w-full">
+            <div class="rating">
+                <div class="mask mask-star" aria-label="1 star" {{ if eq .Recipe.Rating 1 }}aria-current="true"{{ end }}></div>
+                <div class="mask mask-star" aria-label="2 star" {{ if eq .Recipe.Rating 2 }}aria-current="true"{{ end }}></div>
+                <div class="mask mask-star" aria-label="3 star" {{ if eq .Recipe.Rating 3 }}aria-current="true"{{ end }}></div>
+                <div class="mask mask-star" aria-label="4 star" {{ if eq .Recipe.Rating 4 }}aria-current="true"{{ end }}></div>
+                <div class="mask mask-star" aria-label="5 star" {{ if eq .Recipe.Rating 5 }}aria-current="true"{{ end }}></div>
+            </div>
+        </div>
     </div>
 
     <div class="collapse-content">
@@ -48,11 +60,12 @@
                         <div class="stat-value">{{ or .Recipe.GrindSetting }}</div>
                     </div>
                 </div>
-                <ul class="list">
+                <h3>Steps</h3>
+                <ul class="list w-full">
                     {{ range .Recipe.Steps }}
-                        <li class="list-row">
+                        <li class="list-row w-full">
                             <div>
-                                <div class="flex justify-between">
+                                <div class="flex justify-between w-full">
                                     <span>{{ .Title }}</span>
                                     {{ if .Time }}
                                         <span class="badge badge-soft">{{ .Time }}</span>
@@ -65,18 +78,6 @@
                 </ul>
                 <button class="btn btn-primary absolute top-0 right-0 edit-button">Edit</button>
             </section>
-            <div class="card-actions justify-between {{ if .edit }}hidden{{ end }}">
-                {{ if .Recipe.Drink }}
-                    <div class="badge">{{ .Recipe.Drink }}</div>
-                {{ end }}
-                <div class="rating">
-                    <div class="mask mask-star" aria-label="1 star" {{ if eq .Recipe.Rating 1 }}aria-current="true"{{ end }}></div>
-                    <div class="mask mask-star" aria-label="2 star" {{ if eq .Recipe.Rating 2 }}aria-current="true"{{ end }}></div>
-                    <div class="mask mask-star" aria-label="3 star" {{ if eq .Recipe.Rating 3 }}aria-current="true"{{ end }}></div>
-                    <div class="mask mask-star" aria-label="4 star" {{ if eq .Recipe.Rating 4 }}aria-current="true"{{ end }}></div>
-                    <div class="mask mask-star" aria-label="5 star" {{ if eq .Recipe.Rating 5 }}aria-current="true"{{ end }}></div>
-                </div>
-            </div>
         </section>
 
         <form

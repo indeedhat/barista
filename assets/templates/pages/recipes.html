@@ -1,0 +1,16 @@
+{{ define "pages/recipes" }}
+<div class="breadcrumbs text-sm">
+  <ul>
+    <li><a href="/">Home (Recipes)</a></li>
+  </ul>
+</div>
+
+{{ range .Data.Recipes }}
+  {{ template "recipe-card" (map
+    "Recipe" .
+    "Coffee" .Coffee
+  ) }}
+{{ else }}
+<div class="alert alert-notice">No recipes to display</div>
+{{ end }}
+{{ end }}

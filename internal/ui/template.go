@@ -78,4 +78,7 @@ var templateFuncs = template.FuncMap{
 
 		return fmt.Sprint(n)
 	},
+	"html": func(s string) template.HTML {
+		return template.HTML(s)
+	},
 }

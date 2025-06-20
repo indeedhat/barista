@@ -83,7 +83,7 @@ func buildUiRoutes(
 				return
 			}
 
-			coffeeController.ViewCoffees(w, r)
+			coffeeController.ViewRecipes(w, r)
 		})
 
 		private.HandleFunc("GET /coffees", coffeeController.ViewCoffees)
@@ -94,6 +94,8 @@ func buildUiRoutes(
 		private.HandleFunc("GET /coffees/{id}/recipes", coffeeController.NewRecipe)
 		private.HandleFunc("POST /coffees/{id}/recipes", coffeeController.CreateRecipe)
 		private.HandleFunc("PUT /coffees/{coffee_id}/recipes/{recipe_id}", coffeeController.UpdateRecipe)
+
+		private.HandleFunc("GET /recipes", coffeeController.ViewRecipes)
 
 		private.HandleFunc("GET /flavours", coffeeController.ViewFlavours)
 		private.HandleFunc("POST /flavours", coffeeController.CreateFlavourProfile)

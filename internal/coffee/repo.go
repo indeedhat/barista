@@ -24,11 +24,16 @@ type Repository interface {
 	SaveFlavourProfile(*FlavourProfile) error
 	DeleteFlavourProfile(*FlavourProfile) error
 
+	IndexRecipesForUser(user *auth.User) []Recipe
 	SaveRecipe(*Recipe) error
 }
 
 type SqliteRepository struct {
 	db *gorm.DB
+}
+
+func NewSqliteRepo(db *gorm.DB) Repository {
+	return SqliteRepository{db}
 }
 
 // IndexFlavourProfiles implements Repository.
@@ -64,8 +69,16 @@ func (r SqliteRepository) IndexRoastersForUser(user *auth.User) []Roaster {
 	return roasters
 }
 
-func NewSqliteRepo(db *gorm.DB) Repository {
-	return SqliteRepository{db}
+// IndexRecipesForUser implements Repository.
+func (r SqliteRepository) IndexRecipesForUser(user *auth.User) []Recipe {
+	var recipes []Recipe
+
+	r.db.Preload("Coffee").
+		Where("user_id = ?", user.ID).
+		Order("name ASC").
+		Find(&recipes)
+
+	return recipes
 }
 
 // FindCoffee implements Repository.

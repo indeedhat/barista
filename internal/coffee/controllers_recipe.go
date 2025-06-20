@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
 )
@@ -33,6 +34,14 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 	ui.RenderComponent(rw, comData)
 }
 
+func (c Controller) ViewRecipes(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
+	pageData := ui.NewPageData("Recipes", "recipes", user)
+	pageData.Data["Recipes"] = c.repo.IndexRecipesForUser(user)
+
+	ui.RenderUser(rw, r, pageData)
+}
+
 type upsertRecipeRequest struct {
 	Name         string              `json:"name" validate:"required"`
 	Dose         float64             `json:"dose" validate:"required"`
@@ -60,6 +69,7 @@ func (s recipeStepRequest) empty() bool {
 }
 
 func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
 		"edit": true,
 	})
@@ -103,6 +113,8 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 		GrindSetting: req.GrindSetting,
 		Grinder:      req.Grinder,
 		Rating:       req.Rating,
+		User:         *user,
+		Coffee:       *coffee,
 	}
 	assignSteps(&recipe, req.Steps)
 
