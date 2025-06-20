@@ -2,9 +2,10 @@
 Wierd coffe person companion app
 
 ## TODO
-- [ ] update recipes
+- [x] update recipes
 - [ ] delete methods
-- [ ] toggle close cards
+- [x] ~~toggle close cards~~  
+      using an acordian
 - [ ] home page showing recipes
 - [ ] filter on recipes
 - [x] make drink type a select

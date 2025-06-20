@@ -1,19 +1,23 @@
 {{ define "recipe-card" }}
 {{ $id := or .Recipe.ID (rand "r") }}
-<article class="card card-side card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
-    <div class="card-body">
+<article class="collapse collapse-arrow border border-base-300 card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
+    <input type="radio" name="recipe-card-c" />
+    <div class="collapse-title">
+        <div class="absolute top-1 right-10">
+            {{ if .Recipe.Time }}
+                <div class="badge badge-soft badge-accent">{{ .Recipe.Time }}</div>
+            {{ end }}
+            {{ if .Recipe.Frozen }}
+                <div class="badge badge-soft badge-info">Frozen</div>
+            {{ end }}
+        </div>
+        <h2 class="card-title">{{ .Recipe.Name }}</h2>
+        <p>{{ .Coffee.Name }}</p>
+    </div>
+
+    <div class="collapse-content">
         <section>
-            <div class="absolute top-1 right-1">
-                {{ if .Recipe.Time }}
-                    <div class="badge badge-soft badge-accent">{{ .Recipe.Time }}</div>
-                {{ end }}
-                {{ if .Recipe.Frozen }}
-                    <div class="badge badge-soft badge-info">Frozen</div>
-                {{ end }}
-            </div>
-            <h2 class="card-title">{{ .Recipe.Name }}</h2>
-            <p>{{ .Coffee.Name }}</p>
-            <section class="card-open hidden relative">
+            <section class="card-open relative {{ if .edit }}hidden{{ end }}">
                 <ul class="list">
                     <li class="list-row">
                         <div>
@@ -306,17 +310,7 @@ const $card = $("#recipe_{{ $id }}")
 const $body = $card.querySelector(".card-open")
 const $form = $card.querySelector("form")
 
-const openBody = () => {
-    $body.classList.remove("hidden")
-    $card.removeEventListener("click", openBody)
-}
-{{ if not .edit }}
-    $card.addEventListener("click", openBody)
-{{ end }}
-
-console.log($card.querySelector(".edit-button"))
 $card.querySelector(".edit-button").addEventListener("click", () => {
-    console.log("here")
     $body.classList.add("hidden")
     $card.querySelector('.card-actions').classList.add("hidden")
     $form.classList.remove("hidden")
