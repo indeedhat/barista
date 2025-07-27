@@ -162,7 +162,7 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	if savePath != "" {
-		roaster.Icon = savePath
+		roaster.Icon = savePath[5:]
 		if err := c.repo.SaveRoaster(roaster); err != nil {
 			ui.Toast(rw, ui.Warning, "Failed to save image")
 			return

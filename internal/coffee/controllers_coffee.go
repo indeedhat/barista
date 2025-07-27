@@ -158,7 +158,7 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if savePath != "" {
-		coffee.Icon = savePath
+		coffee.Icon = savePath[5:]
 		if err := c.repo.SaveCoffee(coffee); err != nil {
 			ui.Toast(rw, ui.Warning, "Failed to save image")
 			return
