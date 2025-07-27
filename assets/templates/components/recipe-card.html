@@ -307,10 +307,11 @@
 const $card = $("#recipe_{{ $id }}")
 const $stats = $card.querySelector(".card-stats")
 const $form = $card.querySelector("form")
+console.log({ $form })
 
 $card.querySelector(".edit-button").addEventListener("click", () => {
     $stats.classList.add("hidden")
-    $card.querySelector('.card-actions').classList.add("hidden")
+    $card.querySelector('.edit-button').classList.add("hidden")
     $form.classList.remove("hidden")
 })
 
