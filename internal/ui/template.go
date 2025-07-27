@@ -3,14 +3,13 @@ package ui
 import (
 	"fmt"
 	"html/template"
-	"io/fs"
 	"log"
 	"math/rand"
 	"strings"
 	"time"
 
-	"github.com/indeedhat/barista/assets"
 	"github.com/indeedhat/barista/assets/templates"
+	"github.com/indeedhat/barista/internal/version"
 )
 
 func init() {
@@ -84,11 +83,6 @@ var templateFuncs = template.FuncMap{
 		return template.HTML(s)
 	},
 	"asset": func(f string) string {
-		stat, err := fs.Stat(assets.Public, f)
-		if err != nil {
-			return f
-		}
-
-		return fmt.Sprint(f, "?", stat.ModTime().Unix())
+		return f + "?" + version.BuildTime
 	},
 }

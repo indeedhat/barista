@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ./cmd/barista/main.go"
+  cmd = "CGO_ENABLED=0 go build -ldflags=\"-X 'github.com/indeedhat/barista/internal/version.Version=1234' -X 'github.com/indeedhat/barista/internal/version.BuildTime=$(date +%s)'\" -o ./tmp/main ./cmd/barista/main.go"
   delay = 1000
   exclude_dir = ["tmp", "vendor", "testdata"]
   exclude_file = []

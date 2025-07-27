@@ -31,3 +31,5 @@ jobs:
           context: .
           file: ./Dockerfile
           tags: ${{ env.REGISTRY_HOST }}/${{ env.IMAGE }}:${{ env.TAG }}
+          build-args: |
+            VERSION=${{ env.TAG }}
