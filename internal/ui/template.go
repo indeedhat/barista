@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"log"
 	"math/rand"
-	"os"
 	"strings"
 	"time"
 
@@ -90,6 +89,6 @@ var templateFuncs = template.FuncMap{
 			return f
 		}
 
-		return f + "?" + int(stat.ModTime().Unix())
-	}
+		return fmt.Sprint(f, "?", stat.ModTime().Unix())
+	},
 }
