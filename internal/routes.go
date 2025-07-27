@@ -16,7 +16,7 @@ func BuildRoutes(
 	authController auth.Controller,
 	authRepo auth.Repository,
 ) *http.ServeMux {
-	buildApiRoutes(r, coffeeController, authController, authRepo)
+	buildApiRoutes(r, authController, authRepo)
 	buildUiRoutes(r, coffeeController, authController, authRepo)
 
 	return r.ServerMux()
@@ -24,7 +24,6 @@ func BuildRoutes(
 
 func buildApiRoutes(
 	r server.Router,
-	coffeeController coffee.Controller,
 	authController auth.Controller,
 	authRepo auth.Repository,
 ) {
@@ -60,16 +59,22 @@ func buildUiRoutes(
 	authRepo auth.Repository,
 ) {
 	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Public))))
-	r.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("data/uploads"))))
 
 	guest := r.Group("", auth.IsGuestMiddleware(auth.UI, authRepo))
 	{
 		guest.HandleFunc("GET /login", authController.ViewLogin)
 		guest.HandleFunc("POST /login", authController.Login)
+
+		guest.HandleFunc("GET /register", authController.ViewRegister)
+		guest.HandleFunc("POST /register", authController.Register)
 	}
 
 	private := r.Group("", auth.IsLoggedInMiddleware(auth.UI, authRepo))
 	{
+		private.Handle("GET /uploads/",
+			http.StripPrefix("/uploads/", http.FileServer(http.Dir("data/uploads"))),
+		)
+
 		private.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path != "/" && r.URL.Path != "/home" {
 				ui.Toast(w, ui.Warning, "Not Found")

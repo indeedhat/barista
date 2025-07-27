@@ -1,0 +1,28 @@
+{{define "pages/register"}}
+<div class="card card-border bg-neutral" id="register-card">
+    <div class="card-body">
+        <h2 class="card-title">Register</h2>
+        <form
+            hx-target="#register-card"
+            hx-post="/register"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset">
+                <label class="label">Name *</label>
+                <input type="text" name="name" class="input" placeholder="Name..." value="{{ .Form.Name }}" />
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="label">Password *</label>
+                <input type="password" name="password" class="input" placeholder="Password..." />
+                {{ template "field-error" .FieldErrors.password }}
+
+                <label class="label">Confirm Password *</label>
+                <input type="password" name="password_conf" class="input" placeholder="Confirm Password..." />
+                {{ template "field-error" .FieldErrors.password_conf }}
+
+                <button type="submit" class="btn btn-primary">Register</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+{{end}}

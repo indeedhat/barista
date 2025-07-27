@@ -43,7 +43,7 @@ func (r SqliteRepository) CreateRootUser() error {
 // FindUserByLogin implements Repository.
 func (r SqliteRepository) FindUserByLogin(name string, password string) (*User, error) {
 	var authUser AuthUser
-	if err := r.db.Where("name = ?", name).First(&authUser).Error; err != nil {
+	if err := r.db.Where("name LIKE ?", name).First(&authUser).Error; err != nil {
 		return nil, err
 	}
 

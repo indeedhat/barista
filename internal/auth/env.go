@@ -19,3 +19,5 @@ const (
 	defaultRootUsername = "admin"
 	defaultRootPassword = "admin"
 )
+
+const envEnableRegister dotenv.Bool = "ENABLE_REGISTER"
