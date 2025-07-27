@@ -3,11 +3,14 @@ package ui
 import (
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
+	"github.com/indeedhat/barista/assets"
 	"github.com/indeedhat/barista/assets/templates"
 )
 
@@ -81,4 +84,12 @@ var templateFuncs = template.FuncMap{
 	"html": func(s string) template.HTML {
 		return template.HTML(s)
 	},
+	"asset": func(f string) string {
+		stat, err := fs.Stat(assets.Public, f)
+		if err != nil {
+			return f
+		}
+
+		return f + "?" + int(stat.ModTime().Unix())
+	}
 }

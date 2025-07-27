@@ -42,7 +42,6 @@ func buildApiRoutes(
 	self := r.Group("/api", auth.AdminOrSelfMiddleware(auth.API, authRepo))
 	{
 		self.HandleFunc("PATCH /user/{id}", authController.UpdateUser)
-		self.HandleFunc("POST /user/{id}/change-password", authController.ChangePassword)
 		self.HandleFunc("POST /user/{id}/force-logout", authController.ForceLogoutUser)
 	}
 
@@ -87,6 +86,9 @@ func buildUiRoutes(
 
 			coffeeController.ViewRecipes(w, r)
 		})
+
+		private.HandleFunc("GET /user/settings", authController.ViewSettings)
+		private.HandleFunc("POST /user/change-password", authController.ChangePassword)
 
 		private.HandleFunc("GET /coffees", coffeeController.ViewCoffees)
 		private.HandleFunc("POST /coffees", coffeeController.CreateCoffee)

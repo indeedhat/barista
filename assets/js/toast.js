@@ -2,7 +2,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         document.body.addEventListener("triggerToast", e => {
             const $toast = createElement(`
-                <div role="alert" class="alert">
+                <div role="alert" class="alert alert-${e.detail.level}">
                     ${createIcon(e.detail.level)}
                     <span>${e.detail.message}</span>
                 </div>
@@ -15,7 +15,6 @@
             })
 
             document.getElementById("toast-container").appendChild($toast)
-            $toast.classList.add(`alert-${e.detail.level}`)
         })
     });
 
@@ -40,7 +39,6 @@
     }
 
     const createElement = (html) => {
-        console.log(html)
         const $wrapper = document.createElement("template")
         $wrapper.className = "hidden"
         $wrapper.innerHTML = html

@@ -1,0 +1,39 @@
+{{ define "pages/user-settings" }}
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/settings">User Settings</a></li>
+    </ul>
+</div>
+
+<div class="card card-border bg-neutral w-full" id="password-card">
+    <div class="card-body">
+        <form
+            hx-post="/user/change-password"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-42">Existing Password *</span>
+                    <input type="password" name="existing" placeholder="Existing Password..." value="{{ .Form.Existing }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.existing }}
+
+                <label class="input w-full">
+                    <span class="label w-42">New Password *</span>
+                    <input type="password" name="password" placeholder="New Password..." value="{{ .Form.Password }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.password }}
+
+                <label class="input w-full">
+                    <span class="label w-42">Confirm Password *</span>
+                    <input type="password" name="password_conf" placeholder="Confirm Password..." value="{{ .Form.PasswordConfirm }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.password_conf }}
+
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+{{ end }}

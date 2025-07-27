@@ -8,7 +8,7 @@
         <script src="/assets/js/htmx.js"></script>
         <script src="/assets/js/htmx-json.js"></script>
         <script src="/assets/js/toast.js"></script>
-        <link rel="stylesheet" href="/assets/css/app.css?{{ unix }}" />
+        <link rel="stylesheet" href="/assets/css/app.css?3" />
         <script>var $ = (selector) => document.querySelector(selector)</script>
 
         <link rel="manifest" href="/assets/pwa/manifest.json">
@@ -72,7 +72,7 @@
                 <label for="nav" aria-label="close sidebar" class="drawer-overlay"></label>
                 <aside class="menu bg-base-200 text-base-content min-h-full p-4 gap-2">
                     <ul class="menu bg-base-300 rounded-field w-56">
-                        <li><span>Hello, {{ .User.Name }}</span></li>
+                        <li><a href="/user/settings" hx-target="main">Hello, {{ .User.Name }}</a></li>
                     </ul>
                     <ul class="menu bg-base-300 rounded-field w-56">
                         <li><a href="/" hx-target="main">Home</a></li>
