@@ -5,6 +5,7 @@ FROM node:18 AS tailwind
 WORKDIR /app
 
 COPY package.json .
+COPY tailwind.config.js .
 RUN npm i
 
 COPY assets/ ./assets
