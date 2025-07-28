@@ -6,6 +6,7 @@ import (
 	"github.com/indeedhat/barista/assets"
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/coffee"
+	"github.com/indeedhat/barista/internal/machine"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
 )
@@ -14,10 +15,11 @@ func BuildRoutes(
 	r server.Router,
 	coffeeController coffee.Controller,
 	authController auth.Controller,
+	machineController machine.Controller,
 	authRepo auth.Repository,
 ) *http.ServeMux {
 	buildApiRoutes(r, authController, authRepo)
-	buildUiRoutes(r, coffeeController, authController, authRepo)
+	buildUiRoutes(r, coffeeController, authController, machineController, authRepo)
 
 	return r.ServerMux()
 }
@@ -55,6 +57,7 @@ func buildUiRoutes(
 	r server.Router,
 	coffeeController coffee.Controller,
 	authController auth.Controller,
+	machineController machine.Controller,
 	authRepo auth.Repository,
 ) {
 	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Public))))
@@ -113,6 +116,18 @@ func buildUiRoutes(
 		private.HandleFunc("PUT /roasters/{id}", coffeeController.UpdateRoaster)
 		private.HandleFunc("POST /roasters/{id}/icon", coffeeController.UpdateRoasterImage)
 		private.HandleFunc("DELETE /roaster/{id}", coffeeController.DeleteRoaster)
+
+		private.HandleFunc("GET /machines", machineController.ViewMachines)
+		private.HandleFunc("POST /machines", machineController.CreateMachine)
+		private.HandleFunc("GET /machines/{id}", machineController.ViewMachine)
+		private.HandleFunc("PUT /machines/{id}", machineController.UpdateMachine)
+		private.HandleFunc("POST /machines/{id}/icon", machineController.UpdateMachineImage)
+		private.HandleFunc("DELETE /machines/{id}", machineController.DeleteMachine)
+
+		private.HandleFunc("GET /machines/{id}/baskets", machineController.NewBasket)
+		private.HandleFunc("POST /machines/{id}/baskets", machineController.CreateBasket)
+		private.HandleFunc("PUT /machines/{machine_id}/baskets/{basket_id}", machineController.UpdateBasket)
+		private.HandleFunc("DELETE /machines/{machine_id}/baskets/{basket_id}", machineController.DeleteMachine)
 
 		private.HandleFunc("POST /logout", authController.Logout)
 	}

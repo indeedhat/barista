@@ -1,0 +1,93 @@
+{{ define "basket-card" }}
+{{ $id := or .Machine.ID (rand "b") }}
+<article class="collapse border border-base-300 card-border bg-neutral w-full relative" id="basket_{{ $id }}">
+    <input type="radio" name="basket-card-c"
+        {{ if or .open .edit }}
+            checked="checked"
+        {{ end }}
+    />
+    <div class="collapse-title w-full relative">
+        <h2 class="card-title">{{ .Basket.Name }}</h2>
+        <p>{{ .Basket.Brand }} ({{ .Basket.Dose }})</p>
+    </div>
+
+    <div class="collapse-content">
+        <section>
+            <div class="flex justify-between">
+                <button class="btn btn-error delete-button"
+                    hx-delete="/machines/{{ .Machine.ID }}/baskets/{{ .Basket.ID }}"
+                    hx-confirm="Are you sure you want to delete this basket?"
+                    hx-target="#basket_{{ $id }}"
+                    hx-swap="outerHTML"
+                >
+                    Delete
+                </button>
+                <button class="btn btn-primary edit-button">Edit</button>
+            </div>
+        </section>
+
+        <form
+            {{ if not .edit }}
+                class="hidden"
+            {{ end }}
+            {{ if .Basket.ID }}
+                hx-put="/machines/{{ .Machine.ID }}/baskets/{{ .Basket.ID }}"
+            {{ else }}
+                hx-post="/machines/{{ .Machine.ID }}/recipes"
+            {{ end }}
+            hx-ext="json-enc"
+            hx-target="#recipe_{{ $id }}"
+        >
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-40">Name *</span>
+                    <input type="text"
+                        class="w-full"
+                        name="name"
+                        placeholder="Name *"
+                        value="{{ or .Form.Name .Basket.Name }}"
+                    />
+                </label>
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="input w-full">
+                    <span class="label w-40">Brand *</span>
+                    <input type="text"
+                        class="w-full"
+                        name="brand"
+                        placeholder="Brand *"
+                        value="{{ or .Form.Brand .Basket.Brand }}"
+                    />
+                </label>
+                {{ template "field-error" .FieldErrors.brand }}
+
+                <label class="input w-full">
+                    <span class="label w-50">Dose *</span>
+                    <input type="number"
+                        min="0"
+                        step="1"
+                        name="dose.int"
+                        placeholder="Dose *"
+                        value="{{ or .Form.Dose .Brand.Dose }}"
+                        class="w-full"
+                    />
+                    <span class="label w-12">g</span>
+                </label>
+                {{ template "field-error" .FieldErrors.dose }}
+
+                <button type="submit" class="btn btn-primary">Save Basket</button>
+            </fieldset>
+        </form>
+    </div>
+</article>
+
+<script type="module">
+const $card = $("#recipe_{{ $id }}")
+const $form = $card.querySelector("form")
+
+$card.querySelector(".edit-button").addEventListener("click", () => {
+    $card.querySelector('.edit-button').classList.add("hidden")
+    $form.classList.remove("hidden")
+})
+</script>
+{{ end }}

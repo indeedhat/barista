@@ -2,6 +2,7 @@ package coffee
 
 import (
 	"net/http"
+	"os/user"
 	"time"
 
 	"github.com/indeedhat/barista/internal/auth"
@@ -10,6 +11,7 @@ import (
 )
 
 func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
 		"Form":   map[string]struct{}{},
 		"Recipe": map[string]struct{}{},
@@ -25,7 +27,7 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
@@ -97,7 +99,7 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
@@ -135,6 +137,7 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
 		"edit": true,
 	})
@@ -149,7 +152,7 @@ func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(coffeeId)
+	coffee, err := c.repo.FindCoffee(coffeeId, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
@@ -190,6 +193,7 @@ func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) DeleteRecipe(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
 		"open": true,
 	})
@@ -204,7 +208,7 @@ func (c Controller) DeleteRecipe(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(coffeeId)
+	coffee, err := c.repo.FindCoffee(coffeeId, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return

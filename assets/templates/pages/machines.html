@@ -1,0 +1,51 @@
+{{ define "pages/machines" }}
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/machines">Machines</a></li>
+    </ul>
+</div>
+
+{{ if not .Data.open }}
+    <button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">
+        Create Roaster
+    </button>
+{{ end}}
+<div class="card card-border bg-neutral w-full {{ if not .Data.open }}hidden{{ end }}" id="create-card">
+    <div class="card-body">
+        <form
+            hx-post="/machines"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-22">Name *</span>
+                    <input type="text" name="name" placeholder="Name..." value="{{ .Form.Name }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="input w-full">
+                    <span class="label w-22">Brand *</span>
+                    <input type="text" name="brand" placeholder="Brand..." value="{{ .Form.Brand }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.brand }}
+
+                <label class="input w-full">
+                    <span class="label w-22">Model No *</span>
+                    <input type="text" name="model" placeholder="Model No..." value="{{ .Form.Model }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.model }}
+
+                <button type="submit" class="btn btn-primary">Create Machine</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<h2>Machines</h2>
+{{ range .Data.Machines }}
+    {{ template "machine-card" . }}
+{{ else }}
+    <div class="alert alert-notice">No machines to display</div>
+{{ end }}
+{{ end }}
