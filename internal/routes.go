@@ -5,8 +5,8 @@ import (
 
 	"github.com/indeedhat/barista/assets"
 	"github.com/indeedhat/barista/internal/auth"
+	"github.com/indeedhat/barista/internal/brewer"
 	"github.com/indeedhat/barista/internal/coffee"
-	"github.com/indeedhat/barista/internal/machine"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
 )
@@ -15,11 +15,11 @@ func BuildRoutes(
 	r server.Router,
 	coffeeController coffee.Controller,
 	authController auth.Controller,
-	machineController machine.Controller,
+	brewerController brewer.Controller,
 	authRepo auth.Repository,
 ) *http.ServeMux {
 	buildApiRoutes(r, authController, authRepo)
-	buildUiRoutes(r, coffeeController, authController, machineController, authRepo)
+	buildUiRoutes(r, coffeeController, authController, brewerController, authRepo)
 
 	return r.ServerMux()
 }
@@ -57,7 +57,7 @@ func buildUiRoutes(
 	r server.Router,
 	coffeeController coffee.Controller,
 	authController auth.Controller,
-	machineController machine.Controller,
+	brewerController brewer.Controller,
 	authRepo auth.Repository,
 ) {
 	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Public))))
@@ -117,17 +117,20 @@ func buildUiRoutes(
 		private.HandleFunc("POST /roasters/{id}/icon", coffeeController.UpdateRoasterImage)
 		private.HandleFunc("DELETE /roaster/{id}", coffeeController.DeleteRoaster)
 
-		private.HandleFunc("GET /machines", machineController.ViewMachines)
-		private.HandleFunc("POST /machines", machineController.CreateMachine)
-		private.HandleFunc("GET /machines/{id}", machineController.ViewMachine)
-		private.HandleFunc("PUT /machines/{id}", machineController.UpdateMachine)
-		private.HandleFunc("POST /machines/{id}/icon", machineController.UpdateMachineImage)
-		private.HandleFunc("DELETE /machines/{id}", machineController.DeleteMachine)
+		private.HandleFunc("GET /baskets/select", brewerController.BasketsSelect)
+		private.HandleFunc("GET /brewers/select", brewerController.BrewersSelect)
 
-		private.HandleFunc("GET /machines/{id}/baskets", machineController.NewBasket)
-		private.HandleFunc("POST /machines/{id}/baskets", machineController.CreateBasket)
-		private.HandleFunc("PUT /machines/{machine_id}/baskets/{basket_id}", machineController.UpdateBasket)
-		private.HandleFunc("DELETE /machines/{machine_id}/baskets/{basket_id}", machineController.DeleteMachine)
+		private.HandleFunc("GET /brewers", brewerController.ViewBrewers)
+		private.HandleFunc("POST /brewers", brewerController.CreateBrewer)
+		private.HandleFunc("GET /brewers/{id}", brewerController.ViewBrewer)
+		private.HandleFunc("PUT /brewers/{id}", brewerController.UpdateBrewer)
+		private.HandleFunc("POST /brewers/{id}/icon", brewerController.UpdateBrewerImage)
+		private.HandleFunc("DELETE /brewers/{id}", brewerController.DeleteBrewer)
+
+		private.HandleFunc("GET /brewers/{id}/baskets", brewerController.NewBasket)
+		private.HandleFunc("POST /brewers/{id}/baskets", brewerController.CreateBasket)
+		private.HandleFunc("PUT /brewers/{brewer_id}/baskets/{basket_id}", brewerController.UpdateBasket)
+		private.HandleFunc("DELETE /brewers/{brewer_id}/baskets/{basket_id}", brewerController.DeleteBasket)
 
 		private.HandleFunc("POST /logout", authController.Logout)
 	}

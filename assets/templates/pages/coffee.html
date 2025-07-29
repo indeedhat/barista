@@ -136,6 +136,7 @@
         {{ template "recipe-card" (map
             "Recipe" .
             "Coffee" $.Data.Coffee
+            "Drinks" $.Data.Drinks
         ) }}
     {{ else }}
     <div class="alert alert-notice">No Recipes yet</div>

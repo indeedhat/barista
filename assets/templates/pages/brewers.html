@@ -1,20 +1,20 @@
-{{ define "pages/machines" }}
+{{ define "pages/brewers" }}
 <div class="breadcrumbs text-sm">
     <ul>
         <li><a href="/">Home</a></li>
-        <li><a href="/machines">Machines</a></li>
+        <li><a href="/brewers">Brewers</a></li>
     </ul>
 </div>
 
 {{ if not .Data.open }}
     <button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">
-        Create Roaster
+        Create Brewer
     </button>
 {{ end}}
 <div class="card card-border bg-neutral w-full {{ if not .Data.open }}hidden{{ end }}" id="create-card">
     <div class="card-body">
         <form
-            hx-post="/machines"
+            hx-post="/brewers"
             hx-ext="json-enc"
         >
             <fieldset class="fieldset gap-4">
@@ -32,20 +32,31 @@
 
                 <label class="input w-full">
                     <span class="label w-22">Model No *</span>
-                    <input type="text" name="model" placeholder="Model No..." value="{{ .Form.Model }}" />
+                    <input type="text" name="model" placeholder="Model No..." value="{{ .Form.ModelNumber }}" />
                 </label>
                 {{ template "field-error" .FieldErrors.model }}
 
-                <button type="submit" class="btn btn-primary">Create Machine</button>
+                <label class="input w-full">
+                    <span class="label w-22">Brewer Type *</span>
+                    <select class="w-full" name="type">
+                        <option value="" {{ selected .Form.Type "" }}>Select Brewer Type</option>
+                        {{ range .Data.BrewerTypes }}
+                            <option value="{{ . }}" {{ selected . $.Form.Type }}>{{ . }}</option>
+                        {{ end }}
+                    </select>
+                </label>
+                {{ template "field-error" .FieldErrors.type }}
+
+                <button type="submit" class="btn btn-primary">Create Brewer</button>
             </fieldset>
         </form>
     </div>
 </div>
 
-<h2>Machines</h2>
-{{ range .Data.Machines }}
-    {{ template "machine-card" . }}
+<h2>Brewers</h2>
+{{ range .Data.Brewers }}
+    {{ template "brewer-card" . }}
 {{ else }}
-    <div class="alert alert-notice">No machines to display</div>
+    <div class="alert alert-notice">No brewers to display</div>
 {{ end }}
 {{ end }}

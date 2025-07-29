@@ -11,9 +11,9 @@ import (
 
 	"github.com/indeedhat/barista/internal"
 	"github.com/indeedhat/barista/internal/auth"
+	"github.com/indeedhat/barista/internal/brewer"
 	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/database"
-	"github.com/indeedhat/barista/internal/machine"
 	"github.com/indeedhat/barista/internal/server"
 	_ "github.com/indeedhat/dotenv/autoload"
 )
@@ -32,17 +32,17 @@ func main() {
 		coffee.FlavourProfile{},
 		coffee.Recipe{},
 		auth.User{},
-		machine.Machine{},
-		machine.Basket{},
+		brewer.Brewer{},
+		brewer.Basket{},
 	)
 
 	authRepo := auth.NewSqliteRepo(db)
 	coffeeRepo := coffee.NewSqliteRepo(db)
-	machineRepo := machine.NewSqliteRepo(db)
+	brewerRepo := brewer.NewSqliteRepo(db)
 
 	authController := auth.NewController(authRepo)
 	coffeeController := coffee.NewController(coffeeRepo)
-	machineController := machine.NewController(machineRepo)
+	brewerController := brewer.NewController(brewerRepo)
 
 	if firstRun {
 		if err := authRepo.CreateRootUser(); err != nil {
@@ -58,7 +58,7 @@ func main() {
 		router,
 		coffeeController,
 		authController,
-		machineController,
+		brewerController,
 		authRepo,
 	)
 

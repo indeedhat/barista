@@ -1,7 +1,7 @@
-{{ define "roaster-card"}}
+{{ define "brewer-card"}}
 <article class="card card-side card-border bg-neutral w-full" 
-    hx-get="/machines/{{ .ID }}"
-    hx-push-url="/machines/{{ .ID }}"
+    hx-get="/brewers/{{ .ID }}"
+    hx-push-url="/brewers/{{ .ID }}"
 >
     <figure>
         {{ if .Icon }}

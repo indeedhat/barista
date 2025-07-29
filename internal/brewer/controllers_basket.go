@@ -1,10 +1,12 @@
-package machine
+package brewer
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/server"
+	"github.com/indeedhat/barista/internal/types"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
@@ -19,19 +21,8 @@ func (c Controller) NewBasket(rw http.ResponseWriter, r *http.Request) {
 		ui.RenderComponent(rw, comData)
 	}()
 
-	id, err := server.PathID(r)
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Machine not found")
-		return
-	}
-
-	machine, err := c.repo.FindMachine(id, user.ID)
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Machine not found")
-		return
-	}
-
-	comData["Machine"] = machine
+	id, _ := server.PathID(r)
+	comData["Brewer"] = c.findEspressoBrewer(rw, user, id)
 }
 
 type upsertBasketRequest struct {
@@ -55,18 +46,12 @@ func (c Controller) CreateBasket(rw http.ResponseWriter, r *http.Request) {
 		ui.RenderComponent(rw, comData)
 	}()
 
-	id, err := server.PathID(r)
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Machine not found")
+	id, _ := server.PathID(r)
+	brewer := c.findEspressoBrewer(rw, user, id)
+	if brewer == nil {
 		return
 	}
-
-	machine, err := c.repo.FindMachine(id, user.ID)
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Machine not found")
-		return
-	}
-	comData["Machine"] = machine
+	comData["Brewer"] = brewer
 
 	var req upsertBasketRequest
 	if err := server.UnmarshalBody(r, &req, &comData); err != nil {
@@ -79,11 +64,11 @@ func (c Controller) CreateBasket(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	basket := Basket{}
+	basket := Basket{Brewer: *brewer}
 	req.apply(&basket)
 
-	machine.AddBasket(basket)
-	if err := c.repo.SaveMachine(machine); err != nil {
+	brewer.AddBasket(basket)
+	if err := c.repo.SaveBrewer(brewer); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to create basket")
 		return
 	}
@@ -104,21 +89,20 @@ func (c Controller) UpdateBasket(rw http.ResponseWriter, r *http.Request) {
 		ui.RenderComponent(rw, comData)
 	}()
 
-	machineId, _ := server.PathID(r, "machine_id")
+	brewerId, _ := server.PathID(r, "brewer_id")
 	basketId, _ := server.PathID(r, "basket_id")
-	if machineId == 0 || basketId == 0 {
+	if brewerId == 0 || basketId == 0 {
 		ui.Toast(rw, ui.Warning, "Basket not found")
 		return
 	}
 
-	machine, err := c.repo.FindMachine(machineId, user.ID)
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Machine not found")
+	brewer := c.findEspressoBrewer(rw, user, brewerId)
+	if brewer == nil {
 		return
 	}
-	comData["Machine"] = machine
+	comData["Brewer"] = brewer
 
-	basket := machine.Basket(basketId)
+	basket := brewer.Basket(basketId)
 	if basket == nil {
 		ui.Toast(rw, ui.Warning, "Basket not found")
 		return
@@ -137,9 +121,9 @@ func (c Controller) UpdateBasket(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	req.apply(basket)
-	machine.AddBasket(*basket)
+	brewer.AddBasket(*basket)
 
-	if err := c.repo.SaveMachine(machine); err != nil {
+	if err := c.repo.SaveBrewer(brewer); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to save basket")
 		return
 	}
@@ -152,6 +136,7 @@ func (c Controller) UpdateBasket(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) DeleteBasket(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("basket-card", ui.ComponentData{
 		"open": true,
 	})
@@ -159,34 +144,81 @@ func (c Controller) DeleteBasket(rw http.ResponseWriter, r *http.Request) {
 		ui.RenderComponent(rw, comData)
 	}()
 
-	machineId, _ := server.PathID(r, "machine_id")
+	brewerId, _ := server.PathID(r, "brewer_id")
 	basketId, _ := server.PathID(r, "basket_id")
-	if machineId == 0 || basketId == 0 {
+	if brewerId == 0 || basketId == 0 {
 		ui.Toast(rw, ui.Warning, "Basket not found")
 		return
 	}
 
-	machine, err := c.repo.FindMachine(machineId)
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Machine not found")
+	brewer := c.findEspressoBrewer(rw, user, brewerId)
+	if brewer == nil {
 		return
 	}
-	comData["Machine"] = machine
+	comData["Brewer"] = brewer
 
-	basket := machine.Basket(basketId)
+	basket := brewer.Basket(basketId)
 	if basket == nil {
 		ui.Toast(rw, ui.Warning, "Basket not found")
 		return
 	}
 	comData["Basket"] = basket
 
-	machine.RemoveBasket(*basket)
+	brewer.RemoveBasket(*basket)
 
-	if err := c.repo.SaveMachine(machine); err != nil {
+	if err := c.repo.SaveBrewer(brewer); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to delete basket")
 		return
 	}
 
 	comData["Component"] = ""
 	ui.Toast(rw, ui.Success, "Basket deleted")
+}
+
+func (c Controller) BasketsSelect(rw http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get("brewer.int")
+	if idStr == "" {
+		rw.WriteHeader(http.StatusOK)
+		return
+	}
+
+	user := r.Context().Value("user").(*auth.User)
+	brewerId, _ := strconv.Atoi(idStr)
+	brewer, err := c.repo.FindBrewer(uint(brewerId), user.ID)
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Brewer not found")
+		return
+	}
+	if brewer.Type != "Espresso" {
+		return
+	}
+
+	comData := ui.NewComponentData("baskets-select", ui.ComponentData{
+		"value": r.URL.Query().Get("value"),
+	})
+	defer func() {
+		ui.RenderComponent(rw, comData)
+	}()
+
+	comData["Baskets"] = brewer.Baskets
+}
+
+func (c Controller) findEspressoBrewer(rw http.ResponseWriter, user *auth.User, id uint) *Brewer {
+	if id == 0 {
+		ui.Toast(rw, ui.Warning, "Brewer not found")
+		return nil
+	}
+
+	brewer, err := c.repo.FindBrewer(id, user.ID)
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Brewer not found")
+		return nil
+	}
+
+	if brewer.Type != types.BrewerEspresso {
+		ui.Toast(rw, ui.Warning, "Only espresso machines can have baskets")
+		return nil
+	}
+
+	return brewer
 }

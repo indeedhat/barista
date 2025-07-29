@@ -57,13 +57,27 @@
                 <div class="stats w-full grid-cols-2 rounded-none">
                     <div class="stat">
                         <div class="stat-title">Grinder</div>
-                        <div class="stat-value">{{ or .Recipe.Grinder }}</div>
+                        <div class="stat-value">{{ .Recipe.Grinder }}</div>
                     </div>
                     <div class="stat">
                         <div class="stat-title">Grind Size</div>
-                        <div class="stat-value">{{ or .Recipe.GrindSetting }}</div>
+                        <div class="stat-value">{{ .Recipe.GrindSetting }}</div>
                     </div>
                 </div>
+                {{ if .Recipe.Brewer }}
+                    <div class="stats w-full grid-cols-2 rounded-none">
+                        <div class="stat">
+                            <div class="stat-title">Brewer</div>
+                            <div class="stat-value">{{ .Recipe.Brewer.Name }}</div>
+                        </div>
+                        {{ if eq .Recipe.Brewer.Type "Espresso" }}
+                            <div class="stat">
+                                <div class="stat-title">Basket</div>
+                                <div class="stat-value">{{ .Recipe.Basket.Name }}</div>
+                            </div>
+                        {{ end }}
+                    </div>
+                {{ end }}
                 <h3>Steps</h3>
                 <ul class="list w-full">
                     {{ range .Recipe.Steps }}
@@ -144,26 +158,38 @@
                 {{ $drink := or .Form.Drink .Recipe.Drink }}
                 <label class="input w-full">
                     <span class="label w-40">Drink Type *</span>
-                    <select class="w-full" name="drink">
-                        <option value="" {{ selected $drink "" }}>Pick a Drink TYpe</option>
-                        <option value="Americano" {{ selected $drink "Americano" }}>Americano</option>
-                        <option value="Cafetiere" {{ selected $drink "Cafetiere" }}>Cafetiere</option>
-                        <option value="Cappuccino" {{ selected $drink "Cappuccino" }}>Cappuccino</option>
-                        <option value="Cortado" {{ selected $drink "Cortado" }}>Cortado</option>
-                        <option value="Doppio" {{ selected $drink "Doppio" }}>Doppio</option>
-                        <option value="Espresso" {{ selected $drink "Espresso" }}>Espresso</option>
-                        <option value="Flat White" {{ selected $drink "Flat White" }}>Flat White</option>
-                        <option value="Latte" {{ selected $drink "Latte" }}>Latte</option>
-                        <option value="Lungo" {{ selected $drink "Lungo" }}>Lungo</option>
-                        <option value="Macchiato" {{ selected $drink "Macchiato" }}>Macchiato</option>
-                        <option value="Mocha Pot" {{ selected $drink "Mocha Pot" }}>Mocha Pot</option>
-                        <option value="Mocha" {{ selected $drink "Mocha" }}>Mocha</option>
-                        <option value="Pourover" {{ selected $drink "Pourover" }}>Pourover</option>
-                        <option value="Ristretto" {{ selected $drink "Ristretto" }}>Ristretto</option>
-                        <option value="Other" {{ selected $drink "Other" }}>Other</option>
+                    <select class="w-full"
+                        name="drink"
+                        hx-get="/brewers/select"
+                        hx-trigger="change"
+                        hx-target="next .brewer-container"
+                        hx-ext="qs-clean"
+                    >
+                        <option value="" {{ selected $drink "" }}>Pick a Drink Type</option>
+                        {{ range .Drinks }}
+                            <option value="{{ . }}" {{ selected $drink . }}>{{ . }}</option>
+                        {{ end }}
                     </select>
                 </label>
                 {{ template "field-error" .FieldErrors.drink }}
+
+                {{ $brewer := or .Form.Brewer .Recipe.BrewerID }}
+                <div class="brewer-container empty:hidden"
+                    {{ if $brewer }}
+                        hx-get="/brewers/select?drink={{ $drink }}&value={{ $brewer }}"
+                        hx-trigger="load"
+                        hx-target="this"
+                    {{ end }}
+                ></div>
+
+                {{ $basket := or .Form.Basket .Recipe.BasketID }}
+                <div class="basket-container empty:hidden"
+                    {{ if $basket }}
+                        hx-get="/baskets/select?brewer.int={{ $brewer }}&value={{ $basket }}"
+                        hx-trigger="load"
+                        hx-target="this"
+                    {{ end }}
+                ></div>
 
                 {{ $declump := or .Form.Declump .Recipe.Declump }}
                 <label class="input w-full">

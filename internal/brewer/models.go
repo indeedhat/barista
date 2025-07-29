@@ -1,17 +1,19 @@
-package machine
+package brewer
 
 import (
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/database/model"
+	"github.com/indeedhat/barista/internal/types"
 )
 
-type Machine struct {
+type Brewer struct {
 	model.SoftDelete
 
 	Name        string
 	Brand       string
 	ModelNumber string
 	Icon        string
+	Type        types.BrewerType
 
 	UserID uint
 	User   auth.User
@@ -19,7 +21,7 @@ type Machine struct {
 	Baskets []Basket
 }
 
-func (m Machine) Basket(id uint) *Basket {
+func (m *Brewer) Basket(id uint) *Basket {
 	for _, r := range m.Baskets {
 		if r.ID == id {
 			return &r
@@ -29,7 +31,7 @@ func (m Machine) Basket(id uint) *Basket {
 	return nil
 }
 
-func (m Machine) AddBasket(basket Basket) {
+func (m *Brewer) AddBasket(basket Basket) {
 	for i, r := range m.Baskets {
 		if r.ID == basket.ID {
 			m.Baskets[i] = basket
@@ -40,7 +42,7 @@ func (m Machine) AddBasket(basket Basket) {
 	m.Baskets = append(m.Baskets, basket)
 }
 
-func (m Machine) RemoveBasket(basket Basket) {
+func (m *Brewer) RemoveBasket(basket Basket) {
 	for i, r := range m.Baskets {
 		if r.ID == basket.ID {
 			m.Baskets = append(m.Baskets[:i], m.Baskets[i+1:]...)
@@ -55,4 +57,7 @@ type Basket struct {
 	Dose  float64
 	Brand string
 	Name  string
+
+	BrewerID uint
+	Brewer   Brewer `gorm:"foreignKey:BrewerID"`
 }

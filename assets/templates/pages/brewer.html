@@ -1,0 +1,75 @@
+{{ define "pages/brewer" }}
+<div class="breadcrumbs text-sm">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/brewers">Brewers</a></li>
+        <li><a href="/brewers/{{ .Data.Brewer.ID }}">{{ .Data.Brewer.Name }}</a></li>
+    </ul>
+</div>
+
+<div class="card card-border bg-neutral w-full" id="update-card">
+    <div class="card-body">
+        {{ template "icon-upload" (map
+            "action" ( print "/brewers/" .Data.Brewer.ID "/icon" )
+            "icon" .Data.Brewers.Icon
+            "alt" .Data.Brewers.Name
+        ) }}
+
+        <form
+            hx-put="/brewers/{{ .Data.Brewer.ID }}"
+            hx-ext="json-enc"
+        >
+            <fieldset class="fieldset gap-4">
+            <fieldset class="fieldset gap-4">
+                <label class="input w-full">
+                    <span class="label w-22">Name *</span>
+                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.Name .Data.Brewer.Name }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.name }}
+
+                <label class="input w-full">
+                    <span class="label w-22">Brand *</span>
+                    <input type="text" name="brand" placeholder="Brand..." value="{{ or .Form.Brand .Data.Brewer.Brand }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.brand }}
+
+                <label class="input w-full">
+                    <span class="label w-22">Model No *</span>
+                    <input type="text" name="model" placeholder="Model No..." value="{{ or .Form.ModelNumber .Data.Brewer.ModelNumber }}" />
+                </label>
+                {{ template "field-error" .FieldErrors.model }}
+
+                <label class="input w-full">
+                    <span class="label w-22">Type</span>
+                    <input type="text" value="{{ .Data.Brewer.Type }}" disabled />
+                </label>
+
+                <button type="submit" class="btn btn-primary">Save Brewer</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+{{ if eq .Data.Brewer.Type "Espresso" }}
+    <div class="flex justify-between">
+        <h2>Baskets</h2>
+        <button class="btn btn-primary"
+            hx-get="/brewers/{{ .Data.Brewer.ID }}/baskets"
+            hx-target="#baskets"
+            hx-swap="afterbegin"
+        >
+            Add
+        </button>
+    </div>
+    <section id="baskets" class="flex flex-col gap-2">
+        {{ range .Data.Brewer.Baskets }}
+            {{ template "basket-card" (map
+                "Basket" .
+                "Brewer" $.Data.Brewer
+            ) }}
+        {{ else }}
+            <div class="alert alert-notice">No Baskets yet</div>
+        {{ end }}
+    </section>
+{{ end }}
+{{ end }}

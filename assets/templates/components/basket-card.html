@@ -1,5 +1,5 @@
 {{ define "basket-card" }}
-{{ $id := or .Machine.ID (rand "b") }}
+{{ $id := or .Basket.ID (rand "b") }}
 <article class="collapse border border-base-300 card-border bg-neutral w-full relative" id="basket_{{ $id }}">
     <input type="radio" name="basket-card-c"
         {{ if or .open .edit }}
@@ -15,7 +15,7 @@
         <section>
             <div class="flex justify-between">
                 <button class="btn btn-error delete-button"
-                    hx-delete="/machines/{{ .Machine.ID }}/baskets/{{ .Basket.ID }}"
+                    hx-delete="/brewers/{{ .Brewer.ID }}/baskets/{{ .Basket.ID }}"
                     hx-confirm="Are you sure you want to delete this basket?"
                     hx-target="#basket_{{ $id }}"
                     hx-swap="outerHTML"
@@ -31,12 +31,12 @@
                 class="hidden"
             {{ end }}
             {{ if .Basket.ID }}
-                hx-put="/machines/{{ .Machine.ID }}/baskets/{{ .Basket.ID }}"
+                hx-put="/brewers/{{ .Brewer.ID }}/baskets/{{ .Basket.ID }}"
             {{ else }}
-                hx-post="/machines/{{ .Machine.ID }}/recipes"
+                hx-post="/brewers/{{ .Brewer.ID }}/baskets"
             {{ end }}
             hx-ext="json-enc"
-            hx-target="#recipe_{{ $id }}"
+            hx-target="#basket_{{ $id }}"
         >
             <fieldset class="fieldset gap-4">
                 <label class="input w-full">
@@ -68,7 +68,7 @@
                         step="1"
                         name="dose.int"
                         placeholder="Dose *"
-                        value="{{ or .Form.Dose .Brand.Dose }}"
+                        value="{{ or .Form.Dose .Basket.Dose }}"
                         class="w-full"
                     />
                     <span class="label w-12">g</span>
@@ -82,7 +82,7 @@
 </article>
 
 <script type="module">
-const $card = $("#recipe_{{ $id }}")
+const $card = $("#basket_{{ $id }}")
 const $form = $card.querySelector("form")
 
 $card.querySelector(".edit-button").addEventListener("click", () => {
