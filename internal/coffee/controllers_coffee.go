@@ -6,6 +6,7 @@ import (
 
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/server"
+	"github.com/indeedhat/barista/internal/types"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
@@ -17,6 +18,7 @@ func (c Controller) ViewCoffees(rw http.ResponseWriter, r *http.Request) {
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Data["Drinks"] = types.Drinks
 
 	ui.RenderUser(rw, r, pageData)
 }
@@ -47,6 +49,7 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Data["Drinks"] = types.Drinks
 	pageData.Data["open"] = true
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
@@ -115,6 +118,7 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 
 	pageData := ui.NewPageData("Coffee", "coffee", user)
 	pageData.Data["Coffee"] = coffee
+	pageData.Data["Drinks"] = types.Drinks
 	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
 	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
 	pageData.Form = upsertCoffeeRequest{
@@ -171,6 +175,7 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("Coffee", "coffee", user)
+	pageData.Data["Drinks"] = types.Drinks
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()

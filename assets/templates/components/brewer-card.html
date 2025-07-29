@@ -1,0 +1,42 @@
+{{ define "brewer-card"}}
+<article class="card card-side card-border bg-neutral w-full" 
+    hx-get="/brewers/{{ .ID }}"
+    hx-push-url="/brewers/{{ .ID }}"
+>
+    <figure>
+        {{ if .Icon }}
+            <img src="/{{ .Icon }}"
+                onerror="if (this.src == '/assets/img/coffee.png') return;
+                    this.src = '/assets/img/coffee.png';
+                    this.classList.remove('object-fit');
+                    this.classList.add('object-contain');
+                "
+                alt="roaster"
+                class="h-full object-fit w-[100px] rounded-box"
+            />
+        {{ else }}
+            <img src="/assets/img/coffee.png"
+                alt="roaster"
+                class="h-full object-contain w-[100px] rounded-box"
+            />
+        {{ end }}
+    </figure>
+    <div class="card-body">
+        <div class="card-title">{{ .Name }}</div>
+        <ul class="list">
+            <li class="list-row">
+                <div>
+                    <div>{{ .Brand }}</div>
+                    <div class="text-xs font-semibold opacity-60">BRAND</div>
+                </div>
+            </li>
+            <li class="list-row">
+                <div>
+                    <div>{{ .ModelNumber }}</div>
+                    <div class="text-xs font-semibold opacity-60">MODEL</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</article>
+{{ end }}

@@ -1,0 +1,12 @@
+{{ define "baskets-select" }}
+<label class="input w-full">
+    <span class="label w-40">Basket</span>
+    <select class="w-full" name="basket.int">
+        <option value="" {{ selected .value "" }}>Pick a Basket</option>
+        {{ range .Baskets }}
+            <option value="{{ .ID }}" {{ selected $.value .ID }}>{{ .Name }}</option>
+        {{ end }}
+    </select>
+</label>
+{{ template "field-error" .error }}
+{{ end }}

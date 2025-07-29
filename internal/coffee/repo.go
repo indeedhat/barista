@@ -73,6 +73,8 @@ func (r SqliteRepository) IndexRecipesForUser(user *auth.User) []Recipe {
 	var recipes []Recipe
 
 	r.db.Preload("Coffee").
+		Preload("Brewer").
+		Preload("Basket").
 		Where("user_id = ?", user.ID).
 		Order("name ASC").
 		Find(&recipes)

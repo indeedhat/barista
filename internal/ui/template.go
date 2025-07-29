@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/indeedhat/barista/assets/templates"
+	"github.com/indeedhat/barista/internal/types"
 	"github.com/indeedhat/barista/internal/version"
 )
 
@@ -84,5 +85,8 @@ var templateFuncs = template.FuncMap{
 	},
 	"asset": func(f string) string {
 		return f + "?" + version.BuildTime
+	},
+	"is_espresso": func(d types.DrinkType) bool {
+		return d.IsEspressoBased()
 	},
 }

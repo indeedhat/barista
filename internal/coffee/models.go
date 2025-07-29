@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/indeedhat/barista/internal/auth"
+	"github.com/indeedhat/barista/internal/brewer"
 	"github.com/indeedhat/barista/internal/database/model"
 )
 
@@ -101,6 +102,11 @@ type Recipe struct {
 	Grinder      string
 	Steps        RecipeSteps
 	Rating       uint8
+
+	BrewerID *uint
+	Brewer   *brewer.Brewer
+	BasketID *uint
+	Basket   *brewer.Basket
 
 	CoffeeID uint
 	Coffee   Coffee `gorm:"foreignKey:CoffeeID"`

@@ -1,0 +1,18 @@
+{{ define "brewers-select" }}
+<label class="input w-full">
+    <span class="label w-40">Brewer</span>
+    <select class="w-full"
+        name="brewer.int"
+        hx-get="/baskets/select"
+        hx-trigger="change"
+        hx-target="next .basket-container"
+        hx-ext="qs-clean"
+    >
+        <option value="" {{ selected .value "" }}>Pick a Brewer</option>
+        {{ range .Brewers }}
+            <option value="{{ .ID }}" {{ selected $.value .ID }}>{{ .Name }} ({{ .Brand }} {{ .ModelNumber }})</option>
+        {{ end }}
+    </select>
+</label>
+{{ template "field-error" .error }}
+{{ end }}

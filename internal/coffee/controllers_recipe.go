@@ -6,13 +6,16 @@ import (
 
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/server"
+	"github.com/indeedhat/barista/internal/types"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
 func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
 		"Form":   map[string]struct{}{},
 		"Recipe": map[string]struct{}{},
+		"Drinks": types.Drinks,
 		"edit":   true,
 	})
 	defer func() {
@@ -25,7 +28,7 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
@@ -38,6 +41,7 @@ func (c Controller) ViewRecipes(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("Recipes", "recipes", user)
 	pageData.Data["Recipes"] = c.repo.IndexRecipesForUser(user)
+	pageData.Data["Drinks"] = types.Drinks
 
 	ui.RenderUser(rw, r, pageData)
 }
@@ -54,6 +58,8 @@ type upsertRecipeRequest struct {
 	Grinder      string              `json:"grinder" validate:"required"`
 	Steps        []recipeStepRequest `json:"steps"`
 	Rating       uint8               `json:"rating"`
+	Basket       *uint               `json:"basket"`
+	Brewer       *uint               `json:"brewer"`
 }
 
 func (r upsertRecipeRequest) apply(recipe *Recipe) {
@@ -67,6 +73,9 @@ func (r upsertRecipeRequest) apply(recipe *Recipe) {
 	recipe.GrindSetting = r.GrindSetting
 	recipe.Grinder = r.Grinder
 	recipe.Rating = r.Rating
+	recipe.BrewerID = r.Brewer
+	recipe.BasketID = r.Basket
+
 	assignSteps(recipe, r.Steps)
 }
 
@@ -85,7 +94,8 @@ func (s recipeStepRequest) empty() bool {
 func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
-		"edit": true,
+		"edit":   true,
+		"Drinks": types.Drinks,
 	})
 	defer func() {
 		ui.RenderComponent(rw, comData)
@@ -97,7 +107,7 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(id)
+	coffee, err := c.repo.FindCoffee(id, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
@@ -112,6 +122,11 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 
 	if err := server.ValidateRequest(req, &comData); err != nil {
 		ui.Toast(rw, ui.Warning, "Bad request")
+		return
+	}
+
+	if err != nil {
+		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
 	}
 
@@ -135,8 +150,10 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
-		"edit": true,
+		"edit":   true,
+		"Drinks": types.Drinks,
 	})
 	defer func() {
 		ui.RenderComponent(rw, comData)
@@ -149,7 +166,7 @@ func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(coffeeId)
+	coffee, err := c.repo.FindCoffee(coffeeId, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
@@ -190,8 +207,10 @@ func (c Controller) UpdateRecipe(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) DeleteRecipe(rw http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("recipe-card", ui.ComponentData{
-		"open": true,
+		"open":   true,
+		"Drinks": types.Drinks,
 	})
 	defer func() {
 		ui.RenderComponent(rw, comData)
@@ -204,7 +223,7 @@ func (c Controller) DeleteRecipe(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	coffee, err := c.repo.FindCoffee(coffeeId)
+	coffee, err := c.repo.FindCoffee(coffeeId, user.ID)
 	if err != nil {
 		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
