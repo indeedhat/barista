@@ -20,4 +20,4 @@ const (
 	defaultRootPassword = "admin"
 )
 
-const envEnableRegister dotenv.Bool = "ENABLE_REGISTER"
+const EnvEnableRegister dotenv.Bool = "ENABLE_REGISTER"

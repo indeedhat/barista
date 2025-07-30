@@ -1,4 +1,4 @@
-package auth
+package auth_controllers
 
 import (
 	"errors"
@@ -7,16 +7,6 @@ import (
 
 	"github.com/indeedhat/barista/internal/server"
 )
-
-const sessionCookie = "bs"
-
-type Controller struct {
-	repo Repository
-}
-
-func NewController(repo Repository) Controller {
-	return Controller{repo}
-}
 
 type createSuccessResponse struct {
 	ID uint `json:"id"`

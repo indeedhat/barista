@@ -1,14 +1,15 @@
-package auth
+package auth_controllers
 
 import (
 	"net/http"
 
+	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
 func (c Controller) ViewSettings(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*User)
+	user := r.Context().Value("user").(*auth.User)
 	ui.RenderUser(rw, r, ui.NewPageData("User Settings", "user-settings", user))
 }
 
@@ -19,7 +20,7 @@ type changePasswordRequest struct {
 }
 
 func (c Controller) ChangePassword(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*User)
+	user := r.Context().Value("user").(*auth.User)
 	pageData := ui.NewPageData("User Settings", "user-settings", user)
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
@@ -50,13 +51,6 @@ func (c Controller) ChangePassword(rw http.ResponseWriter, r *http.Request) {
 		pageData.FieldErrors["password"] = append(pageData.FieldErrors["password"], "Passwords do not match")
 		pageData.FieldErrors["password_conf"] = append(pageData.FieldErrors["password_conf"], "Passwords do not match")
 		ui.Toast(rw, ui.Warning, "Change Password Failed")
-		return
-	}
-
-	hash, err := hashPassword(req.Password)
-	if err != nil {
-		server.WriteResponse(rw, http.StatusInternalServerError, nil)
-		ui.Toast(rw, ui.Warning, "Server Error, Please try again")
 		return
 	}
 

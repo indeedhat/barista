@@ -1,4 +1,4 @@
-package coffee
+package coffee_controllers
 
 import (
 	"fmt"
