@@ -25,12 +25,18 @@ type createSuccessResponse struct {
 	ID uint `json:"id"`
 }
 
+type flavoursData struct {
+	ui.PageData
+	Flavours []FlavourProfile
+	Open     bool
+}
+
 func (c Controller) ViewFlavours(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
+	pageData := flavoursData{PageData: ui.NewPageData("Flavours", "flavours", user)}
 
-	pageData := ui.NewPageData("Flavours", "flavours", user)
 	pageData.Form = createFlavourProfileRequest{}
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
 
 	ui.RenderUser(rw, r, pageData)
 }
@@ -41,9 +47,9 @@ type createFlavourProfileRequest struct {
 
 func (c Controller) CreateFlavourProfile(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Flavours", "flavours", user)
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-	pageData.Data["open"] = true
+	pageData := flavoursData{PageData: ui.NewPageData("Flavours", "flavours", user)}
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
+	pageData.Open = true
 
 	var req createFlavourProfileRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
@@ -68,8 +74,8 @@ func (c Controller) CreateFlavourProfile(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-	pageData.Data["open"] = false
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
+	pageData.Open = false
 	pageData.Form = createFlavourProfileRequest{}
 
 	ui.Toast(rw, ui.Success, "Flavour created")

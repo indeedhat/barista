@@ -12,6 +12,7 @@ import (
 	"github.com/indeedhat/barista/internal"
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/brewer"
+	"github.com/indeedhat/barista/internal/brewer/controllers"
 	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/database"
 	"github.com/indeedhat/barista/internal/server"
@@ -42,7 +43,7 @@ func main() {
 
 	authController := auth.NewController(authRepo)
 	coffeeController := coffee.NewController(coffeeRepo)
-	brewerController := brewer.NewController(brewerRepo)
+	brewerController := brewer_controllers.New(brewerRepo)
 
 	if firstRun {
 		if err := authRepo.CreateRootUser(); err != nil {

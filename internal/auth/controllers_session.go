@@ -20,17 +20,19 @@ func (c Controller) Logout(rw http.ResponseWriter, r *http.Request) {
 	ui.Redirect(rw, "/login")
 }
 
+type loginPageData struct {
+	ui.PageData
+	Register bool
+}
+
 func (c Controller) ViewLogin(rw http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("register") != "" {
 		ui.Toast(rw, ui.Success, "User Created, you may now login")
 	}
 
-	ui.RenderGuest(rw, r, ui.PageData{
-		Title: "Login",
-		Page:  "pages/login",
-		Data: map[string]any{
-			"register": envEnableRegister.Get(),
-		},
+	ui.RenderGuest(rw, r, loginPageData{
+		PageData: ui.NewPageData("Login", "login"),
+		Register: envEnableRegister.Get(),
 	})
 }
 
@@ -41,9 +43,9 @@ type loginRequest struct {
 
 // Login handles user login attempts
 func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
-	pageData := ui.NewPageData("Login", "login")
-	pageData.Data = map[string]any{
-		"register": envEnableRegister.Get(),
+	pageData := loginPageData{
+		PageData: ui.NewPageData("Login", "login"),
+		Register: envEnableRegister.Get(),
 	}
 	defer func() {
 		ui.RenderGuest(rw, r, pageData)
@@ -57,14 +59,14 @@ func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 
 	if err := server.ValidateRequest(req); err != nil {
 		pageData.FieldErrors = server.ExtractFIeldErrors(err).Fields
-		pageData.Data["name"] = req.Name
+		pageData.Form = req
 		ui.Toast(rw, ui.Warning, "Login failed")
 		return
 	}
 
 	user, err := c.repo.FindUserByLogin(req.Name, req.Password)
 	if user == nil {
-		pageData.Data["name"] = req.Name
+		pageData.Form = req
 		ui.Toast(rw, ui.Warning, "Login failed")
 		return
 	}

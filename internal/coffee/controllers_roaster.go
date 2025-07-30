@@ -9,12 +9,18 @@ import (
 	"github.com/indeedhat/barista/internal/ui"
 )
 
+type upsertRoastersData struct {
+	ui.PageData
+	Roasters []Roaster
+	Open     bool
+}
+
 func (c Controller) ViewRoasters(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	roasters := c.repo.IndexRoastersForUser(user)
 
-	pageData := ui.NewPageData("Roasters", "roasters", user)
-	pageData.Data["Roasters"] = roasters
+	pageData := upsertRoastersData{PageData: ui.NewPageData("Roasters", "roasters", user)}
+	pageData.Roasters = roasters
 	ui.RenderUser(rw, r, pageData)
 }
 
@@ -32,9 +38,9 @@ func (r upsertRoasterRequest) apply(roaster *Roaster) {
 
 func (c Controller) CreateRoaster(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Roasters", "roasters", user)
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	pageData.Data["open"] = true
+	pageData := upsertRoastersData{PageData: ui.NewPageData("Roasters", "roasters", user)}
+	pageData.Roasters = c.repo.IndexRoastersForUser(user)
+	pageData.Open = true
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()
@@ -58,11 +64,16 @@ func (c Controller) CreateRoaster(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	pageData.Data["open"] = false
+	pageData.Roasters = c.repo.IndexRoastersForUser(user)
+	pageData.Open = false
 	pageData.Form = upsertRoasterRequest{}
 
 	ui.Toast(rw, ui.Success, "Roaster created")
+}
+
+type upsertRoasterData struct {
+	ui.PageData
+	Roaster *Roaster
 }
 
 func (c Controller) ViewRoaster(rw http.ResponseWriter, r *http.Request) {
@@ -82,14 +93,14 @@ func (c Controller) ViewRoaster(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageData := ui.NewPageData("Roaster", "roaster", user)
-	pageData.Data["Roaster"] = roaster
+	pageData := upsertRoasterData{PageData: ui.NewPageData("Roaster", "roaster", user)}
+	pageData.Roaster = roaster
 	ui.RenderUser(rw, r, pageData)
 }
 
 func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Roaster", "roaster", user)
+	pageData := upsertRoasterData{PageData: ui.NewPageData("Roaster", "roaster", user)}
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()
@@ -107,7 +118,7 @@ func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	pageData.Title = roaster.Name
-	pageData.Data["Roaster"] = roaster
+	pageData.Roaster = roaster
 
 	var req upsertRoasterRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
@@ -132,7 +143,7 @@ func (c Controller) UpdateRoaster(rw http.ResponseWriter, r *http.Request) {
 
 func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Roaster", "roaster", user)
+	pageData := upsertRoasterData{PageData: ui.NewPageData("Roaster", "roaster", user)}
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()
@@ -150,7 +161,7 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 	}
 
 	pageData.Title = roaster.Name
-	pageData.Data["Roaster"] = roaster
+	pageData.Roaster = roaster
 
 	savePath, err := server.UploadFile(r, "image", fmt.Sprint(RoasterImagePath, roaster.ID), &server.UploadProps{
 		Ext:  []string{".jpg", ".jpeg", ".png"},
@@ -172,7 +183,7 @@ func (c Controller) UpdateRoasterImage(rw http.ResponseWriter, r *http.Request) 
 
 func (c Controller) DeleteRoaster(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Roaster", "roaster", user)
+	pageData := upsertRoasterData{PageData: ui.NewPageData("Roaster", "roaster", user)}
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()
@@ -190,7 +201,7 @@ func (c Controller) DeleteRoaster(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	pageData.Title = roaster.Name
-	pageData.Data["Roaster"] = roaster
+	pageData.Roaster = roaster
 
 	if len(roaster.Coffees) > 0 {
 		ui.Toast(rw, ui.Warning, "Roaster cannot be deleted while it still has coffees")

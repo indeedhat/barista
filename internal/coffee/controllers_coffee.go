@@ -10,15 +10,24 @@ import (
 	"github.com/indeedhat/barista/internal/ui"
 )
 
+type viewCoffeesData struct {
+	ui.PageData
+	Roasters []Roaster
+	Coffees  []Coffee
+	Flavours []FlavourProfile
+	Drinks   []types.DrinkType
+	Open     bool
+}
+
 func (c Controller) ViewCoffees(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 
-	pageData := ui.NewPageData("Coffees", "coffees", user)
+	pageData := viewCoffeesData{PageData: ui.NewPageData("Coffees", "coffees", user)}
 	pageData.Form = upsertCoffeeRequest{}
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-	pageData.Data["Drinks"] = types.Drinks
+	pageData.Roasters = c.repo.IndexRoastersForUser(user)
+	pageData.Coffees = c.repo.IndexCoffeesForUser(user)
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
+	pageData.Drinks = types.Drinks
 
 	ui.RenderUser(rw, r, pageData)
 }
@@ -43,14 +52,24 @@ func (r upsertCoffeeRequest) apply(coffee *Coffee) {
 	coffee.URL = r.URL
 }
 
+type upsertCoffeeData struct {
+	ui.PageData
+	Roasters []Roaster
+	Coffee   Coffee
+	Coffees  []Coffee
+	Flavours []FlavourProfile
+	Drinks   []types.DrinkType
+	Open     bool
+}
+
 func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Coffees", "coffees", user)
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-	pageData.Data["Drinks"] = types.Drinks
-	pageData.Data["open"] = true
+	pageData := upsertCoffeeData{PageData: ui.NewPageData("Coffees", "coffees", user)}
+	pageData.Roasters = c.repo.IndexRoastersForUser(user)
+	pageData.Coffees = c.repo.IndexCoffeesForUser(user)
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
+	pageData.Drinks = types.Drinks
+	pageData.Open = true
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()
@@ -92,11 +111,20 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageData.Data["Coffees"] = c.repo.IndexCoffeesForUser(user)
-	pageData.Data["open"] = false
+	pageData.Coffees = c.repo.IndexCoffeesForUser(user)
+	pageData.Open = false
 	pageData.Form = upsertCoffeeRequest{}
 
 	ui.Toast(rw, ui.Success, "Coffee created")
+}
+
+type viewCoffeeData struct {
+	ui.PageData
+	Coffee   *Coffee
+	Roasters []Roaster
+	Flavours []FlavourProfile
+	Drinks   []types.DrinkType
+	Open     bool
 }
 
 func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
@@ -116,11 +144,11 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pageData := ui.NewPageData("Coffee", "coffee", user)
-	pageData.Data["Coffee"] = coffee
-	pageData.Data["Drinks"] = types.Drinks
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData := viewCoffeeData{PageData: ui.NewPageData("Coffee", "coffee", user)}
+	pageData.Coffee = coffee
+	pageData.Drinks = types.Drinks
+	pageData.Roasters = c.repo.IndexRoastersForUser(user)
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
 	pageData.Form = upsertCoffeeRequest{
 		Flavours: coffee.FlavourIds(),
 	}
@@ -130,7 +158,7 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 
 func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Coffee", "coffee", user)
+	pageData := upsertCoffeeData{PageData: ui.NewPageData("Coffee", "coffee", user)}
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()
@@ -148,9 +176,9 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	pageData.Title = coffee.Name
-	pageData.Data["Coffee"] = coffee
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Coffee = *coffee
+	pageData.Roasters = c.repo.IndexRoastersForUser(user)
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
 
 	savePath, err := server.UploadFile(r, "image", fmt.Sprint(CoffeeImagePath, coffee.ID), &server.UploadProps{
 		Ext:  []string{".jpg", ".jpeg", ".png"},
@@ -174,7 +202,7 @@ func (c Controller) UpdateCoffeeImage(rw http.ResponseWriter, r *http.Request) {
 
 func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Coffee", "coffee", user)
+	pageData := upsertCoffeeData{PageData: ui.NewPageData("Coffee", "coffee", user)}
 	pageData.Data["Drinks"] = types.Drinks
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
@@ -193,9 +221,9 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	pageData.Title = coffee.Name
-	pageData.Data["Coffee"] = coffee
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Coffee = *coffee
+	pageData.Roasters = c.repo.IndexRoastersForUser(user)
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
 
 	var req upsertCoffeeRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
@@ -236,7 +264,7 @@ func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 
 func (c Controller) DeleteCoffee(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Coffee", "coffee", user)
+	pageData := upsertCoffeeData{PageData: ui.NewPageData("Coffee", "coffee", user)}
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()
@@ -254,9 +282,9 @@ func (c Controller) DeleteCoffee(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	pageData.Title = coffee.Name
-	pageData.Data["Coffee"] = coffee
-	pageData.Data["Roasters"] = c.repo.IndexRoastersForUser(user)
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
+	pageData.Coffee = *coffee
+	pageData.Roasters = c.repo.IndexRoastersForUser(user)
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
 
 	if len(coffee.Recipes) > 0 {
 		ui.Toast(rw, ui.Warning, "Coffee cannot be deleted while it still has recipes")

@@ -37,11 +37,17 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 	comData["Coffee"] = coffee
 }
 
+type viewRecipesData struct {
+	ui.PageData
+	Recipes []Recipe
+	Drinks  []types.DrinkType
+}
+
 func (c Controller) ViewRecipes(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Recipes", "recipes", user)
-	pageData.Data["Recipes"] = c.repo.IndexRecipesForUser(user)
-	pageData.Data["Drinks"] = types.Drinks
+	pageData := viewRecipesData{PageData: ui.NewPageData("Recipes", "recipes", user)}
+	pageData.Recipes = c.repo.IndexRecipesForUser(user)
+	pageData.Drinks = types.Drinks
 
 	ui.RenderUser(rw, r, pageData)
 }
@@ -122,11 +128,6 @@ func (c Controller) CreateRecipe(rw http.ResponseWriter, r *http.Request) {
 
 	if err := server.ValidateRequest(req, &comData); err != nil {
 		ui.Toast(rw, ui.Warning, "Bad request")
-		return
-	}
-
-	if err != nil {
-		ui.Toast(rw, ui.Warning, "Coffee not found")
 		return
 	}
 
