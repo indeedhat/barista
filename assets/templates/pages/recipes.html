@@ -1,17 +1,120 @@
 {{ define "pages/recipes" }}
 <div class="breadcrumbs text-sm">
-  <ul>
-    <li><a href="/">Home (Recipes)</a></li>
-  </ul>
+    <ul>
+        <li><a href="/">Home (Recipes)</a></li>
+    </ul>
 </div>
 
+<section id="filters">
+    <div class="text-right">
+        <button class="btn btn-primary" id="filter-open" onclick="">Filter Recipes</button>
+    </div>
+    <div class="card card-border bg-neutral w-full hidden" id="filter-card">
+        <div class="card-body">
+            <div class="card-title">Filters</div>
+            <fieldset class="fieldset gap-4">
+                <label class="select w-full">
+                    <span class="label w-22">Brewer</span>
+                    <select name="brewer">
+                        <option value="">All Brewers</option>
+                        {{ range .Filters.Brewers }}
+                            <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
+                    </select>
+                </label>
+                <label class="select w-full">
+                    <span class="label w-22">Caffeine</span>
+                    <select name="caffeine">
+                        <option value="">All Caffeine Levels</option>
+                        {{ range $val, $text := .Filters.Caffeine }}
+                            <option value="{{ $val }}">{{ $text }}</option>
+                        {{ end }}
+                    </select>
+                </label>
+                <label class="select w-full">
+                    <span class="label w-22">Coffee</span>
+                    <select name="coffee">
+                        <option value="">All Coffees</option>
+                        {{ range .Filters.Coffees }}
+                            <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
+                    </select>
+                </label>
+                <label class="select w-full">
+                    <span class="label w-22">Drink</span>
+                    <select name="drink">
+                        <option value="">All Drink Types</option>
+                        {{ range .Filters.Drinks }}
+                            <option value="{{ . }}">{{ . }}</option>
+                        {{ end }}
+                    </select>
+                </label>
+                <label class="select w-full">
+                    <span class="label w-22">Rating</span>
+                    <select name="rating">
+                        <option value="">All Ratings</option>
+                        {{ range $val, $text := .Filters.Rating }}
+                            <option value="{{ $val }}">{{ $text }}</option>
+                        {{ end }}
+                    </select>
+                </label>
+            </fieldset>
+        </div>
+    </div>
+</section>
+
 {{ range .Recipes }}
-  {{ template "recipe-card" (map
-    "Recipe" .
-    "Coffee" .Coffee
-    "Drinks" $.Enum.Drinks
-  ) }}
+    {{ template "recipe-card" (map
+        "Recipe" .
+        "Coffee" .Coffee
+        "Drinks" $.Enum.Drinks
+    ) }}
 {{ else }}
-<div class="alert alert-notice">No recipes to display</div>
+    <div class="alert alert-notice">No recipes to display</div>
 {{ end }}
+
+<script type="module">
+const $filterCard = $('#filter-card')
+
+$("#filter-open").addEventListener("click", function() {
+    this.remove()
+    $filterCard.classList.remove('hidden')
+})
+
+const $recipes = document.querySelectorAll("article[id*='recipe_']")
+const $brewer = $filterCard.querySelector("select[name=brewer]")
+const $caffeine = $filterCard.querySelector("select[name=caffeine]")
+const $coffee = $filterCard.querySelector("select[name=coffee]")
+const $drink = $filterCard.querySelector("select[name=drink]")
+const $rating = $filterCard.querySelector("select[name=rating]")
+
+const clear = () => $recipes.forEach(function($recipe) {
+    $recipe.classList.remove("hidden")
+})
+
+const apply = ($recipe, $filter, key) => {
+    if ($filter.value == "") {
+        return
+    }
+    console.log(key, $recipe.dataset[`filter${key}`], $filter.value, $recipe.dataset[`filter${key}`] == $filter.value)
+    if ($recipe.dataset[`filter${key}`] == $filter.value) {
+        return
+    }
+    console.log(key, $recipe.dataset[`filter${key}`])
+    $recipe.classList.add("hidden")
+}
+
+[$brewer, $caffeine, $coffee, $drink, $rating].forEach(function($elem) {
+    $elem.addEventListener("change", () => {
+        clear()
+        $recipes.forEach(function($recipe) {
+            apply($recipe, $brewer, "Brewer")
+            apply($recipe, $caffeine, "Caffeine")
+            apply($recipe, $coffee, "Coffee")
+            apply($recipe, $drink, "Drink")
+            apply($recipe, $rating, "Rating")
+        })
+    })
+})
+</script>
 {{ end }}

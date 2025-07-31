@@ -1,8 +1,7 @@
 {{ define "brewers-select" }}
-<label class="input w-full">
+<label class="select w-full">
     <span class="label w-40">Brewer</span>
-    <select class="w-full"
-        name="brewer.int"
+    <select name="brewer.int"
         hx-get="/baskets/select"
         hx-trigger="change"
         hx-target="next .basket-container"
