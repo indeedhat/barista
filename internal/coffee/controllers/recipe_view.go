@@ -1,6 +1,7 @@
 package coffee_controllers
 
 import (
+	"fmt"
 	"net/http"
 	"slices"
 
@@ -40,16 +41,21 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 
 type viewRecipesFilters struct {
 	Coffees  []string
-	Caffeine map[int]types.CaffeineLevel
-	Drinks   []types.DrinkType
+	Caffeine []kv
+	Drinks   []string
 	Brewers  []string
-	Rating   map[int]string
+	Rating   []kv
 }
 
 type viewRecipesData struct {
 	ui.PageData
 	Recipes []coffee.Recipe
 	Filters viewRecipesFilters
+}
+
+type kv struct {
+	Key   string
+	Value string
 }
 
 func (c Controller) ViewRecipes(rw http.ResponseWriter, r *http.Request) {
@@ -60,26 +66,16 @@ func (c Controller) ViewRecipes(rw http.ResponseWriter, r *http.Request) {
 		PageData: ui.NewPageData("Recipes", "recipes", user),
 		Recipes:  recipes,
 		Filters: viewRecipesFilters{
-			Coffees: extractRecipe(recipes, func(r coffee.Recipe) *string { return &r.Coffee.Name }),
-			Caffeine: map[int]types.CaffeineLevel{
-				1: types.CafLevelFull,
-				2: types.CafLevelHalf,
-				3: types.CafLevelDecaf,
-			},
-			Drinks: types.Drinks,
+			Coffees:  extractRecipe(recipes, func(r coffee.Recipe) *string { return &r.Coffee.Name }),
+			Caffeine: extractCaffeineLevels(recipes),
+			Drinks:   extractRecipe(recipes, func(r coffee.Recipe) *string { return &r.Drink }),
 			Brewers: extractRecipe(recipes, func(r coffee.Recipe) *string {
 				if r.Brewer == nil {
 					return nil
 				}
 				return &r.Brewer.Name
 			}),
-			Rating: map[int]string{
-				1: "1 Star",
-				2: "2 Stars",
-				3: "3 Stars",
-				4: "4 Stars",
-				5: "5 Stars",
-			},
+			Rating: extractRatings(recipes),
 		},
 	})
 }
@@ -90,7 +86,7 @@ func extractRecipe(recipes []coffee.Recipe, cb func(coffee.Recipe) *string) []st
 
 	for _, recipe := range recipes {
 		value := cb(recipe)
-		if value == nil {
+		if value == nil || *value == "" {
 			continue
 		}
 		if _, found := seen[*value]; found {
@@ -103,4 +99,39 @@ func extractRecipe(recipes []coffee.Recipe, cb func(coffee.Recipe) *string) []st
 
 	slices.Sort(values)
 	return values
+}
+
+func extractRatings(recipes []coffee.Recipe) []kv {
+	ratings := extractRecipe(recipes, func(r coffee.Recipe) *string {
+		return ptr(fmt.Sprint(r.Rating))
+	})
+	slices.Sort(ratings)
+
+	final := make([]kv, 0, len(ratings))
+	for _, r := range ratings {
+		final = append(final, kv{r, r + " Stars"})
+	}
+
+	return final
+}
+
+func extractCaffeineLevels(recipes []coffee.Recipe) []kv {
+	levels := extractRecipe(recipes, func(r coffee.Recipe) *string {
+		return ptr(fmt.Sprint(r.Coffee.Caffeine))
+	})
+	slices.Sort(levels)
+
+	final := make([]kv, 0, len(levels))
+	for _, l := range levels {
+		switch l {
+		case "1":
+			final = append(final, kv{l, "Caffeinated"})
+		case "2":
+			final = append(final, kv{l, "Half Caf"})
+		case "3":
+			final = append(final, kv{l, "Decaf"})
+		}
+	}
+
+	return final
 }
