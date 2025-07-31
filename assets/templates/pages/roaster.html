@@ -3,37 +3,37 @@
     <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/roasters">Roasters</a></li>
-        <li><a href="/roasters/{{ .Data.Roaster.ID }}">{{ .Data.Roaster.Name }}</a></li>
+        <li><a href="/roasters/{{ .Roaster.ID }}">{{ .Roaster.Name }}</a></li>
     </ul>
 </div>
 
 <div class="card card-border bg-neutral w-full" id="create-card">
     <div class="card-body">
         {{ template "icon-upload" (map
-            "action" ( print "/roasters/" .Data.Roaster.ID "/icon" )
-            "icon" .Data.Roaster.Icon
-            "alt" .Data.Roaster.Name
+            "action" ( print "/roasters/" .Roaster.ID "/icon" )
+            "icon" .Roaster.Icon
+            "alt" .Roaster.Name
         ) }}
 
         <form
-            hx-put="/roasters/{{ .Data.Roaster.ID }}"
+            hx-put="/roasters/{{ .Roaster.ID }}"
             hx-ext="json-enc"
         >
             <fieldset class="fieldset gap-4">
                 <label class="input w-full">
                     <span class="label w-22">Name *</span>
-                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.name .Data.Roaster.Name }}" />
+                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.name .Roaster.Name }}" />
                 </label>
                 {{ template "field-error" .FieldErrors.name }}
 
                 <label class="input w-full">
                     <span class="label w-22">URL *</span>
-                    <input type="text" name="url" placeholder="https://..." value="{{ or .Form.url .Data.Roaster.URL }}" />
+                    <input type="text" name="url" placeholder="https://..." value="{{ or .Form.url .Roaster.URL }}" />
                 </label>
                 {{ template "field-error" .FieldErrors.url }}
 
                 <textarea name="description" class="textarea w-full" placeholder="Description...">{{
-                    or .Form.description .Data.Roaster.Description
+                    or .Form.description .Roaster.Description
                 }}</textarea>
                 {{ template "field-error" .FieldErrors.description }}
 
@@ -44,7 +44,7 @@
 </div>
 
 <h2>Coffees</h2>
-{{ range .Data.Roaster.Coffees }}
+{{ range .Roaster.Coffees }}
     {{ template "coffee-card" . }}
 {{ else }}
     <div class="alert alert-notice">No coffees to display</div>

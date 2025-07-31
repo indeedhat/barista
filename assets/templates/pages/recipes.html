@@ -5,11 +5,11 @@
   </ul>
 </div>
 
-{{ range .Data.Recipes }}
+{{ range .Recipes }}
   {{ template "recipe-card" (map
     "Recipe" .
     "Coffee" .Coffee
-    "Drinks" $.Data.Drinks
+    "Drinks" $.Drinks
   ) }}
 {{ else }}
 <div class="alert alert-notice">No recipes to display</div>

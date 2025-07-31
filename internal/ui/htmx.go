@@ -92,7 +92,7 @@ func (p *PageData) SetFieldErrors(v map[string][]string) {
 var _ Former = (*ComponentData)(nil)
 var _ ErrorFielder = (*ComponentData)(nil)
 
-func RenderGuest(w http.ResponseWriter, r *http.Request, data PageData) error {
+func RenderGuest(w http.ResponseWriter, r *http.Request, data any) error {
 	if r.Header.Get("HX-Request") == "true" {
 		return tmpls.ExecuteTemplate(w, "layouts/hx", data)
 	}
@@ -100,7 +100,7 @@ func RenderGuest(w http.ResponseWriter, r *http.Request, data PageData) error {
 	return tmpls.ExecuteTemplate(w, "layouts/guest", data)
 }
 
-func RenderUser(w http.ResponseWriter, r *http.Request, data PageData) error {
+func RenderUser(w http.ResponseWriter, r *http.Request, data any) error {
 	if r.Header.Get("HX-Request") == "true" {
 		return tmpls.ExecuteTemplate(w, "layouts/hx", data)
 	}

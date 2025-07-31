@@ -2,43 +2,43 @@
 <div class="breadcrumbs text-sm">
   <ul>
     <li><a href="/">Home</a></li>
-    <li><a href="/roasters/{{ .Data.Coffee.Roaster.ID }}">Roaster: {{ .Data.Coffee.Roaster.Name }}</a></li>
-    <li><a href="/roasters/{{ .Data.Coffee.Roaster.ID }}">Coffee: {{ .Data.Coffee.Name }}</a></li>
+    <li><a href="/roasters/{{ .Coffee.Roaster.ID }}">Roaster: {{ .Coffee.Roaster.Name }}</a></li>
+    <li><a href="/roasters/{{ .Coffee.Roaster.ID }}">Coffee: {{ .Coffee.Name }}</a></li>
   </ul>
 </div>
 
 <div class="card card-border bg-neutral w-full" id="update-card">
     <div class="card-body">
         {{ template "icon-upload" (map
-            "action" ( print "/coffees/" .Data.Coffee.ID "/icon" )
-            "icon" .Data.Coffee.Icon
-            "alt" .Data.Coffee.Name
+            "action" ( print "/coffees/" .Coffee.ID "/icon" )
+            "icon" .Coffee.Icon
+            "alt" .Coffee.Name
         ) }}
 
         <form
-            hx-put="/coffees/{{ .Data.Coffee.ID }}"
+            hx-put="/coffees/{{ .Coffee.ID }}"
             hx-ext="json-enc"
         >
             <fieldset class="fieldset gap-4">
                 <label class="input w-full">
                     <span class="label w-28">Name *</span>
-                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.Name .Data.Coffee.Name }}" />
+                    <input type="text" name="name" placeholder="Name..." value="{{ or .Form.Name .Coffee.Name }}" />
                 </label>
                 {{ template "field-error" .FieldErrors.name }}
 
-                {{ $roaster := or .Form.Roaster .Data.Coffee.RoasterID }}
+                {{ $roaster := or .Form.Roaster .Coffee.RoasterID }}
                 <label class="input w-full">
                     <span class="label w-28">Roaster *</span>
                     <select class="w-full" name="roaster.int">
                         <option value="" disabled selected>Pick a Roaster</option>
-                        {{ range .Data.Roasters }}
+                        {{ range .Roasters }}
                             <option value="{{ .ID }}" {{ selected $roaster .ID }}>{{ .Name }}</option>
                         {{ end}}
                     </select>
                 </label>
                 {{ template "field-error" .FieldErrors.flavour }}
 
-                {{ $roastLevel := or .Form.Roast .Data.Coffee.Roast }}
+                {{ $roastLevel := or .Form.Roast .Coffee.Roast }}
                 <label class="input w-full">
                     <span class="label w-28">Roast *</span>
                     <select class="w-full" name="roast.int">
@@ -54,7 +54,7 @@
                 </label>
                 {{ template "field-error" .FieldErrors.roast }}
 
-                {{ $caffeineLevel := or .Form.Caffeine .Data.Coffee.Caffeine }}
+                {{ $caffeineLevel := or .Form.Caffeine .Coffee.Caffeine }}
                 <label class="input w-full">
                     <span class="label w-28">Caffeine *</span>
                     <select class="w-full" name="caffeine.int">
@@ -66,7 +66,7 @@
                 </label>
                 {{ template "field-error" .FieldErrors.caffeine }}
 
-                {{ $rating := or .Form.Rating .Data.Coffee.Rating }}
+                {{ $rating := or .Form.Rating .Coffee.Rating }}
                 <label class="input w-full">
                     <span class="label w-22">Rating</span>
                     <div class="rating">
@@ -96,17 +96,17 @@
 
                 <label class="input w-full">
                     <span class="label w-28">URL</span>
-                    <input type="text" name="url" placeholder="https://..." value="{{ or .Form.URL .Data.Coffee.URL "" }}" />
+                    <input type="text" name="url" placeholder="https://..." value="{{ or .Form.URL .Coffee.URL "" }}" />
                 </label>
                 {{ template "field-error" .FieldErrors.url }}
 
                 {{ template "flavours-input" (map
                     "existing" .Form.Flavours
-                    "flavours" .Data.Flavours
+                    "flavours" .Flavours
                 ) }}
 
                 <textarea name="notes" class="textarea w-full" placeholder="Notes...">{{
-                    or .Form.Notes .Data.Coffee.Notes
+                    or .Form.Notes .Coffee.Notes
                 }}</textarea>
                 {{ template "field-error" .FieldErrors.notes }}
 
@@ -117,14 +117,14 @@
 </div>
 
 <h2>Roaster</h2>
-{{ with .Data.Coffee.Roaster }}
+{{ with .Coffee.Roaster }}
     {{ template "roaster-card" . }}
 {{ end }}
 
 <div class="flex justify-between">
     <h2>Recipes</h2>
     <button class="btn btn-primary"
-        hx-get="/coffees/{{ .Data.Coffee.ID }}/recipes"
+        hx-get="/coffees/{{ .Coffee.ID }}/recipes"
         hx-target="#recipes"
         hx-swap="afterbegin"
     >
@@ -132,11 +132,11 @@
     </button>
 </div>
 <section id="recipes" class="flex flex-col gap-2">
-    {{ range .Data.Coffee.Recipes }}
+    {{ range .Coffee.Recipes }}
         {{ template "recipe-card" (map
             "Recipe" .
-            "Coffee" $.Data.Coffee
-            "Drinks" $.Data.Drinks
+            "Coffee" $.Coffee
+            "Drinks" $.Drinks
         ) }}
     {{ else }}
     <div class="alert alert-notice">No Recipes yet</div>

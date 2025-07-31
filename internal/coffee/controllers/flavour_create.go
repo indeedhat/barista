@@ -1,49 +1,29 @@
-package coffee
+package coffee_controllers
 
 import (
 	"net/http"
 
 	"github.com/indeedhat/barista/internal/auth"
+	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
 )
-
-const (
-	CoffeeImagePath  = "data/uploads/coffee/"
-	RoasterImagePath = "data/uploads/roaster/"
-)
-
-type Controller struct {
-	repo Repository
-}
-
-func NewController(repo Repository) Controller {
-	return Controller{repo}
-}
-
-type createSuccessResponse struct {
-	ID uint `json:"id"`
-}
-
-func (c Controller) ViewFlavours(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*auth.User)
-
-	pageData := ui.NewPageData("Flavours", "flavours", user)
-	pageData.Form = createFlavourProfileRequest{}
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-
-	ui.RenderUser(rw, r, pageData)
-}
 
 type createFlavourProfileRequest struct {
 	Name string `json:"name" validate:"required"`
 }
 
+type createFlavoursData struct {
+	ui.PageData
+	Flavours []coffee.FlavourProfile
+	Open     bool
+}
+
 func (c Controller) CreateFlavourProfile(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := ui.NewPageData("Flavours", "flavours", user)
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-	pageData.Data["open"] = true
+	pageData := createFlavoursData{PageData: ui.NewPageData("Flavours", "flavours", user)}
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
+	pageData.Open = true
 
 	var req createFlavourProfileRequest
 	if err := server.UnmarshalBody(r, &req, &pageData); err != nil {
@@ -58,7 +38,7 @@ func (c Controller) CreateFlavourProfile(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
-	flavour := FlavourProfile{
+	flavour := coffee.FlavourProfile{
 		Name: req.Name,
 	}
 
@@ -68,8 +48,8 @@ func (c Controller) CreateFlavourProfile(rw http.ResponseWriter, r *http.Request
 		return
 	}
 
-	pageData.Data["Flavours"] = c.repo.IndexFlavourProfiles()
-	pageData.Data["open"] = false
+	pageData.Flavours = c.repo.IndexFlavourProfiles()
+	pageData.Open = false
 	pageData.Form = createFlavourProfileRequest{}
 
 	ui.Toast(rw, ui.Success, "Flavour created")

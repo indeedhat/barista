@@ -66,13 +66,23 @@ func (r SqliteRepository) FindUser(id uint) (*User, error) {
 }
 
 // SaveUser implements Repository.
-func (r SqliteRepository) SaveUser(user *User) error {
+func (r SqliteRepository) SaveUser(user *User) (err error) {
+	if user.ID == 0 {
+		if user.Password, err = hashPassword(user.Password); err != nil {
+			return err
+		}
+	}
 	return r.db.Save(user).Error
 }
 
 // UpdateUserPassword implements Repository.
 func (r SqliteRepository) UpdateUserPassword(user *User, password string) error {
-	return r.db.Model(user).UpdateColumn("password", password).Error
+	hash, err := hashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	return r.db.Model(user).UpdateColumn("password", hash).Error
 }
 
 var _ Repository = (*SqliteRepository)(nil)

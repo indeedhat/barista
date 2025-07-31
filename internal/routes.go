@@ -5,61 +5,20 @@ import (
 
 	"github.com/indeedhat/barista/assets"
 	"github.com/indeedhat/barista/internal/auth"
-	"github.com/indeedhat/barista/internal/brewer"
-	"github.com/indeedhat/barista/internal/coffee"
+	"github.com/indeedhat/barista/internal/auth/controllers"
+	"github.com/indeedhat/barista/internal/brewer/controllers"
+	"github.com/indeedhat/barista/internal/coffee/controllers"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
 func BuildRoutes(
 	r server.Router,
-	coffeeController coffee.Controller,
-	authController auth.Controller,
-	brewerController brewer.Controller,
+	coffeeController coffee_controllers.Controller,
+	authController auth_controllers.Controller,
+	brewerController brewer_controllers.Controller,
 	authRepo auth.Repository,
 ) *http.ServeMux {
-	buildApiRoutes(r, authController, authRepo)
-	buildUiRoutes(r, coffeeController, authController, brewerController, authRepo)
-
-	return r.ServerMux()
-}
-
-func buildApiRoutes(
-	r server.Router,
-	authController auth.Controller,
-	authRepo auth.Repository,
-) {
-	// TODO: these are all unimplemented in the new htmx based ui
-	//       once they have this whole function will be removed
-	guest := r.Group("/api", auth.IsGuestMiddleware(auth.API, authRepo))
-	{
-		guest.HandleFunc("POST /auth/login", authController.Login)
-	}
-
-	private := r.Group("/api", auth.IsLoggedInMiddleware(auth.API, authRepo))
-	{
-		private.HandleFunc("POST /me", authController.GetLoggedInUser)
-	}
-
-	self := r.Group("/api", auth.AdminOrSelfMiddleware(auth.API, authRepo))
-	{
-		self.HandleFunc("PATCH /user/{id}", authController.UpdateUser)
-		self.HandleFunc("POST /user/{id}/force-logout", authController.ForceLogoutUser)
-	}
-
-	admin := r.Group("/api", auth.UserHasPermissionMiddleware(auth.API, auth.LevelAdmin, authRepo))
-	{
-		admin.HandleFunc("POST /user", authController.CreateUser)
-	}
-}
-
-func buildUiRoutes(
-	r server.Router,
-	coffeeController coffee.Controller,
-	authController auth.Controller,
-	brewerController brewer.Controller,
-	authRepo auth.Repository,
-) {
 	r.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assets.Public))))
 
 	guest := r.Group("", auth.IsGuestMiddleware(auth.UI, authRepo))
@@ -134,4 +93,6 @@ func buildUiRoutes(
 
 		private.HandleFunc("POST /logout", authController.Logout)
 	}
+
+	return r.ServerMux()
 }
