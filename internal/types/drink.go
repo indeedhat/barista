@@ -76,5 +76,6 @@ var brewerAssoc = map[DrinkType][]BrewerType{
 		BrewerAeroPress,
 		BrewerMochaPot,
 		BrewerCafetiere,
+		BrewerSiphon,
 	},
 }

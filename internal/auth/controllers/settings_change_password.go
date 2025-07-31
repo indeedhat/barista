@@ -54,7 +54,7 @@ func (c Controller) ChangePassword(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := c.repo.UpdateUserPassword(user, hash); err != nil {
+	if err := c.repo.UpdateUserPassword(user, req.Password); err != nil {
 		ui.Toast(rw, ui.Warning, "Failed to save new password")
 		return
 	}

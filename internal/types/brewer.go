@@ -3,19 +3,21 @@ package types
 type BrewerType string
 
 const (
-	BrewerEspresso  BrewerType = "Espresso"
-	BrewerEmersion  BrewerType = "Emersion"
-	BrewerPourOver  BrewerType = "PourOver"
-	BrewerAeroPress BrewerType = "AeroPress"
-	BrewerMochaPot  BrewerType = "MochaPot"
+	BrewerAeroPress BrewerType = "Aero Press"
 	BrewerCafetiere BrewerType = "Cafetiere"
+	BrewerEmersion  BrewerType = "Emersion"
+	BrewerEspresso  BrewerType = "Espresso"
+	BrewerMochaPot  BrewerType = "Mocha Pot"
+	BrewerPourOver  BrewerType = "Pour Over"
+	BrewerSiphon    BrewerType = "Siphon"
 )
 
 var Brewers = []BrewerType{
-	BrewerEspresso,
-	BrewerEmersion,
-	BrewerPourOver,
 	BrewerAeroPress,
-	BrewerMochaPot,
 	BrewerCafetiere,
+	BrewerEmersion,
+	BrewerEspresso,
+	BrewerMochaPot,
+	BrewerPourOver,
+	BrewerSiphon,
 }

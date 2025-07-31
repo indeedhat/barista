@@ -23,7 +23,7 @@ func (c Controller) ViewCoffees(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 
 	pageData := viewCoffeesData{PageData: ui.NewPageData("Coffees", "coffees", user)}
-	pageData.Form = upsertCoffeeRequest{}
+	pageData.Form = createCoffeeRequest{}
 	pageData.Roasters = c.repo.IndexRoastersForUser(user)
 	pageData.Coffees = c.repo.IndexCoffeesForUser(user)
 	pageData.Flavours = c.repo.IndexFlavourProfiles()
@@ -63,7 +63,7 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Drinks = types.Drinks
 	pageData.Roasters = c.repo.IndexRoastersForUser(user)
 	pageData.Flavours = c.repo.IndexFlavourProfiles()
-	pageData.Form = upsertCoffeeRequest{
+	pageData.Form = createCoffeeRequest{
 		Flavours: coffee.FlavourIds(),
 	}
 

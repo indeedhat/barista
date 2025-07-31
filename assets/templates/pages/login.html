@@ -9,7 +9,7 @@
         >
             <fieldset class="fieldset">
                 <label class="label">Name *</label>
-                <input type="text" name="name" class="input" placeholder="Name..." value="{{ .Data.name }}" />
+                <input type="text" name="name" class="input" placeholder="Name..." value="{{ .Form.Name }}" />
                 {{ template "field-error" .FieldErrors.name }}
 
                 <label class="label">Password *</label>
@@ -18,7 +18,7 @@
 
                 <fieldset class="fieldset">
                     <dd>
-                        {{ if .Data.register }}
+                        {{ if .Register }}
                             Are you new? <a href="/register" class="font-bold hover:underline">Register an account</a>
                         {{ end }}
                     </dd>

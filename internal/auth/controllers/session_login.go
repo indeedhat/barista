@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/indeedhat/barista/internal/auth"
+	"github.com/indeedhat/barista/internal/auth/cookie"
 	"github.com/indeedhat/barista/internal/server"
 	"github.com/indeedhat/barista/internal/ui"
 )
@@ -66,7 +67,7 @@ func (c Controller) Login(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(rw, &http.Cookie{
-		Name:     sessionCookie,
+		Name:     cookie.SessionKey,
 		Value:    jwt,
 		HttpOnly: true,
 		Domain:   r.URL.Host,

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/indeedhat/barista/internal/auth/cookie"
 )
 
 var ErrInvalidJWT = errors.New("Invalid jwt")
@@ -66,7 +67,7 @@ func extractJwtFromAuthHeader(r *http.Request) string {
 // extractJwtFromAuthHeader will verify that the Authorization header both exists and is in the
 // Bearer format, if so it will extract the token (hopefully this should be a valid JWT)
 func extractJwtFromCookie(r *http.Request) string {
-	c, err := r.Cookie(sessionCookie)
+	c, err := r.Cookie(cookie.SessionKey)
 	if err != nil {
 		return ""
 	}

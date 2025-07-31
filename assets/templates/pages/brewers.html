@@ -6,12 +6,12 @@
     </ul>
 </div>
 
-{{ if not .Data.open }}
+{{ if not .Open }}
     <button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">
         Create Brewer
     </button>
 {{ end}}
-<div class="card card-border bg-neutral w-full {{ if not .Data.open }}hidden{{ end }}" id="create-card">
+<div class="card card-border bg-neutral w-full {{ if not .Open }}hidden{{ end }}" id="create-card">
     <div class="card-body">
         <form
             hx-post="/brewers"
@@ -40,7 +40,7 @@
                     <span class="label w-22">Brewer Type *</span>
                     <select class="w-full" name="type">
                         <option value="" {{ selected .Form.Type "" }}>Select Brewer Type</option>
-                        {{ range .Data.BrewerTypes }}
+                        {{ range .BrewerTypes }}
                             <option value="{{ . }}" {{ selected . $.Form.Type }}>{{ . }}</option>
                         {{ end }}
                     </select>
@@ -54,7 +54,7 @@
 </div>
 
 <h2>Brewers</h2>
-{{ range .Data.Brewers }}
+{{ range .Brewers }}
     {{ template "brewer-card" . }}
 {{ else }}
     <div class="alert alert-notice">No brewers to display</div>

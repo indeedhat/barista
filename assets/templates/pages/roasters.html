@@ -6,10 +6,10 @@
     </ul>
 </div>
 
-{{ if not .Data.open }}
+{{ if not .Open }}
     <button class="btn btn-primary" onclick="this.remove(); $('#create-card').classList.remove('hidden')">Create Roaster</button>
 {{ end}}
-<div class="card card-border bg-neutral w-full {{ if not .Data.open }}hidden{{ end }}" id="create-card">
+<div class="card card-border bg-neutral w-full {{ if not .Open }}hidden{{ end }}" id="create-card">
     <div class="card-body">
         <form
             hx-post="/roasters"
@@ -40,7 +40,7 @@
 </div>
 
 <h2>Roasters</h2>
-{{ range .Data.Roasters }}
+{{ range .Roasters }}
     {{ template "roaster-card" . }}
 {{ else }}
     <div class="alert alert-notice">No roasters to display</div>

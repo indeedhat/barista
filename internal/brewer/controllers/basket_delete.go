@@ -11,7 +11,7 @@ import (
 func (c Controller) DeleteBasket(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	comData := ui.NewComponentData("basket-card", ui.ComponentData{
-		"open": true,
+		"Open": true,
 	})
 	defer func() {
 		ui.RenderComponent(rw, comData)
