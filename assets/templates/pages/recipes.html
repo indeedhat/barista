@@ -26,8 +26,8 @@
                     <span class="label w-22">Caffeine</span>
                     <select name="caffeine">
                         <option value="">All Caffeine Levels</option>
-                        {{ range $val, $text := .Filters.Caffeine }}
-                            <option value="{{ $val }}">{{ $text }}</option>
+                        {{ range .Filters.Caffeine }}
+                            <option value="{{ .Key }}">{{ .Value }}</option>
                         {{ end }}
                     </select>
                 </label>
@@ -53,8 +53,8 @@
                     <span class="label w-22">Rating</span>
                     <select name="rating">
                         <option value="">All Ratings</option>
-                        {{ range $val, $text := .Filters.Rating }}
-                            <option value="{{ $val }}">{{ $text }}</option>
+                        {{ range .Filters.Rating }}
+                            <option value="{{ .Key }}">{{ .Value }}</option>
                         {{ end }}
                     </select>
                 </label>
