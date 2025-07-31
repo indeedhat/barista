@@ -2,6 +2,7 @@ package coffee_controllers
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/coffee"
@@ -39,10 +40,10 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 
 type viewRecipesFilters struct {
 	Coffees     []string
-	Cafiene     []string
-	DrinkTypes  []string
-	BrewerTypes []string
-	Rating      []string
+	Caffiene    map[int]types.CaffieneLevel
+	DrinkTypes  []types.DrinkType
+	BrewerTypes []types.BrewerType
+	Rating      map[int]string
 }
 
 type viewRecipesData struct {
@@ -53,13 +54,45 @@ type viewRecipesData struct {
 
 func (c Controller) ViewRecipes(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
+	recipes := c.repo.IndexRecipesForUser(user)
 	pageData := viewRecipesData{
 		PageData: ui.NewPageData("Recipes", "recipes", user),
-		Recipes:  c.repo.IndexRecipesForUser(user),
+		Recipes:  recipes,
 		Filters: viewRecipesFilters{
-			Cafiene: []string{},
+			Coffees: extractRecipeCoffees(recipes),
+			Caffiene: map[int]types.CaffieneLevel{
+				1: types.CafLevelFull,
+				2: types.CafLevelHalf,
+				3: types.CafLevelDecaf,
+			},
+			DrinkTypes:  types.Drinks,
+			BrewerTypes: types.Brewers,
+			Rating: map[int]string{
+				1: "1 Star",
+				2: "2 Stars",
+				3: "3 Stars",
+				4: "4 Stars",
+				5: "5 Stars",
+			},
 		},
 	}
 
 	ui.RenderUser(rw, r, pageData)
+}
+
+func extractRecipeCoffees(recipes []coffee.Recipe) []string {
+	var seen map[string]struct{}
+	var coffees []string
+
+	for _, recipe := range recipes {
+		if _, found := seen[recipe.Coffee.Name]; found {
+			continue
+		}
+
+		seen[recipe.Coffee.Name] = struct{}{}
+		coffees = append(coffees, recipe.Coffee.Name)
+	}
+
+	slices.Sort(coffees)
+	return coffees
 }

@@ -1,6 +1,15 @@
 {{ define "recipe-card" }}
 {{ $id := or .Recipe.ID (rand "r") }}
-<article class="collapse border border-base-300 card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
+<article class="collapse border border-base-300 card-border bg-neutral w-full relative"
+    id="recipe_{{ $id }}"
+    data-filter-coffee="{{ .Recipe.Coffee.Name }}"
+    data-filter-caffiene="{{ .Recipe.Coffee.Caffeine }}"
+    data-filter-drink="{{ .Recipe.Drink }}"
+    {{ if .Recipe.Brewer }}
+        data-filter-brewer="{{ .Recipe.Brewer.Name }}"
+    {{ end }}
+    data-filter-rating="{{ .Recipe.Rating }}"
+>
     <input type="radio" name="recipe-card-c"
         {{ if or .open .edit }}
             checked="checked"
