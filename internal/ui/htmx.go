@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/indeedhat/barista/internal/types"
 )
 
 type Former interface {
@@ -61,6 +63,13 @@ type PageData struct {
 	Form        any
 	FieldErrors map[string][]string
 	Data        map[string]any
+	Enum        pageDataEnums
+}
+
+type pageDataEnums struct {
+	Drinks    []types.DrinkType
+	CafLevels []types.CaffieneLevel
+	Brewers   []types.BrewerType
 }
 
 func NewPageData(title, page string, user ...any) PageData {
@@ -70,6 +79,11 @@ func NewPageData(title, page string, user ...any) PageData {
 		Form:        make(map[string]any),
 		FieldErrors: make(map[string][]string),
 		Data:        make(map[string]any),
+		Enum: pageDataEnums{
+			Drinks:    types.Drinks,
+			CafLevels: types.CaffieneLevels,
+			Brewers:   types.Brewers,
+		},
 	}
 
 	if len(user) > 0 {

@@ -6,7 +6,6 @@ import (
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/server"
-	"github.com/indeedhat/barista/internal/types"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
@@ -27,7 +26,6 @@ type createCoffeeData struct {
 	Coffee   coffee.Coffee
 	Coffees  []coffee.Coffee
 	Flavours []coffee.FlavourProfile
-	Drinks   []types.DrinkType
 	Open     bool
 }
 
@@ -37,7 +35,6 @@ func (c Controller) CreateCoffee(rw http.ResponseWriter, r *http.Request) {
 	pageData.Roasters = c.repo.IndexRoastersForUser(user)
 	pageData.Coffees = c.repo.IndexCoffeesForUser(user)
 	pageData.Flavours = c.repo.IndexFlavourProfiles()
-	pageData.Drinks = types.Drinks
 	pageData.Open = true
 	defer func() {
 		ui.RenderUser(rw, r, pageData)

@@ -9,7 +9,7 @@
   {{ template "recipe-card" (map
     "Recipe" .
     "Coffee" .Coffee
-    "Drinks" $.Drinks
+    "Drinks" $.Enum.Drinks
   ) }}
 {{ else }}
 <div class="alert alert-notice">No recipes to display</div>

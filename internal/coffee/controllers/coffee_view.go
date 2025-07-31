@@ -6,7 +6,6 @@ import (
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/server"
-	"github.com/indeedhat/barista/internal/types"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
@@ -15,7 +14,6 @@ type viewCoffeesData struct {
 	Roasters []coffee.Roaster
 	Coffees  []coffee.Coffee
 	Flavours []coffee.FlavourProfile
-	Drinks   []types.DrinkType
 	Open     bool
 }
 
@@ -27,7 +25,6 @@ func (c Controller) ViewCoffees(rw http.ResponseWriter, r *http.Request) {
 	pageData.Roasters = c.repo.IndexRoastersForUser(user)
 	pageData.Coffees = c.repo.IndexCoffeesForUser(user)
 	pageData.Flavours = c.repo.IndexFlavourProfiles()
-	pageData.Drinks = types.Drinks
 
 	ui.RenderUser(rw, r, pageData)
 }
@@ -37,7 +34,6 @@ type viewCoffeeData struct {
 	Coffee   *coffee.Coffee
 	Roasters []coffee.Roaster
 	Flavours []coffee.FlavourProfile
-	Drinks   []types.DrinkType
 	Open     bool
 }
 
@@ -60,7 +56,6 @@ func (c Controller) ViewCoffee(rw http.ResponseWriter, r *http.Request) {
 
 	pageData := viewCoffeeData{PageData: ui.NewPageData("Coffee", "coffee", user)}
 	pageData.Coffee = coffee
-	pageData.Drinks = types.Drinks
 	pageData.Roasters = c.repo.IndexRoastersForUser(user)
 	pageData.Flavours = c.repo.IndexFlavourProfiles()
 	pageData.Form = createCoffeeRequest{

@@ -19,16 +19,14 @@ type createBrewerRequest struct {
 
 type createBrewerData struct {
 	ui.PageData
-	BrewerTypes []types.BrewerType
-	Brewers     []brewer.Brewer
-	Open        bool
+	Brewers []brewer.Brewer
+	Open    bool
 }
 
 func (c Controller) CreateBrewer(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := createBrewerData{PageData: ui.NewPageData("Brewers", "brewers", user)}
 	pageData.Open = true
-	pageData.BrewerTypes = types.Brewers
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()

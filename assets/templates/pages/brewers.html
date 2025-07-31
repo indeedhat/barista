@@ -40,7 +40,7 @@
                     <span class="label w-22">Brewer Type *</span>
                     <select class="w-full" name="type">
                         <option value="" {{ selected .Form.Type "" }}>Select Brewer Type</option>
-                        {{ range .BrewerTypes }}
+                        {{ range .Enum.Brewers }}
                             <option value="{{ . }}" {{ selected . $.Form.Type }}>{{ . }}</option>
                         {{ end }}
                     </select>

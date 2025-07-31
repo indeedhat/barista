@@ -7,7 +7,6 @@ import (
 	"github.com/indeedhat/barista/internal/auth"
 	"github.com/indeedhat/barista/internal/coffee"
 	"github.com/indeedhat/barista/internal/server"
-	"github.com/indeedhat/barista/internal/types"
 	"github.com/indeedhat/barista/internal/ui"
 )
 
@@ -28,14 +27,12 @@ type updateCoffeeData struct {
 	Coffee   coffee.Coffee
 	Coffees  []coffee.Coffee
 	Flavours []coffee.FlavourProfile
-	Drinks   []types.DrinkType
 	Open     bool
 }
 
 func (c Controller) UpdateCoffee(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
 	pageData := updateCoffeeData{PageData: ui.NewPageData("Coffee", "coffee", user)}
-	pageData.Data["Drinks"] = types.Drinks
 	defer func() {
 		ui.RenderUser(rw, r, pageData)
 	}()

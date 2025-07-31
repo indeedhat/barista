@@ -37,17 +37,29 @@ func (c Controller) NewRecipe(rw http.ResponseWriter, r *http.Request) {
 	comData["Coffee"] = coffee
 }
 
+type viewRecipesFilters struct {
+	Coffees     []string
+	Cafiene     []string
+	DrinkTypes  []string
+	BrewerTypes []string
+	Rating      []string
+}
+
 type viewRecipesData struct {
 	ui.PageData
 	Recipes []coffee.Recipe
-	Drinks  []types.DrinkType
+	Filters viewRecipesFilters
 }
 
 func (c Controller) ViewRecipes(rw http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value("user").(*auth.User)
-	pageData := viewRecipesData{PageData: ui.NewPageData("Recipes", "recipes", user)}
-	pageData.Recipes = c.repo.IndexRecipesForUser(user)
-	pageData.Drinks = types.Drinks
+	pageData := viewRecipesData{
+		PageData: ui.NewPageData("Recipes", "recipes", user),
+		Recipes:  c.repo.IndexRecipesForUser(user),
+		Filters: viewRecipesFilters{
+			Cafiene: []string{},
+		},
+	}
 
 	ui.RenderUser(rw, r, pageData)
 }

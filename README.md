@@ -2,7 +2,7 @@
 Wierd coffe person companion app
 
 ## TODO
-- [ ] delete methods
+- [x] delete methods
 - [ ] filter on recipes
 - [ ] maybe add user settings for things like default grinder
 - [ ] user management ui
