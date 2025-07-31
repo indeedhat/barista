@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/indeedhat/barista/internal/auth/cookie"
+	"github.com/indeedhat/barista/internal/cookie"
 )
 
 var ErrInvalidJWT = errors.New("Invalid jwt")
