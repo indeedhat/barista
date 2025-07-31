@@ -1,14 +1,14 @@
 package types
 
-type CaffieneLevel string
+type CaffeineLevel string
 
 const (
-	CafLevelFull  CaffieneLevel = "Caffeinated"
-	CafLevelHalf  CaffieneLevel = "Half Caf"
-	CafLevelDecaf CaffieneLevel = "Decaf"
+	CafLevelFull  CaffeineLevel = "Caffeinated"
+	CafLevelHalf  CaffeineLevel = "Half Caf"
+	CafLevelDecaf CaffeineLevel = "Decaf"
 )
 
-var CaffieneLevels = []CaffieneLevel{
+var CaffeineLevels = []CaffeineLevel{
 	CafLevelFull,
 	CafLevelHalf,
 	CafLevelDecaf,

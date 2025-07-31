@@ -1,6 +1,15 @@
 {{ define "recipe-card" }}
 {{ $id := or .Recipe.ID (rand "r") }}
-<article class="collapse border border-base-300 card-border bg-neutral w-full relative" id="recipe_{{ $id }}">
+<article class="collapse border border-base-300 card-border bg-neutral w-full relative"
+    id="recipe_{{ $id }}"
+    data-filter-coffee="{{ .Recipe.Coffee.Name }}"
+    data-filter-caffeine="{{ .Recipe.Coffee.Caffeine }}"
+    data-filter-drink="{{ .Recipe.Drink }}"
+    {{ if .Recipe.Brewer }}
+        data-filter-brewer="{{ .Recipe.Brewer.Name }}"
+    {{ end }}
+    data-filter-rating="{{ .Recipe.Rating }}"
+>
     <input type="radio" name="recipe-card-c"
         {{ if or .open .edit }}
             checked="checked"
@@ -156,10 +165,9 @@
                 {{ template "field-error" .FieldErrors.weight_out }}
 
                 {{ $drink := or .Form.Drink .Recipe.Drink }}
-                <label class="input w-full">
+                <label class="select w-full">
                     <span class="label w-40">Drink Type *</span>
-                    <select class="w-full"
-                        name="drink"
+                    <select name="drink"
                         hx-get="/brewers/select"
                         hx-trigger="change"
                         hx-target="next .brewer-container"
@@ -192,9 +200,9 @@
                 ></div>
 
                 {{ $declump := or .Form.Declump .Recipe.Declump }}
-                <label class="input w-full">
+                <label class="select w-full">
                     <span class="label w-40">Declump</span>
-                    <select class="w-full" name="declump">
+                    <select name="declump">
                         <option value="" {{ selected $declump "" }}>Pick a Declump Method</option>
                         <option value="Shaker" {{ selected $declump "Shaker" }}>Shaker</option>
                         <option value="WDT" {{ selected $declump "WDT" }}>WDT</option>

@@ -36,9 +36,9 @@
                 </label>
                 {{ template "field-error" .FieldErrors.model }}
 
-                <label class="input w-full">
+                <label class="select w-full">
                     <span class="label w-22">Brewer Type *</span>
-                    <select class="w-full" name="type">
+                    <select name="type">
                         <option value="" {{ selected .Form.Type "" }}>Select Brewer Type</option>
                         {{ range .Enum.Brewers }}
                             <option value="{{ . }}" {{ selected . $.Form.Type }}>{{ . }}</option>

@@ -68,7 +68,7 @@ type PageData struct {
 
 type pageDataEnums struct {
 	Drinks    []types.DrinkType
-	CafLevels []types.CaffieneLevel
+	CafLevels []types.CaffeineLevel
 	Brewers   []types.BrewerType
 }
 
@@ -81,7 +81,7 @@ func NewPageData(title, page string, user ...any) PageData {
 		Data:        make(map[string]any),
 		Enum: pageDataEnums{
 			Drinks:    types.Drinks,
-			CafLevels: types.CaffieneLevels,
+			CafLevels: types.CaffeineLevels,
 			Brewers:   types.Brewers,
 		},
 	}

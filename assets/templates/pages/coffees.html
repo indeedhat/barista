@@ -22,9 +22,9 @@
                 </label>
                 {{ template "field-error" .FieldErrors.name }}
 
-                <label class="input w-full">
+                <label class="select w-full">
                     <span class="label w-28">Roaster *</span>
-                    <select class="w-full" name="roaster.int">
+                    <select name="roaster.int">
                         <option value="" disabled selected>Pick a Roaster</option>
                         {{ range .Roasters }}
                             <option value="{{ .ID }}" {{ selected $.Form.Roaster .ID }}>{{ .Name }}</option>
@@ -33,9 +33,9 @@
                 </label>
                 {{ template "field-error" .FieldErrors.flavour }}
 
-                <label class="input w-full">
+                <label class="select w-full">
                     <span class="label w-28">Roast *</span>
-                    <select class="w-full" name="roast.int">
+                    <select name="roast.int">
                         <option value="" disabled selected>Pick a Roast Level</option>
                         <option value="1" {{ selected $.Form.Roast 1 }}>Very Light</option>
                         <option value="2" {{ selected $.Form.Roast 2 }}>Light</option>
@@ -48,9 +48,9 @@
                 </label>
                 {{ template "field-error" .FieldErrors.roast }}
 
-                <label class="input w-full">
+                <label class="select w-full">
                     <span class="label w-28">Caffeine *</span>
-                    <select class="w-full" name="caffeine.int">
+                    <select name="caffeine.int">
                         <option value="" disabled selected>Pick a Caffeine Level</option>
                         <option value="1" {{ selected $.Form.Roast 1 }}>Caffeinated</option>
                         <option value="2" {{ selected $.Form.Roast 2 }}>Half Caf</option>
