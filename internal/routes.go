@@ -68,6 +68,7 @@ func BuildRoutes(
 
 		private.HandleFunc("GET /flavours", coffeeController.ViewFlavours)
 		private.HandleFunc("POST /flavours", coffeeController.CreateFlavourProfile)
+		private.HandleFunc("POST /flavours/input", coffeeController.CreateFlavourFromComponent)
 
 		private.HandleFunc("GET /roasters", coffeeController.ViewRoasters)
 		private.HandleFunc("POST /roasters", coffeeController.CreateRoaster)

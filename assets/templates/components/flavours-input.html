@@ -1,25 +1,34 @@
 {{ define "flavours-input" }}
-<div class="flex flex-wrap gap-4" id="checkbox-container"></div>
-<div class="form-control">
-    <label class="input w-full">
-        <span class="label w-28">Flavours</span>
-        <input
-            list="flavour-options"
-            id="datalist-input"
-            placeholder="Type to select..."
-        />
-        <datalist id="flavour-options">
-            {{ range  .flavours }}
-                <option value="{{ .ID }}">{{ .Name }}</option>
-            {{ end }}
-        </datalist>
-    </label>
-</div>
+<fieldset class="flavours fieldset gap-4"
+    hx-post="/flavours/input"
+    hx-trigger="flavour-submit"
+    hx-target="this"
+    hx-swap="outerHTML"
+>
+    <div class="flex flex-wrap gap-4 empty:hidden" id="checkbox-container"></div>
+    <div class="form-control">
+        <label class="input w-full">
+            <span class="label w-28">Flavours</span>
+            <input
+                name="new_flavour"
+                list="flavour-options"
+                id="datalist-input"
+                placeholder="Type to select..."
+            />
+            <datalist id="flavour-options">
+                {{ range  .flavours }}
+                    <option value="{{ .ID }}">{{ .Name }}</option>
+                {{ end }}
+            </datalist>
+        </label>
+    </div>
+</fieldset>
 
 <script type="module">
 const $dlist = $("#datalist-input")
 const $container = $("#checkbox-container")
 const $list = $("#flavour-options")
+
 
 const getOptionText = value => {
     const $el = [ ...$list.querySelectorAll("option") ].filter($e => $e.value == value)
@@ -40,51 +49,68 @@ const addOption = (value, text) => {
 }
 
 const selectFlavour = (value) => {
-    const id = `cb-flavour-${$dlist.value}`
+    const id = `cb-flavour-${value}`
     const text = getOptionText(value)
     removeOption(value)
 
-    const $label = document.createElement("span")
-    $label.className = "badge badge-outline badge-primary"
-    $label.id = id
-
-    const $checkbox = document.createElement("input")
-    $checkbox.type = "checkbox"
-    $checkbox.checked = true
-    $checkbox.className = "hidden"
-    $checkbox.name = "flavours.int"
-    $checkbox.value = value
+    const $label = createElement(`<label class="badge badge-outline badge-primary" id="${id}">
+        <input type="checkbox" class="hidden" name="flavours[].int" value="${value}" checked />
+        <span>${text}</span>
+        <span>×</span>
+    </label>`)
 
     $label.addEventListener("click", () => $checkbox.click())
 
-    const $span = document.createElement("span")
-    $span.textContent = text
-
     // Remove when unchecked
-    $checkbox.addEventListener("change", () => {
-        if (!$checkbox.checked) {
+    $label.querySelector("input").addEventListener("change", function() {
+        if (!this.checked) {
             addOption(value, $span.textContent)
             $label.remove()
         }
     })
 
-    const $close = document.createElement("span")
-    $close.textContent = '×'
-
-    $label.appendChild($checkbox)
-    $label.appendChild($span)
-    $label.appendChild($close)
     $container.appendChild($label)
-
     $dlist.value = ''
 }
 
-const handleSelectFlavour = () => {
-    const value = $dlist.value.trim()
-    selectFlavour(value)
+const createElement = (html) => {
+    const $wrapper = document.createElement("template")
+    $wrapper.className = "hidden"
+    $wrapper.innerHTML = html
+    return $wrapper.content.firstElementChild
 }
 
-$dlist.addEventListener("change", handleSelectFlavour)
+$dlist.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') {
+        return;
+    }
+    event.preventDefault()
+
+    if (!$dlist.value.trim()) {
+        return
+    }
+
+    let $options = $list.querySelectorAll('option')
+    for (let $option of $options) {
+        if ($option.text.trim().toLowerCase() != $dlist.value.trim().toLowerCase()) {
+            continue
+        }
+
+        selectFlavour($options[i].value)
+        return
+    }
+
+    $dlist.closest('.flavours').dispatchEvent(new Event('flavour-submit', { bubbles: true }))
+})
+
+$dlist.addEventListener("change", () => {
+    const value = $dlist.value.trim()
+    if (!value) {
+        return
+    }
+
+    selectFlavour(value)
+})
 
 {{ range .existing }}
     selectFlavour('{{ . }}')

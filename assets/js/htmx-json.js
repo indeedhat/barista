@@ -119,7 +119,11 @@ htmx.defineExtension('json-enc', (() => {
             const v = parseValue(values[i], type)
 
             if (!rest.length) {
-                ob[key].push(v)
+                if (i < ob[key].length) {
+                    ob[key][i] = v
+                } else {
+                    ob[key].push(v)
+                }
                 continue
             }
 
